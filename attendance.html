@@ -124,15 +124,211 @@
         el.style.borderColor = 'var(--border-color)';
         el.style.boxShadow = 'none';
         const icon = el.querySelector('i');
-        icon.classList.remove('fa-folder-open');
-        icon.classList.add('fa-folder');
+        if (icon) {
+          icon.classList.remove('fa-folder-open');
+          icon.classList.add('fa-folder');
+        }
       });
       const activeEl = document.getElementById('dfolder-' + dept);
-      activeEl.style.borderColor = 'var(--primary-blue)';
-      activeEl.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
-      const activeIcon = activeEl.querySelector('i');
-      activeIcon.classList.remove('fa-folder');
-      activeIcon.classList.add('fa-folder-open');
+      if (activeEl) {
+        activeEl.style.borderColor = 'var(--primary-blue)';
+        activeEl.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
+        const activeIcon = activeEl.querySelector('i');
+        if (activeIcon) {
+          activeIcon.classList.remove('fa-folder');
+          activeIcon.classList.add('fa-folder-open');
+        }
+      }
+
+      document.getElementById('dailyFolderTitle').textContent = Daily Attendance Logs - Department: ${dept === 'ALL' ? 'All Departments' : dept};
+      filterDailyData();
+    }
+
+    function filterDailyData() {
+      const selectedDate = document.getElementById('dateFilter').value;
+      const records = DB.getAttendance();
+      const employees = DB.getEmployees();
+      const tbody = document.getElementById('attendanceTable');
+
+      const enhancedRecords = records.map(r => {
+        const emp = employees.find(e => e.id === r.id);
+        return {
+          ...r,
+          department: emp ? emp.department : 'BSIT',
+          position: emp ? emp.position : 'Staff'
+        };
+      });
+
+      const filtered = enhancedRecords.filter(r => {
+        const matchDate = !selectedDate || r.date === selectedDate;
+        const matchDept = dailySelectedDept === 'ALL' || r.department === dailySelectedDept;
+        return matchDate && matchDept;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = <tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 25px;">No attendance records found for this date or department.</td></tr>;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td><strong>${r.name}</strong></td>
+          <td><span style="background: #e3f2fd; color: #0d6efd; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">${r.department}</span></td>
+          <td>${r.position}</td>
+          <td>${r.date}</td>
+          <td><span style="color: #198754; font-weight: 600;">${r.timeIn}</span></td>
+          <td><span style="color: #0dcaf0; font-weight: 600;">${r.timeOut}</span></td>
+          <td><span style="background: #d1e7dd; color: #0f5132; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem;">${r.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    filterDailyData();
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Daily Attendance Record - DAS</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <script src="app.js"></script>
+  <script>checkAuth();</script>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h2>Digital Attendance System</h2>
+        <p>Admin Panel</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+        <li class="active"><a href="attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+        <li><a href="monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+        <li><a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <i class="fa-solid fa-user-circle" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display:block; font-size:0.85rem;">Welcome,</strong>
+          <span style="font-size:0.80rem; color:#90caf9;">Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="topbar">
+        <div><i class="fa-solid fa-bars"></i></div>
+        <div class="topbar-info">
+          <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+          <i class="fa-regular fa-bell"></i>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 5px;"><i class="fa-solid fa-clipboard-check" style="color: var(--primary-blue);"></i> Daily Attendance Record</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Track employee Time In and Time Out daily.</p>
+          </div>
+          <div>
+            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-regular fa-calendar-days"></i> Filter Date:</label>
+            <input type="date" id="dateFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterDailyData()">
+          </div>
+        </div>
+
+        <!-- Department Folders Grid -->
+        <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-muted);">Department Folders:</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 25px;">
+          <div onclick="selectDailyDept('ALL')" class="daily-folder active-folder" id="dfolder-ALL" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">All Depts</h4>
+          </div>
+          <div onclick="selectDailyDept('BSHM')" class="daily-folder" id="dfolder-BSHM" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BSHM</h4>
+          </div>
+          <div onclick="selectDailyDept('BSED')" class="daily-folder" id="dfolder-BSED" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BSED</h4>
+          </div>
+          <div onclick="selectDailyDept('BEED')" class="daily-folder" id="dfolder-BEED" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BEED</h4>
+          </div>
+          <div onclick="selectDailyDept('BSCRIM')" class="daily-folder" id="dfolder-BSCRIM" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BSCRIM</h4>
+          </div>
+          <div onclick="selectDailyDept('BSIT')" class="daily-folder" id="dfolder-BSIT" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BSIT</h4>
+          </div>
+          <div onclick="selectDailyDept('BSBA')" class="daily-folder" id="dfolder-BSBA" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
+            <h4 style="font-size: 0.85rem;">BSBA</h4>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 id="dailyFolderTitle" style="margin-bottom: 15px; font-size: 1.05rem; color: var(--primary-blue);">Daily Attendance Logs - All Departments</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Date</th>
+                <th>Time In</th>
+                <th>Time Out</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="database.js"></script>
+  <script>
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('dateFilter').value = todayStr;
+
+    let dailySelectedDept = 'ALL';
+
+    function selectDailyDept(dept) {
+      dailySelectedDept = dept;
+      document.querySelectorAll('.daily-folder').forEach(el => {
+        el.style.borderColor = 'var(--border-color)';
+        el.style.boxShadow = 'none';
+        const icon = el.querySelector('i');
+        if (icon) {
+          icon.classList.remove('fa-folder-open');
+          icon.classList.add('fa-folder');
+        }
+      });
+      const activeEl = document.getElementById('dfolder-' + dept);
+      if (activeEl) {
+        activeEl.style.borderColor = 'var(--primary-blue)';
+        activeEl.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
+        const activeIcon = activeEl.querySelector('i');
+        if (activeIcon) {
+          activeIcon.classList.remove('fa-folder');
+          activeIcon.classList.add('fa-folder-open');
+        }
+      }
 
       document.getElementById('dailyFolderTitle').textContent = Daily Attendance Logs - Department: ${dept === 'ALL' ? 'All Departments' : dept};
       filterDailyData();
