@@ -2,6 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>Monthly Record - DAS</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <script src="app.js"></script>
+  <script>checkAuth();</script>
+
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h2>Digital Attendance System</h2>
+        <p>Admin Panel</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+        <li><a href="attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+        <li class="active"><a href="monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+        <li><a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div><i class="fa-solid fa-bars"></i></div>
+        <div class="topbar-info">
+          <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h1 style="font-size: 1.5rem;"><i class="fa-solid fa-calendar-days" style="color: var(--primary-blue);"></i> Monthly Attendance Overview</h1>
+          <div>
+            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-solid fa-calendar"></i> Select Month:</label>
+            <input type="month" id="monthFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterMonthlyData()">
+          </div>
+        </div>
+
+        <!-- Department Folders Grid -->
+        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-muted);">Piliin ang Department Folder:</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
+          <div onclick="selectDeptFolder('ALL')" class="dept-folder active-folder" id="folder-ALL" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue); box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">All Departments</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSHM')" class="dept-folder" id="folder-BSHM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSHM</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSED')" class="dept-folder" id="folder-BSED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSED</h4>
+          </div>
+          <div onclick="selectDeptFolder('BEED')" class="dept-folder" id="folder-BEED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BEED</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSCRIM')" class="dept-folder" id="folder-BSCRIM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSCRIM</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSIT')" class="dept-folder" id="folder-BSIT" style="background:#fff; padding:15
+cdnjs.cloudflare.com
+cdnjs.cloudflare.com
+Windelyn
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
   <title>Attendance Record - DAS</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,42 +107,32 @@
       </div>
 
       <div class="content-area">
-        <h1 style="font-size: 1.5rem; margin-bottom: 20px;">Daily Attendance Record</h1>
-
-        <div class="card">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Time In</th>
-                <th>Time Out</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="attendanceTable"></tbody>
-          </table>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h1 style="font-size: 1.5rem;"><i class="fa-solid fa-clipboard-check" style="color: var(--primary-blue);"></i> Daily Attendance Record</h1>
+          <div>
+            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-regular fa-calendar-days"></i> Filter Date:</label>
+            <input type="date" id="dateFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterDailyData()">
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <script src="database.js"></script>
-  <script>
-    const records = DB.getAttendance();
-    const tbody = document.getElementById('attendanceTable');
-
-    tbody.innerHTML = records.map(r => `
-      <tr>
-        <td>${r.id}</td>
-        <td>${r.name}</td>
-        <td>${r.date}</td>
-        <td>${r.timeIn}</td>
-        <td>${r.timeOut}</td>
-        <td><span style="color: green; font-weight: bold;">${r.status}</span></td>
-      </tr>
-    `).join('');
-  </script>
-</body>
-</html>
+        <!-- Department Folders Grid -->
+        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-muted);">Piliin ang Department Folder:</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
+          <div onclick="selectDailyDept('ALL')" class="daily-folder active-folder" id="dfolder-ALL" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue); box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">All Departments</h4>
+          </div>
+          <div onclick="selectDailyDept('BSHM')" class="daily-folder" id="dfolder-BSHM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSHM</h4>
+          </div>
+          <div onclick="selectDailyDept('BSED')" class="daily-folder" id="dfolder-BSED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSED</h4>
+          </div>
+          <div onclick="selectDailyDept('BEED')" class="daily-folder" id="dfolder-BEED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BEED</h4>
+          </div>
+          <div onclick="selectDailyDept('BSCRIM')" class="daily-folder" id="dfolder-BSCRIM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid
