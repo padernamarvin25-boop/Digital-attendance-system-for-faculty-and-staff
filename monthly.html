@@ -33,7 +33,6 @@
   <script>checkAuth();</script>
 
   <div class="app-container">
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -56,7 +55,6 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
       <div class="topbar">
         <div><i class="fa-solid fa-bars"></i></div>
@@ -78,45 +76,36 @@
           </div>
         </div>
 
-        <!-- Department Folders Grid -->
         <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-muted);">Department Folders:</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 25px;">
-          
           <div class="monthly-folder active-folder" id="mfolder-ALL" onclick="selectMonthlyDept('ALL')">
             <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">All Depts</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BSHM" onclick="selectMonthlyDept('BSHM')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSHM</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BSED" onclick="selectMonthlyDept('BSED')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSED</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BEED" onclick="selectMonthlyDept('BEED')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BEED</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BSCRIM" onclick="selectMonthlyDept('BSCRIM')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSCRIM</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BSIT" onclick="selectMonthlyDept('BSIT')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSIT</h4>
           </div>
-
           <div class="monthly-folder" id="mfolder-BSBA" onclick="selectMonthlyDept('BSBA')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSBA</h4>
           </div>
-
         </div>
 
         <div class="card">
@@ -144,12 +133,10 @@
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     document.getElementById('monthFilter').value = ${year}-${month};
-
     let monthlySelectedDept = 'ALL';
 
     function selectMonthlyDept(dept) {
       monthlySelectedDept = dept;
-      
       document.querySelectorAll('.monthly-folder').forEach(el => {
         el.classList.remove('active-folder');
         const icon = el.querySelector('i');
@@ -158,7 +145,6 @@
           icon.classList.add('fa-folder');
         }
       });
-
       const activeEl = document.getElementById('mfolder-' + dept);
       if (activeEl) {
         activeEl.classList.add('active-folder');
@@ -168,7 +154,6 @@
           activeIcon.classList.add('fa-folder-open');
         }
       }
-
       document.getElementById('monthlyFolderTitle').textContent = Monthly Summary - Department: ${dept === 'ALL' ? 'All Departments' : dept};
       filterMonthlyData();
     }
