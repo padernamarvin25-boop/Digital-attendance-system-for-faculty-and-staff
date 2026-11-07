@@ -35,40 +35,35 @@
       </div>
 
       <div class="content-area">
-        <h1 style="font-size: 1.5rem; margin-bottom: 20px;">Monthly Attendance Overview</h1>
-
-        <div class="card">
-          <table>
-            <thead>
-              <tr>
-                <th>Employee ID</th>
-                <th>Employee Name</th>
-                <th>Total Days Present</th>
-              </tr>
-            </thead>
-            <tbody id="monthlyTable"></tbody>
-          </table>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h1 style="font-size: 1.5rem;"><i class="fa-solid fa-calendar-days" style="color: var(--primary-blue);"></i> Monthly Attendance Overview</h1>
+          <div>
+            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-solid fa-calendar"></i> Select Month:</label>
+            <input type="month" id="monthFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterMonthlyData()">
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <script src="database.js"></script>
-  <script>
-    const employees = DB.getEmployees();
-    const records = DB.getAttendance();
-    const tbody = document.getElementById('monthlyTable');
-
-    tbody.innerHTML = employees.map(emp => {
-      const count = records.filter(r => r.id === emp.id).length;
-      return `
-        <tr>
-          <td>${emp.id}</td>
-          <td>${emp.name}</td>
-          <td><strong>${count} days</strong></td>
-        </tr>
-      `;
-    }).join('');
-  </script>
-</body>
-</html>
+        <!-- Department Folders Grid -->
+        <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-muted);">Piliin ang Department Folder:</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px;">
+          <div onclick="selectDeptFolder('ALL')" class="dept-folder active-folder" id="folder-ALL" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue); box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">All Departments</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSHM')" class="dept-folder" id="folder-BSHM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSHM</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSED')" class="dept-folder" id="folder-BSED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSED</h4>
+          </div>
+          <div onclick="selectDeptFolder('BEED')" class="dept-folder" id="folder-BEED" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BEED</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSCRIM')" class="dept-folder" id="folder-BSCRIM" style="background:#fff; padding:15px; border-radius:8px; text-align:center; cursor:pointer; border:1px solid var(--border-color);">
+            <i class="fa-solid fa-folder" style="font-size: 2rem; color: #ffc107; margin-bottom: 8px;"></i>
+            <h4 style="font-size: 0.95rem;">BSCRIM</h4>
+          </div>
+          <div onclick="selectDeptFolder('BSIT')" class="dept-folder" id="folder-BSIT" style="background:#fff; padding:15
