@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Dagdag na estilo para matiyak na napaka-clickable ng bawat folder */
     .daily-folder {
       background: #fff;
       padding: 15px 10px;
@@ -34,7 +33,6 @@
   <script>checkAuth();</script>
 
   <div class="app-container">
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -57,7 +55,6 @@
       </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
       <div class="topbar">
         <div><i class="fa-solid fa-bars"></i></div>
@@ -79,45 +76,36 @@
           </div>
         </div>
 
-        <!-- Department Folders Grid -->
         <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-muted);">Department Folders:</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 25px;">
-          
           <div class="daily-folder active-folder" id="dfolder-ALL" onclick="selectDailyDept('ALL')">
             <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">All Depts</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BSHM" onclick="selectDailyDept('BSHM')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSHM</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BSED" onclick="selectDailyDept('BSED')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSED</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BEED" onclick="selectDailyDept('BEED')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BEED</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BSCRIM" onclick="selectDailyDept('BSCRIM')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSCRIM</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BSIT" onclick="selectDailyDept('BSIT')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSIT</h4>
           </div>
-
           <div class="daily-folder" id="dfolder-BSBA" onclick="selectDailyDept('BSBA')">
             <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
             <h4 style="font-size: 0.85rem; margin:0;">BSBA</h4>
           </div>
-
         </div>
 
         <div class="card">
@@ -146,13 +134,10 @@
   <script>
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('dateFilter').value = todayStr;
-
     let dailySelectedDept = 'ALL';
 
     function selectDailyDept(dept) {
       dailySelectedDept = dept;
-      
-      // Alisin ang active state sa lahat ng folders
       document.querySelectorAll('.daily-folder').forEach(el => {
         el.classList.remove('active-folder');
         const icon = el.querySelector('i');
@@ -161,8 +146,6 @@
           icon.classList.add('fa-folder');
         }
       });
-
-      // Lagyan ng active state ang pinindot na folder
       const activeEl = document.getElementById('dfolder-' + dept);
       if (activeEl) {
         activeEl.classList.add('active-folder');
@@ -172,7 +155,6 @@
           activeIcon.classList.add('fa-folder-open');
         }
       }
-
       document.getElementById('dailyFolderTitle').textContent = Daily Attendance Logs - Department: ${dept === 'ALL' ? 'All Departments' : dept};
       filterDailyData();
     }
