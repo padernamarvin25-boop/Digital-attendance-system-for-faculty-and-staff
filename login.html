@@ -1,119 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | Digital Attendance</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .login-card {
-            max-width: 420px;
-            width: 100%;
-            background: white;
-            padding: 32px 25px;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,.2);
-            text-align: left;
-        }
-
-        .login-card .logo,
-        .login-card h1,
-        .login-card .subtitle {
-            text-align: center;
-        }
-
-        .login-card h1 {
-            font-size: 25px;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            margin-bottom: 25px;
-        }
-
-        .field {
-            margin-bottom: 18px;
-        }
-
-        .field label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .field input {
-            width: 100%;
-            padding: 13px;
-            border: 1px solid #cbd5e1;
-            border-radius: 9px;
-            font-size: 16px;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 9px;
-            background: #1d4ed8;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #1d4ed8;
-            text-decoration: none;
-        }
-
-        #message {
-            margin-top: 15px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Admin Login - Digital Attendance System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <main class="welcome">
-        <section class="login-card">
-            <div class="logo">DA</div>
-            <h1>Admin Login</h1>
-            <p class="subtitle">Digital Attendance System</p>
+<body class="login-body">
 
-            <form id="loginForm">
-                <div class="field">
-                    <label for="username">Username</label>
-                    <input id="username" type="text"
-                        placeholder="Enter username" required>
-                </div>
+  <div class="login-card">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: #0d6efd;"></i>
+      <h2 style="margin-top: 10px;">Admin Login</h2>
+      <p style="color: #6c757d; font-size: 0.85rem;">Sign in to access the dashboard</p>
+    </div>
 
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" type="password"
-                        placeholder="Enter password" required>
-                </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label><i class="fa-solid fa-user"></i> Admin Username</label>
+        <input type="text" id="username" class="form-control" required placeholder="Enter Username">
+      </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-lock"></i> Admin Password</label>
+        <input type="password" id="password" class="form-control" required placeholder="Enter Password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+        <i class="fa-solid fa-right-to-bracket"></i> LOG IN
+      </button>
+    </form>
+  </div>
 
-                <button class="login-btn" type="submit">
-                    Log In
-                </button>
-                <p id="message"></p>
-            </form>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
 
-            <a class="back-link" href="index.html">
-                ← Back to Home
-            </a>
-        </section>
-    </main>
-
-    <script>
-        document.getElementById("loginForm")
-            .addEventListener("submit", function(event) {
-                event.preventDefault();
-                document.getElementById("message").textContent =
-                    "Login backend is not connected yet.";
-            });
-    </script>
+      if(u === 'admin' && p === 'admin123') {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        window.location.href = 'dashboard.html';
+      } else {
+        alert('Maling Username o Password! (Use: admin / admin123)');
+      }
+    });
+  </script>
 </body>
 </html>
