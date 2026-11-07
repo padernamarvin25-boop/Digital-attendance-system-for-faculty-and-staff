@@ -24,6 +24,13 @@
         <li><a href="monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
         <li><a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
       </ul>
+      <div class="sidebar-footer">
+        <i class="fa-solid fa-user-circle" style="font-size: 1.5rem;"></i>
+        <div>
+          <strong style="display:block; font-size:0.85rem;">Welcome,</strong>
+          <span style="font-size:0.8rem; color:#90caf9;">Admin</span>
+        </div>
+      </div>
     </div>
 
     <div class="main-content">
@@ -31,6 +38,7 @@
         <div><i class="fa-solid fa-bars"></i></div>
         <div class="topbar-info">
           <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+          <i class="fa-regular fa-bell"></i>
         </div>
       </div>
 
@@ -38,10 +46,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
           <div>
             <h1 style="font-size: 1.5rem; margin-bottom: 5px;"><i class="fa-solid fa-clipboard-check" style="color: var(--primary-blue);"></i> Daily Attendance Record</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Subaybayan ang Time In at Time Out ng mga empleyado araw-araw.</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Track employee Time In and Time Out daily.</p>
           </div>
           <div>
-            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-regular fa-calendar-days"></i> Piliin ang Petsa:</label>
+            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-regular fa-calendar-days"></i> Filter Date:</label>
             <input type="date" id="dateFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterDailyData()">
           </div>
         </div>
@@ -80,7 +88,7 @@
         </div>
 
         <div class="card">
-          <h3 id="dailyFolderTitle" style="margin-bottom: 15px; font-size: 1.05rem; color: var(--primary-blue);">Pang-araw-araw na Tala (Daily Logs) - All Departments</h3>
+          <h3 id="dailyFolderTitle" style="margin-bottom: 15px; font-size: 1.05rem; color: var(--primary-blue);">Daily Attendance Logs - All Departments</h3>
           <table>
             <thead>
               <tr>
@@ -122,7 +130,7 @@
       activeIcon.classList.remove('fa-folder');
       activeIcon.classList.add('fa-folder-open');
 
-      document.getElementById('dailyFolderTitle').textContent = Pang-araw-araw na Tala (Daily Logs) - Department: ${dept === 'ALL' ? 'All Departments' : dept};
+      document.getElementById('dailyFolderTitle').textContent = Daily Attendance Logs - Department: ${dept === 'ALL' ? 'All Departments' : dept};
       filterDailyData();
     }
 
@@ -148,7 +156,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = <tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 25px;">Walang attendance record o time-in sa petsang ito.</td></tr>;
+        tbody.innerHTML = <tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 25px;">No attendance records found for this date or department.</td></tr>;
         return;
       }
 
