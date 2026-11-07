@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Daily Attendance Record - DAS</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -11,6 +11,7 @@
   <script>checkAuth();</script>
 
   <div class="app-container">
+    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -28,11 +29,12 @@
         <i class="fa-solid fa-user-circle" style="font-size: 1.5rem;"></i>
         <div>
           <strong style="display:block; font-size:0.85rem;">Welcome,</strong>
-          <span style="font-size:0.8rem; color:#90caf9;">Admin</span>
+          <span style="font-size:0.80rem; color:#90caf9;">Admin</span>
         </div>
       </div>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
       <div class="topbar">
         <div><i class="fa-solid fa-bars"></i></div>
@@ -57,7 +59,7 @@
         <!-- Department Folders Grid -->
         <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-muted);">Department Folders:</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 25px;">
-          <div onclick="selectDailyDept('ALL')" class="daily-folder active-folder" id="dfolder-ALL" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue);">
+          <div onclick="selectDailyDept('ALL')" class="daily-folder active-folder" id="dfolder-ALL" style="background:#fff; padding:12px; border-radius:8px; text-align:center; cursor:pointer; border:2px solid var(--primary-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px;"></i>
             <h4 style="font-size: 0.85rem;">All Depts</h4>
           </div>
@@ -120,12 +122,14 @@
       dailySelectedDept = dept;
       document.querySelectorAll('.daily-folder').forEach(el => {
         el.style.borderColor = 'var(--border-color)';
+        el.style.boxShadow = 'none';
         const icon = el.querySelector('i');
         icon.classList.remove('fa-folder-open');
         icon.classList.add('fa-folder');
       });
       const activeEl = document.getElementById('dfolder-' + dept);
       activeEl.style.borderColor = 'var(--primary-blue)';
+      activeEl.style.boxShadow = '0 2px 5px rgba(0,0,0,0.05)';
       const activeIcon = activeEl.querySelector('i');
       activeIcon.classList.remove('fa-folder');
       activeIcon.classList.add('fa-folder-open');
