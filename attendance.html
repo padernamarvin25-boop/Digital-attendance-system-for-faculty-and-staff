@@ -3,80 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Employee Registration</title>
+<title>Employee Registration | Digital Attendance</title>
 <link rel="stylesheet" href="style.css">
+
 <style>
 * { box-sizing: border-box; }
-body { margin: 0; background: #f1f5f9; }
+
+body {
+    margin: 0;
+    background: #f1f5f9;
+    font-family: Arial, sans-serif;
+    color: #1e293b;
+}
 
 header {
     background: #0f172a;
     color: white;
     padding: 20px;
 }
-header h2 { margin: 0 0 12px; }
-nav { display: flex; flex-wrap: wrap; gap: 8px; }
-nav a {
-    color: #e2e8f0;
-    text-decoration: none;
-    padding: 8px 10px;
-    border-radius: 6px;
-}
-nav a:hover { background: #2563eb; color: white; }
 
-main { padding: 22px; max-width: 1000px; margin: auto; }
+header h2 { margin: 0 0 15px; }
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+nav a {
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 7px;
+}
+
+nav a:hover,
+nav a.active {
+    background: #2563eb;
+    color: white;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 22px;
+}
+
 .card {
     background: white;
     padding: 24px;
-    border-radius: 14px;
-    box-shadow: 0 3px 12px #0000000a;
     margin-bottom: 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px #0f172a0b;
 }
+
 h2 { color: #1e293b; }
+
+.description {
+    color: #64748b;
+    line-height: 1.6;
+}
+
 form {
     display: grid;
-    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
+
 .field label {
     display: block;
-    margin-bottom: 7px;
     font-weight: bold;
-    font-size: 14px;
+    margin-bottom: 8px;
 }
-.field input, .field select {
+
+.field input,
+.field select {
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
-    background: white;
     font-size: 15px;
+    background: white;
 }
+
+.full { grid-column: 1 / -1; }
+
 button {
-    padding: 12px 16px;
-    border: 0;
+    padding: 12px 17px;
+    border: none;
     border-radius: 8px;
     background: #2563eb;
     color: white;
     font-weight: bold;
     cursor: pointer;
 }
+
 button:hover { background: #1d4ed8; }
+
 .cancel { background: #64748b; }
-.full { grid-column: 1 / -1; }
-table { width: 100%; border-collapse: collapse; }
+.delete { background: #dc2626; }
+.delete:hover { background: #b91c1c; }
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
 th, td {
     text-align: left;
-    padding: 12px 8px;
+    padding: 13px 10px;
     border-bottom: 1px solid #e2e8f0;
-    font-size: 14px;
 }
-th { color: #475569; background: #f8fafc; }
-.table-wrap { overflow-x: auto; }
-.small-btn { padding: 8px; margin: 2px; }
-.delete { background: #dc2626; }
-#notice { color: #475569; }
-@media(max-width:600px) {
+
+th {
+    background: #f8fafc;
+    color: #475569;
+}
+
+#notice {
+    margin-top: 15px;
+    color: #1d4ed8;
+}
+
+.count {
+    color: #2563eb;
+    font-weight: bold;
+}
+
+@media(max-width: 600px) {
     main { padding: 12px; }
     .card { padding: 16px; }
     form { grid-template-columns: 1fr; }
@@ -84,13 +147,14 @@ th { color: #475569; background: #f8fafc; }
 }
 </style>
 </head>
+
 <body>
 
 <header>
     <h2>Digital Attendance System</h2>
     <nav>
         <a href="dashboard.html">Home</a>
-        <a href="employees.html">Employee Registration</a>
+        <a class="active" href="employees.html">Employee Registration</a>
         <a href="attendance.html">Attendance Record</a>
         <a href="monthly.html">Monthly Record</a>
         <a href="login.html">Log Out</a>
@@ -98,30 +162,36 @@ th { color: #475569; background: #f8fafc; }
 </header>
 
 <main>
+
     <section class="card">
         <h2 id="formTitle">Employee Registration</h2>
-        <p>Register faculty and staff members.</p>
+        <p class="description">
+            Register faculty and staff members in the system.
+        </p>
 
         <form id="employeeForm">
+
             <div class="field">
                 <label for="employeeId">Employee ID</label>
-                <input id="employeeId" required maxlength="30"
-                    placeholder="Enter employee ID">
+                <input id="employeeId" type="text"
+                    placeholder="Enter employee ID"
+                    maxlength="30" required>
             </div>
 
             <div class="field">
                 <label for="employeeName">Employee Name</label>
-                <input id="employeeName" required maxlength="100"
-                    placeholder="Enter full name">
+                <input id="employeeName" type="text"
+                    placeholder="Enter full name"
+                    maxlength="100" required>
             </div>
 
             <div class="field">
                 <label for="position">Position</label>
                 <select id="position" required>
                     <option value="">Select position</option>
-                    <option>Faculty</option>
-                    <option>Staff</option>
-                    <option>Admin</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
                 </select>
             </div>
 
@@ -129,39 +199,50 @@ th { color: #475569; background: #f8fafc; }
                 <label for="department">Department</label>
                 <select id="department" required>
                     <option value="">Select department</option>
-                    <option>BSCRIM</option>
-                    <option>BSIT</option>
-                    <option>BSHM</option>
-                    <option>BSED</option>
-                    <option>BSBA</option>
-                    <option>BEED</option>
+                    <option value="BSCRIM">BSCRIM</option>
+                    <option value="BSIT">BSIT</option>
+                    <option value="BSHM">BSHM</option>
+                    <option value="BSED">BSED</option>
+                    <option value="BSBA">BSBA</option>
+                    <option value="BEED">BEED</option>
                 </select>
             </div>
 
             <div class="field full">
                 <label for="employeePassword">Employee Password</label>
                 <input id="employeePassword" type="password"
-                    required minlength="4" placeholder="Create password">
+                    placeholder="Create demo password"
+                    minlength="4" required>
             </div>
 
             <div class="full">
-                <button type="submit" id="saveBtn">Save Employee</button>
-                <button type="button" class="cancel" id="cancelBtn"
-                    hidden>Cancel Edit</button>
+                <button type="submit" id="saveBtn">
+                    Save Employee
+                </button>
+
+                <button type="button" id="cancelBtn"
+                    class="cancel" hidden>
+                    Cancel Edit
+                </button>
             </div>
+
         </form>
+
         <p id="notice" role="status"></p>
     </section>
 
     <section class="card">
         <h2>Registered Employees</h2>
-        <p>Demo records are stored only in this browser.</p>
+        <p class="description">
+            Total employees: <span class="count" id="employeeCount">0</span>
+        </p>
+
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
                         <th>Position</th>
                         <th>Department</th>
                         <th>Actions</th>
@@ -171,126 +252,602 @@ th { color: #475569; background: #f8fafc; }
             </table>
         </div>
     </section>
+
 </main>
+
+<!-- Shared JavaScript file -->
+<script src="app.js"></script>
 
 <script>
 const form = document.getElementById("employeeForm");
 const list = document.getElementById("employeeList");
 const notice = document.getElementById("notice");
-const password = document.getElementById("employeePassword");
-let employees = [];
+const passwordInput = document.getElementById("employeePassword");
+const cancelBtn = document.getElementById("cancelBtn");
+
+let employees = AttendanceApp.getEmployees();
 let editingId = null;
 
 function renderEmployees() {
     list.replaceChildren();
 
-    employees.forEach(employee => {
+    const sortedEmployees = [...employees].sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+
+    sortedEmployees.forEach(employee => {
         const tr = document.createElement("tr");
 
-        [employee.id, employee.name, employee.position,
-         employee.department].forEach(value => {
+        [
+            employee.id,
+            employee.name,
+            employee.position,
+            employee.department
+        ].forEach(value => {
             const td = document.createElement("td");
             td.textContent = value;
             tr.appendChild(td);
         });
 
-        const actions = document.createElement("td");
-        const edit = document.createElement("button");
-        edit.textContent = "Edit";
-        edit.className = "small-btn";
-        edit.type = "button";
-        edit.onclick = () => startEdit(employee.id);
+        const actionCell = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "actions";
 
-        const remove = document.createElement("button");
-        remove.textContent = "Delete";
-        remove.className = "small-btn delete";
-        remove.type = "button";
-        remove.onclick = () => deleteEmployee(employee.id);
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => editEmployee(employee.id);
 
-        actions.append(edit, remove);
-        tr.appendChild(actions);
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete";
+        deleteBtn.onclick = () => deleteEmployee(employee.id);
+
+        actions.append(editBtn, deleteBtn);
+        actionCell.appendChild(actions);
+        tr.appendChild(actionCell);
         list.appendChild(tr);
     });
+
+    document.getElementById("employeeCount").textContent =
+        employees.length;
 }
 
-form.addEventListener("submit", event => {
+form.addEventListener("submit", function(event) {
     event.preventDefault();
 
-    const id = document.getElementById("employeeId").value.trim();
-    const name = document.getElementById("employeeName").value.trim();
+    const id = document.getElementById("employeeId")
+        .value.trim();
+
+    const name = document.getElementById("employeeName")
+        .value.trim();
+
     const position = document.getElementById("position").value;
     const department = document.getElementById("department").value;
-    const pass = password.value;
+    const password = passwordInput.value;
 
-    if (!id || !name || !position || !department || !pass) return;
-
-    if (editingId === null && employees.some(e => e.id === id)) {
-        notice.textContent = "Employee ID already exists.";
+    if (!id || !name || !position || !department) {
+        notice.textContent = "Please complete all required fields.";
         return;
     }
 
-    if (editingId !== null && id !== editingId &&
-        employees.some(e => e.id === id)) {
-        notice.textContent = "Employee ID already exists.";
+    if (editingId === null && password.length < 4) {
+        notice.textContent = "Password must contain at least 4 characters.";
         return;
     }
 
-    const record = { id, name, position, department, password: pass };
+    if (editingId !== null && password && password.length < 4) {
+        notice.textContent = "Password must contain at least 4 characters.";
+        return;
+    }
+
+    const duplicate = employees.some(employee =>
+        employee.id.toLowerCase() === id.toLowerCase() &&
+        employee.id !== editingId
+    );
+
+    if (duplicate) {
+        notice.textContent = "This Employee ID is already registered.";
+        return;
+    }
+
+    let updatedEmployees;
 
     if (editingId !== null) {
-        employees = employees.map(e => e.id === editingId ? record : e);
-        notice.textContent = "Demo record updated.";
+        updatedEmployees = employees.map(employee => {
+            if (employee.id !== editingId) return employee;
+
+            return {
+                ...employee,
+                id,
+                name,
+                position,
+                department
+            };
+        });
+
+        notice.textContent = "Employee record updated.";
     } else {
-        employees.push(record);
-        notice.textContent = "Demo employee registered.";
+        updatedEmployees = [
+            ...employees,
+            { id, name, position, department }
+        ];
+
+        notice.textContent = "Employee registered successfully.";
+    }
+
+    try {
+        AttendanceApp.saveEmployees(updatedEmployees);
+        employees = updatedEmployees;
+    } catch (error) {
+        notice.textContent =
+            "Unable to save. Browser storage may be unavailable.";
+        return;
     }
 
     form.reset();
     editingId = null;
-    password.required = true;
-    document.getElementById("formTitle").textContent = "Employee Registration";
-    document.getElementById("saveBtn").textContent = "Save Employee";
-    document.getElementById("cancelBtn").hidden = true;
+    passwordInput.required = true;
+
+    document.getElementById("formTitle").textContent =
+        "Employee Registration";
+
+    document.getElementById("saveBtn").textContent =
+        "Save Employee";
+
+    cancelBtn.hidden = true;
     renderEmployees();
 });
 
-function startEdit(id) {
-    const e = employees.find(item => item.id === id);
-    if (!e) return;
+function editEmployee(id) {
+    const employee = employees.find(item => item.id === id);
+    if (!employee) return;
 
     editingId = id;
-    document.getElementById("employeeId").value = e.id;
-    document.getElementById("employeeName").value = e.name;
-    document.getElementById("position").value = e.position;
-    document.getElementById("department").value = e.department;
-    password.value = e.password;
-    password.required = false;
+
+    document.getElementById("employeeId").value = employee.id;
+    document.getElementById("employeeName").value = employee.name;
+    document.getElementById("position").value = employee.position;
+    document.getElementById("department").value = employee.department;
+
+    // Do not display or retrieve an existing password.
+    passwordInput.value = "";
+    passwordInput.required = false;
+
     document.getElementById("formTitle").textContent = "Edit Employee";
     document.getElementById("saveBtn").textContent = "Update Employee";
-    document.getElementById("cancelBtn").hidden = false;
-    notice.textContent = "Editing " + e.name;
-    window.scrollTo(0, 0);
+
+    cancelBtn.hidden = false;
+    notice.textContent =
+        "Editing " + employee.name +
+        ". Leave password blank to keep it unchanged.";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function deleteEmployee(id) {
-    if (!confirm("Delete this demo employee record?")) return;
-    employees = employees.filter(e => e.id !== id);
+    const employee = employees.find(item => item.id === id);
+    if (!employee) return;
+
+    if (!confirm("Delete " + employee.name + "'s demo record?")) {
+        return;
+    }
+
+    const updatedEmployees = employees.filter(item => item.id !== id);
+
+    try {
+        AttendanceApp.saveEmployees(updatedEmployees);
+        employees = updatedEmployees;
+    } catch (error) {
+        notice.textContent = "Unable to save changes.";
+        return;
+    }
+
     if (editingId === id) resetForm();
+
     renderEmployees();
-    notice.textContent = "Demo record deleted.";
+    notice.textContent = "Employee record deleted.";
 }
 
 function resetForm() {
     form.reset();
     editingId = null;
-    password.required = true;
-    document.getElementById("formTitle").textContent = "Employee Registration";
-    document.getElementById("saveBtn").textContent = "Save Employee";
-    document.getElementById("cancelBtn").hidden = true;
+    passwordInput.required = true;
+
+    document.getElementById("formTitle").textContent =
+        "Employee Registration";
+
+    document.getElementById("saveBtn").textContent =
+        "Save Employee";
+
+    cancelBtn.hidden = true;
 }
 
-document.getElementById("cancelBtn").onclick = resetForm;
+cancelBtn.addEventListener("click", resetForm);
+
 renderEmployees();
+</script>
+
+</body>
+</html>
+Windelyn
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Record | Digital Attendance</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: #f1f5f9;
+    font-family: Arial, sans-serif;
+    color: #1e293b;
+}
+
+header {
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+}
+
+header h2 { margin: 0 0 14px; }
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+nav a {
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 7px;
+}
+
+nav a:hover, nav a.active {
+    background: #2563eb;
+    color: white;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 22px;
+}
+
+.card {
+    background: white;
+    padding: 24px;
+    margin-bottom: 22px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px #0f172a0b;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin: 14px 0 8px;
+}
+
+input, select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    font-size: 15px;
+}
+
+button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px 5px 5px 0;
+}
+
+button:hover { background: #1d4ed8; }
+
+.time-out { background: #0f766e; }
+.time-out:hover { background: #115e59; }
+
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.note {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+#message {
+    color: #1d4ed8;
+    font-weight: bold;
+}
+
+@media(max-width: 600px) {
+    main { padding: 12px; }
+    .card { padding: 16px; }
+    .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>Digital Attendance System</h2>
+    <nav>
+        <a href="dashboard.html">Home</a>
+        <a href="employees.html">Employee Registration</a>
+        <a class="active" href="attendance.html">Attendance Record</a>
+        <a href="monthly.html">Monthly Record</a>
+        <a href="login.html">Log Out</a>
+    </nav>
+</header>
+
+<main>
+    <section class="card">
+        <h2>Employee Attendance</h2>
+        <p class="note">
+            Select a registered employee, then record Time In or Time Out.
+        </p>
+
+        <label for="employeeSelect">Registered Employee</label>
+        <select id="employeeSelect">
+            <option value="">Select employee</option>
+        </select>
+
+        <div class="grid">
+            <div>
+                <label for="employeeId">Employee ID</label>
+                <input id="employeeId" readonly
+                    placeholder="Employee ID">
+            </div>
+
+            <div>
+                <label for="employeeName">Employee Name</label>
+                <input id="employeeName" readonly
+                    placeholder="Employee name">
+            </div>
+        </div>
+
+        <label for="attendanceDate">Attendance Date</label>
+        <input type="date" id="attendanceDate">
+
+        <p>
+            <button type="button" id="timeInBtn">Time In</button>
+            <button type="button" id="timeOutBtn" class="time-out">
+                Time Out
+            </button>
+        </p>
+
+        <p id="message" role="status"></p>
+    </section>
+
+    <section class="card">
+        <h2>Today's Attendance</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceList"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="app.js"></script>
+
+<script>
+const employeeSelect = document.getElementById("employeeSelect");
+const employeeId = document.getElementById("employeeId");
+const employeeName = document.getElementById("employeeName");
+const attendanceDate = document.getElementById("attendanceDate");
+const attendanceList = document.getElementById("attendanceList");
+const message = document.getElementById("message");
+
+function loadEmployees() {
+    const employees = AttendanceApp.getEmployees();
+
+    employeeSelect.replaceChildren();
+
+    const firstOption = document.createElement("option");
+    firstOption.value = "";
+    firstOption.textContent = "Select employee";
+    employeeSelect.appendChild(firstOption);
+
+    employees
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(employee => {
+            const option = document.createElement("option");
+            option.value = employee.id;
+            option.textContent = employee.name + " (" + employee.id + ")";
+            employeeSelect.appendChild(option);
+        });
+}
+
+function selectedEmployee() {
+    return AttendanceApp.getEmployees().find(
+        employee => employee.id === employeeSelect.value
+    );
+}
+
+function updateEmployeeFields() {
+    const employee = selectedEmployee();
+
+    employeeId.value = employee ? employee.id : "";
+    employeeName.value = employee ? employee.name : "";
+
+    if (!employee) {
+        message.textContent = "";
+    }
+}
+
+function getSelectedRecord() {
+    const employee = selectedEmployee();
+    const date = attendanceDate.value;
+
+    if (!employee) {
+        message.textContent = "Please select a registered employee.";
+        return null;
+    }
+
+    if (!date) {
+        message.textContent = "Please select an attendance date.";
+        return null;
+    }
+
+    let records = AttendanceApp.getAttendance();
+
+    let record = records.find(item =>
+        item.id === employee.id && item.date === date
+    );
+
+    if (!record) {
+        record = {
+            id: employee.id,
+            name: employee.name,
+            date,
+            timeIn: "",
+            timeOut: "",
+            status: "Absent"
+        };
+
+        records.push(record);
+    }
+
+    return { record, records };
+}
+
+function saveRecord(type) {
+    const result = getSelectedRecord();
+    if (!result) return;
+
+    const { record, records } = result;
+
+    if (type === "in") {
+        if (record.timeIn) {
+            message.textContent =
+                "Time In has already been recorded for this date.";
+            return;
+        }
+
+        record.timeIn = AttendanceApp.getCurrentTime();
+        record.status = "Present";
+    } else {
+        if (!record.timeIn) {
+            message.textContent =
+                "Please record Time In before Time Out.";
+            return;
+        }
+
+        if (record.timeOut) {
+            message.textContent =
+                "Time Out has already been recorded for this date.";
+            return;
+        }
+
+        record.timeOut = AttendanceApp.getCurrentTime();
+    }
+
+    try {
+        AttendanceApp.saveAttendance(records);
+        renderAttendance();
+
+        message.textContent = type === "in"
+            ? "Time In recorded successfully in this browser."
+            : "Time Out recorded successfully in this browser.";
+    } catch (error) {
+        message.textContent =
+            "Unable to save attendance in browser storage.";
+    }
+}
+
+function renderAttendance() {
+    attendanceList.replaceChildren();
+
+    const date = attendanceDate.value;
+    const records = AttendanceApp.getAttendance()
+        .filter(record => record.date === date)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    records.forEach(record => {
+        const tr = document.createElement("tr");
+
+        [
+            record.date,
+            record.id,
+            record.name,
+            record.timeIn || "—",
+            record.timeOut || "—",
+            record.status
+        ].forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+
+        attendanceList.appendChild(tr);
+    });
+}
+
+employeeSelect.addEventListener("change", updateEmployeeFields);
+
+attendanceDate.addEventListener("change", renderAttendance);
+
+document.getElementById("timeInBtn").addEventListener(
+    "click", () => saveRecord("in")
+);
+
+document.getElementById("timeOutBtn").addEventListener(
+    "click", () => saveRecord("out")
+);
+
+attendanceDate.value = AttendanceApp.today();
+loadEmployees();
+renderAttendance();
 </script>
 
 </body>
