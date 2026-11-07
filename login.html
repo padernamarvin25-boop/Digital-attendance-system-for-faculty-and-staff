@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Digital Attendance</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-card {
+            max-width: 420px;
+            width: 100%;
+            background: white;
+            padding: 32px 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,.2);
+            text-align: left;
+        }
+
+        .login-card .logo,
+        .login-card h1,
+        .login-card .subtitle {
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            margin-bottom: 25px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 9px;
+            background: #1d4ed8;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <main class="welcome">
+        <section class="login-card">
+            <div class="logo">DA</div>
+            <h1>Admin Login</h1>
+            <p class="subtitle">Digital Attendance System</p>
+
+            <form id="loginForm">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" type="text"
+                        placeholder="Enter username" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password"
+                        placeholder="Enter password" required>
+                </div>
+
+                <button class="login-btn" type="submit">
+                    Log In
+                </button>
+                <p id="message"></p>
+            </form>
+
+            <a class="back-link" href="index.html">
+                ← Back to Home
+            </a>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById("loginForm")
+            .addEventListener("submit", function(event) {
+                event.preventDefault();
+                document.getElementById("message").textContent =
+                    "Login backend is not connected yet.";
+            });
+    </script>
+</body>
+</html>
