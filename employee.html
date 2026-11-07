@@ -50,18 +50,29 @@
               </div>
               <div class="form-group">
                 <label>Password *</label>
-                <input type="password" id="empPass" class="form-control" required placeholder="Enter Password">
+                <div class="password-container">
+                  <input type="password" id="empPass" class="form-control" required placeholder="Enter Password">
+                  <i class="fa-solid fa-eye" id="toggleRegPass"></i>
+                </div>
               </div>
               <div class="form-group">
                 <label>Position *</label>
-                <input type="text" id="empPos" class="form-control" required placeholder="Enter Position">
+                <select id="empPos" class="form-control" required>
+                  <option value="">Select Position</option>
+                  <option value="Staff">Staff</option>
+                  <option value="Faculty">Faculty</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Department *</label>
                 <select id="empDept" class="form-control" required>
                   <option value="">Select Department</option>
-                  <option value="Faculty">Faculty</option>
-                  <option value="Staff">Staff</option>
+                  <option value="BSHM">BSHM</option>
+                  <option value="BSED">BSED</option>
+                  <option value="BEED">BEED</option>
+                  <option value="BSCRIM">BSCRIM</option>
+                  <option value="BSIT">BSIT</option>
+                  <option value="BSBA">BSBA</option>
                 </select>
               </div>
             </div>
@@ -78,6 +89,16 @@
 
   <script src="database.js"></script>
   <script>
+    // Password toggle para sa Registration
+    const toggleRegPass = document.getElementById('toggleRegPass');
+    const empPass = document.getElementById('empPass');
+
+    toggleRegPass.addEventListener('click', function () {
+      const type = empPass.getAttribute('type') === 'password' ? 'text' : 'password';
+      empPass.setAttribute('type', type);
+      this.classList.toggle('fa-eye-slash');
+    });
+
     document.getElementById('regForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const employees = DB.getEmployees();
