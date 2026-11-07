@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Registration</title>
+<link rel="stylesheet" href="style.css">
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #f1f5f9; }
+
+header {
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+}
+header h2 { margin: 0 0 12px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; }
+nav a {
+    color: #e2e8f0;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+nav a:hover { background: #2563eb; color: white; }
+
+main { padding: 22px; max-width: 1000px; margin: auto; }
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #0000000a;
+    margin-bottom: 22px;
+}
+h2 { color: #1e293b; }
+form {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 16px;
+}
+.field label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.field input, .field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    font-size: 15px;
+}
+button {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover { background: #1d4ed8; }
+.cancel { background: #64748b; }
+.full { grid-column: 1 / -1; }
+table { width: 100%; border-collapse: collapse; }
+th, td {
+    text-align: left;
+    padding: 12px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+th { color: #475569; background: #f8fafc; }
+.table-wrap { overflow-x: auto; }
+.small-btn { padding: 8px; margin: 2px; }
+.delete { background: #dc2626; }
+#notice { color: #475569; }
+@media(max-width:600px) {
+    main { padding: 12px; }
+    .card { padding: 16px; }
+    form { grid-template-columns: 1fr; }
+    .full { grid-column: auto; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h2>Digital Attendance System</h2>
+    <nav>
+        <a href="dashboard.html">Home</a>
+        <a href="employees.html">Employee Registration</a>
+        <a href="attendance.html">Attendance Record</a>
+        <a href="monthly.html">Monthly Record</a>
+        <a href="login.html">Log Out</a>
+    </nav>
+</header>
+
+<main>
+    <section class="card">
+        <h2 id="formTitle">Employee Registration</h2>
+        <p>Register faculty and staff members.</p>
+
+        <form id="employeeForm">
+            <div class="field">
+                <label for="employeeId">Employee ID</label>
+                <input id="employeeId" required maxlength="30"
+                    placeholder="Enter employee ID">
+            </div>
+
+            <div class="field">
+                <label for="employeeName">Employee Name</label>
+                <input id="employeeName" required maxlength="100"
+                    placeholder="Enter full name">
+            </div>
+
+            <div class="field">
+                <label for="position">Position</label>
+                <select id="position" required>
+                    <option value="">Select position</option>
+                    <option>Faculty</option>
+                    <option>Staff</option>
+                    <option>Admin</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="department">Department</label>
+                <select id="department" required>
+                    <option value="">Select department</option>
+                    <option>BSCRIM</option>
+                    <option>BSIT</option>
+                    <option>BSHM</option>
+                    <option>BSED</option>
+                    <option>BSBA</option>
+                    <option>BEED</option>
+                </select>
+            </div>
+
+            <div class="field full">
+                <label for="employeePassword">Employee Password</label>
+                <input id="employeePassword" type="password"
+                    required minlength="4" placeholder="Create password">
+            </div>
+
+            <div class="full">
+                <button type="submit" id="saveBtn">Save Employee</button>
+                <button type="button" class="cancel" id="cancelBtn"
+                    hidden>Cancel Edit</button>
+            </div>
+        </form>
+        <p id="notice" role="status"></p>
+    </section>
+
+    <section class="card">
+        <h2>Registered Employees</h2>
+        <p>Demo records are stored only in this browser.</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeList"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+const form = document.getElementById("employeeForm");
+const list = document.getElementById("employeeList");
+const notice = document.getElementById("notice");
+const password = document.getElementById("employeePassword");
+let employees = [];
+let editingId = null;
+
+function renderEmployees() {
+    list.replaceChildren();
+
+    employees.forEach(employee => {
+        const tr = document.createElement("tr");
+
+        [employee.id, employee.name, employee.position,
+         employee.department].forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+
+        const actions = document.createElement("td");
+        const edit = document.createElement("button");
+        edit.textContent = "Edit";
+        edit.className = "small-btn";
+        edit.type = "button";
+        edit.onclick = () => startEdit(employee.id);
+
+        const remove = document.createElement("button");
+        remove.textContent = "Delete";
+        remove.className = "small-btn delete";
+        remove.type = "button";
+        remove.onclick = () => deleteEmployee(employee.id);
+
+        actions.append(edit, remove);
+        tr.appendChild(actions);
+        list.appendChild(tr);
+    });
+}
+
+form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const id = document.getElementById("employeeId").value.trim();
+    const name = document.getElementById("employeeName").value.trim();
+    const position = document.getElementById("position").value;
+    const department = document.getElementById("department").value;
+    const pass = password.value;
+
+    if (!id || !name || !position || !department || !pass) return;
+
+    if (editingId === null && employees.some(e => e.id === id)) {
+        notice.textContent = "Employee ID already exists.";
+        return;
+    }
+
+    if (editingId !== null && id !== editingId &&
+        employees.some(e => e.id === id)) {
+        notice.textContent = "Employee ID already exists.";
+        return;
+    }
+
+    const record = { id, name, position, department, password: pass };
+
+    if (editingId !== null) {
+        employees = employees.map(e => e.id === editingId ? record : e);
+        notice.textContent = "Demo record updated.";
+    } else {
+        employees.push(record);
+        notice.textContent = "Demo employee registered.";
+    }
+
+    form.reset();
+    editingId = null;
+    password.required = true;
+    document.getElementById("formTitle").textContent = "Employee Registration";
+    document.getElementById("saveBtn").textContent = "Save Employee";
+    document.getElementById("cancelBtn").hidden = true;
+    renderEmployees();
+});
+
+function startEdit(id) {
+    const e = employees.find(item => item.id === id);
+    if (!e) return;
+
+    editingId = id;
+    document.getElementById("employeeId").value = e.id;
+    document.getElementById("employeeName").value = e.name;
+    document.getElementById("position").value = e.position;
+    document.getElementById("department").value = e.department;
+    password.value = e.password;
+    password.required = false;
+    document.getElementById("formTitle").textContent = "Edit Employee";
+    document.getElementById("saveBtn").textContent = "Update Employee";
+    document.getElementById("cancelBtn").hidden = false;
+    notice.textContent = "Editing " + e.name;
+    window.scrollTo(0, 0);
+}
+
+function deleteEmployee(id) {
+    if (!confirm("Delete this demo employee record?")) return;
+    employees = employees.filter(e => e.id !== id);
+    if (editingId === id) resetForm();
+    renderEmployees();
+    notice.textContent = "Demo record deleted.";
+}
+
+function resetForm() {
+    form.reset();
+    editingId = null;
+    password.required = true;
+    document.getElementById("formTitle").textContent = "Employee Registration";
+    document.getElementById("saveBtn").textContent = "Save Employee";
+    document.getElementById("cancelBtn").hidden = true;
+}
+
+document.getElementById("cancelBtn").onclick = resetForm;
+renderEmployees();
+</script>
+
+</body>
+</html>
