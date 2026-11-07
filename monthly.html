@@ -1,361 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Record | Digital Attendance System</title>
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f3f6fb;
-            color: #1e293b;
-        }
-
-        .page {
-            max-width: 1200px;
-            margin: auto;
-            padding: 24px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-            color: #123b70;
-        }
-
-        .header p {
-            margin: 0;
-            color: #64748b;
-        }
-
-        .back-link {
-            display: inline-block;
-            padding: 11px 16px;
-            border-radius: 8px;
-            background: #123b70;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .filter-card, .summary-card, .table-card {
-            background: white;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-        }
-
-        .filter-row {
-            display: flex;
-            align-items: end;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .field {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-
-        button {
-            padding: 12px 18px;
-            border: none;
-            border-radius: 8px;
-            background: #1764c0;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover, .back-link:hover {
-            opacity: 0.9;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .summary-card h3 {
-            margin: 0 0 12px;
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .summary-card .number {
-            color: #123b70;
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .table-heading {
-            margin: 0 0 16px;
-            color: #123b70;
-        }
-
-        .table-wrap {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 650px;
-        }
-
-        th, td {
-            padding: 13px;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        th {
-            background: #edf4ff;
-            color: #123b70;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            background: #dcfce7;
-            color: #166534;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .empty {
-            padding: 24px;
-            text-align: center;
-            color: #64748b;
-        }
-
-        .notice {
-            color: #64748b;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        @media (max-width: 650px) {
-            .page { padding: 15px; }
-            .header h1 { font-size: 23px; }
-            .summary-grid { grid-template-columns: 1fr; }
-            .summary-card { margin-bottom: 0; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Monthly Record - DAS</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
-    <main class="page">
-        <header class="header">
-            <div>
-                <h1>Monthly Attendance Record</h1>
-                <p>View attendance records for a selected month.</p>
-            </div>
-            <a class="back-link" href="dashboard.html">← Dashboard</a>
-        </header>
+  <script src="app.js"></script>
+  <script>checkAuth();</script>
 
-        <section class="filter-card">
-            <div class="filter-row">
-                <div class="field">
-                    <label for="monthFilter">Select Month</label>
-                    <input type="month" id="monthFilter">
-                </div>
-                <button type="button" id="viewButton">View Records</button>
-            </div>
-        </section>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h2>Digital Attendance System</h2>
+        <p>Admin Panel</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+        <li><a href="attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+        <li class="active"><a href="monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+        <li><a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+      </ul>
+    </div>
 
-        <section class="summary-grid">
-            <div class="summary-card">
-                <h3>Total Attendance Records</h3>
-                <div class="number" id="totalRecords">0</div>
-            </div>
+    <div class="main-content">
+      <div class="topbar">
+        <div><i class="fa-solid fa-bars"></i></div>
+        <div class="topbar-info">
+          <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+        </div>
+      </div>
 
-            <div class="summary-card">
-                <h3>Employees Recorded</h3>
-                <div class="number" id="totalEmployees">0</div>
-            </div>
+      <div class="content-area">
+        <h1 style="font-size: 1.5rem; margin-bottom: 20px;">Monthly Attendance Overview</h1>
 
-            <div class="summary-card">
-                <h3>Days With Attendance</h3>
-                <div class="number" id="totalDays">0</div>
-            </div>
-        </section>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Total Days Present</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <section class="table-card">
-            <h2 class="table-heading">Attendance History</h2>
+  <script src="database.js"></script>
+  <script>
+    const employees = DB.getEmployees();
+    const records = DB.getAttendance();
+    const tbody = document.getElementById('monthlyTable');
 
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Employee ID</th>
-                            <th>Employee Name</th>
-                            <th>Time In</th>
-                            <th>Time Out</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="monthlyTableBody">
-                        <tr>
-                            <td colspan="6" class="empty">Loading records...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <p class="notice">
-                Records shown here come from attendance saved in this browser.
-                This version uses local storage and is not yet connected to a shared database.
-            </p>
-        </section>
-    </main>
-
-    <script src="app.js"></script>
-
-    <script>
-        const monthFilter = document.getElementById("monthFilter");
-        const viewButton = document.getElementById("viewButton");
-        const tableBody = document.getElementById("monthlyTableBody");
-
-        const now = new Date();
-        monthFilter.value =
-            now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, "0");
-
-        function displayValue(value) {
-            return value === undefined || value === null || value === ""
-                ? "—"
-                : String(value);
-        }
-
-        function escapeHTML(value) {
-            return String(value ?? "").replace(/[&<>"']/g, function (char) {
-                const entities = {
-                    "&": "&amp;",
-                    "<": "&lt;",
-                    ">": "&gt;",
-                    '"': "&quot;",
-                    "'": "&#39;"
-                };
-                return entities[char];
-            });
-        }
-
-        function showRecords() {
-            if (!window.AttendanceApp) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="6" class="empty">The app.js file could not be loaded. Please check the file name.</td></tr>';
-                return;
-            }
-
-            const selectedMonth = monthFilter.value;
-
-            if (!selectedMonth) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="6" class="empty">Please select a month.</td></tr>';
-                return;
-            }
-
-            const allRecords = AttendanceApp.getAttendance();
-
-            const records = allRecords
-                .filter(function (record) {
-                    return String(record.date || "").startsWith(selectedMonth);
-                })
-                .sort(function (a, b) {
-                    return String(b.date || "").localeCompare(String(a.date || ""));
-                });
-
-            document.getElementById("totalRecords").textContent = records.length;
-
-            const employeeIds = new Set(
-                records.map(function (record) {
-                    return String(record.employeeId || record.id || record.employeeName || "");
-                }).filter(Boolean)
-            );
-
-            document.getElementById("totalEmployees").textContent = employeeIds.size;
-
-            const attendanceDays = new Set(
-                records.map(function (record) {
-                    return record.date;
-                }).filter(Boolean)
-            );
-
-            document.getElementById("totalDays").textContent = attendanceDays.size;
-
-            if (records.length === 0) {
-                tableBody.innerHTML =
-                    '<tr><td colspan="6" class="empty">No attendance records found for this month.</td></tr>';
-                return;
-            }
-
-            tableBody.innerHTML = records.map(function (record) {
-                const date = escapeHTML(displayValue(record.date));
-                const employeeId = escapeHTML(
-                    displayValue(record.employeeId || record.id)
-                );
-                const employeeName = escapeHTML(
-                    displayValue(record.employeeName || record.name)
-                );
-                const timeIn = escapeHTML(displayValue(record.timeIn));
-                const timeOut = escapeHTML(displayValue(record.timeOut));
-                const status = escapeHTML(displayValue(record.status || "Present"));
-
-                return `
-                    <tr>
-                        <td>${date}</td>
-                        <td>${employeeId}</td>
-                        <td>${employeeName}</td>
-                        <td>${timeIn}</td>
-                        <td>${timeOut}</td>
-                        <td><span class="status">${status}</span></td>
-                    </tr>
-                `;
-            }).join("");
-        }
-
-        viewButton.addEventListener("click", showRecords);
-        monthFilter.addEventListener("change", showRecords);
-
-        showRecords();
-    </script>
+    tbody.innerHTML = employees.map(emp => {
+      const count = records.filter(r => r.id === emp.id).length;
+      return `
+        <tr>
+          <td>${emp.id}</td>
+          <td>${emp.name}</td>
+          <td><strong>${count} days</strong></td>
+        </tr>
+      `;
+    }).join('');
+  </script>
 </body>
 </html>
