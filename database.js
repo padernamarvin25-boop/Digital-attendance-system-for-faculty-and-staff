@@ -1,39 +1,20 @@
-const STORAGE_KEYS = {
-  employees: "attendance_employees",
-  records: "attendance_records",
-  admin: "attendance_admin"
-};
-
-const Database = {
-  get(key) {
-    try {
-      return JSON.parse(localStorage.getItem(key)) ?? [];
-    } catch {
-      return [];
-    }
-  },
-
-  save(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-  },
-
+// LocalStorage Database Wrapper
+const DB = {
   getEmployees() {
-    return this.get(STORAGE_KEYS.employees);
+    return JSON.parse(localStorage.getItem('das_employees')) || [
+      { id: 'EMP001', name: 'Juan Dela Cruz', position: 'Instructor', department: 'Faculty', password: '123' },
+      { id: 'EMP002', name: 'Maria Santos', position: 'Staff Admin', department: 'Staff', password: '123' }
+    ];
   },
-
   saveEmployees(employees) {
-    this.save(STORAGE_KEYS.employees, employees);
+    localStorage.setItem('das_employees', JSON.stringify(employees));
   },
-
-  getRecords() {
-    return this.get(STORAGE_KEYS.records);
+  getAttendance() {
+    return JSON.parse(localStorage.getItem('das_attendance')) || [
+      { id: 'EMP001', name: 'Juan Dela Cruz', date: new Date().toISOString().split('T')[0], timeIn: '07:55 AM', timeOut: '05:00 PM', status: 'Present' }
+    ];
   },
-
-  saveRecords(records) {
-    this.save(STORAGE_KEYS.records, records);
+  saveAttendance(records) {
+    localStorage.setItem('das_attendance', JSON.stringify(records));
   }
 };
-
-window.Database = Database;
-window.STORAGE_KEYS = STORAGE_KEYS;
-
