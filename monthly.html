@@ -1,296 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monthly Attendance Record</title>
-<link rel="stylesheet" href="style.css">
-<style>
-* { box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Record | Digital Attendance System</title>
+    <link rel="stylesheet" href="style.css">
 
-body {
-    margin: 0;
-    background: #f1f5f9;
-    font-family: Arial, sans-serif;
-    color: #1e293b;
-}
+    <style>
+        * { box-sizing: border-box; }
 
-header {
-    background: #0f172a;
-    color: white;
-    padding: 20px;
-}
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+        }
 
-header h2 { margin: 0 0 14px; }
+        .page {
+            max-width: 1200px;
+            margin: auto;
+            padding: 24px;
+        }
 
-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
 
-nav a {
-    color: #e2e8f0;
-    text-decoration: none;
-    padding: 9px;
-    border-radius: 7px;
-}
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+            color: #123b70;
+        }
 
-nav a:hover, nav a.active {
-    background: #2563eb;
-    color: white;
-}
+        .header p {
+            margin: 0;
+            color: #64748b;
+        }
 
-main {
-    max-width: 1100px;
-    margin: auto;
-    padding: 22px;
-}
+        .back-link {
+            display: inline-block;
+            padding: 11px 16px;
+            border-radius: 8px;
+            background: #123b70;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
 
-.card {
-    background: white;
-    padding: 22px;
-    border-radius: 14px;
-    margin-bottom: 20px;
-    box-shadow: 0 3px 12px #00000008;
-}
+        .filter-card, .summary-card, .table-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
 
-.filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 14px;
-    align-items: end;
-}
+        .filter-row {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
+        .field {
+            flex: 1;
+            min-width: 200px;
+        }
 
-input, select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    background: white;
-    font-size: 15px;
-}
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
 
-button {
-    border: none;
-    background: #2563eb;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+        }
 
-button:hover { background: #1d4ed8; }
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #1764c0;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.summary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-}
+        button:hover, .back-link:hover {
+            opacity: 0.9;
+        }
 
-.stat {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 18px;
-    border-radius: 12px;
-}
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
 
-.stat p { margin: 0; }
+        .summary-card h3 {
+            margin: 0 0 12px;
+            color: #64748b;
+            font-size: 14px;
+        }
 
-.number {
-    font-size: 28px;
-    font-weight: bold;
-    color: #2563eb;
-    margin-top: 10px;
-}
+        .summary-card .number {
+            color: #123b70;
+            font-size: 30px;
+            font-weight: bold;
+        }
 
-.table-wrap { overflow-x: auto; }
+        .table-heading {
+            margin: 0 0 16px;
+            color: #123b70;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 580px;
-}
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #e2e8f0;
-    text-align: left;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
 
-th {
-    background: #f8fafc;
-    color: #475569;
-}
+        th, td {
+            padding: 13px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            font-size: 14px;
+        }
 
-#message { color: #64748b; }
+        th {
+            background: #edf4ff;
+            color: #123b70;
+        }
 
-@media(max-width:650px) {
-    main { padding: 12px; }
-    .card { padding: 16px; }
-    .filters { grid-template-columns: 1fr; }
-    .summary { gap: 8px; }
-    .stat { padding: 12px; }
-    .number { font-size: 23px; }
-}
-</style>
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .empty {
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .notice {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 650px) {
+            .page { padding: 15px; }
+            .header h1 { font-size: 23px; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .summary-card { margin-bottom: 0; }
+        }
+    </style>
 </head>
+
 <body>
-
-<header>
-    <h2>Digital Attendance System</h2>
-    <nav>
-        <a href="dashboard.html">Home</a>
-        <a href="employees.html">Employee Registration</a>
-        <a href="attendance.html">Attendance Record</a>
-        <a href="monthly.html" class="active">Monthly Record</a>
-        <a href="login.html">Log Out</a>
-    </nav>
-</header>
-
-<main>
-    <section class="card">
-        <h2>Monthly Attendance Record</h2>
-        <p>Choose a month and year to view attendance summaries.</p>
-
-        <div class="filters">
+    <main class="page">
+        <header class="header">
             <div>
-                <label for="month">Month</label>
-                <select id="month">
-                    <option value="0">January</option>
-                    <option value="1">February</option>
-                    <option value="2">March</option>
-                    <option value="3">April</option>
-                    <option value="4">May</option>
-                    <option value="5">June</option>
-                    <option value="6">July</option>
-                    <option value="7">August</option>
-                    <option value="8">September</option>
-                    <option value="9">October</option>
-                    <option value="10">November</option>
-                    <option value="11">December</option>
-                </select>
+                <h1>Monthly Attendance Record</h1>
+                <p>View attendance records for a selected month.</p>
+            </div>
+            <a class="back-link" href="dashboard.html">← Dashboard</a>
+        </header>
+
+        <section class="filter-card">
+            <div class="filter-row">
+                <div class="field">
+                    <label for="monthFilter">Select Month</label>
+                    <input type="month" id="monthFilter">
+                </div>
+                <button type="button" id="viewButton">View Records</button>
+            </div>
+        </section>
+
+        <section class="summary-grid">
+            <div class="summary-card">
+                <h3>Total Attendance Records</h3>
+                <div class="number" id="totalRecords">0</div>
             </div>
 
-            <div>
-                <label for="year">Year</label>
-                <input type="number" id="year" min="2000" max="2100">
+            <div class="summary-card">
+                <h3>Employees Recorded</h3>
+                <div class="number" id="totalEmployees">0</div>
             </div>
 
-            <button type="button" id="viewBtn">View Records</button>
-        </div>
-        <p id="message" role="status"></p>
-    </section>
+            <div class="summary-card">
+                <h3>Days With Attendance</h3>
+                <div class="number" id="totalDays">0</div>
+            </div>
+        </section>
 
-    <section class="card">
-        <h3>Attendance Summary</h3>
-        <div class="summary">
-            <div class="stat">
-                <p>Present Records</p>
-                <div class="number" id="presentCount">0</div>
-            </div>
-            <div class="stat">
-                <p>Absent Records</p>
-                <div class="number" id="absentCount">0</div>
-            </div>
-            <div class="stat">
-                <p>Total Records</p>
-                <div class="number" id="totalCount">0</div>
-            </div>
-        </div>
-    </section>
+        <section class="table-card">
+            <h2 class="table-heading">Attendance History</h2>
 
-    <section class="card">
-        <h3>Attendance Details</h3>
-        <div class="table-wrap">
-            <table>
-                <thead>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employee ID</th>
+                            <th>Employee Name</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyTableBody">
+                        <tr>
+                            <td colspan="6" class="empty">Loading records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="notice">
+                Records shown here come from attendance saved in this browser.
+                This version uses local storage and is not yet connected to a shared database.
+            </p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+
+    <script>
+        const monthFilter = document.getElementById("monthFilter");
+        const viewButton = document.getElementById("viewButton");
+        const tableBody = document.getElementById("monthlyTableBody");
+
+        const now = new Date();
+        monthFilter.value =
+            now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, "0");
+
+        function displayValue(value) {
+            return value === undefined || value === null || value === ""
+                ? "—"
+                : String(value);
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function (char) {
+                const entities = {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                };
+                return entities[char];
+            });
+        }
+
+        function showRecords() {
+            if (!window.AttendanceApp) {
+                tableBody.innerHTML =
+                    '<tr><td colspan="6" class="empty">The app.js file could not be loaded. Please check the file name.</td></tr>';
+                return;
+            }
+
+            const selectedMonth = monthFilter.value;
+
+            if (!selectedMonth) {
+                tableBody.innerHTML =
+                    '<tr><td colspan="6" class="empty">Please select a month.</td></tr>';
+                return;
+            }
+
+            const allRecords = AttendanceApp.getAttendance();
+
+            const records = allRecords
+                .filter(function (record) {
+                    return String(record.date || "").startsWith(selectedMonth);
+                })
+                .sort(function (a, b) {
+                    return String(b.date || "").localeCompare(String(a.date || ""));
+                });
+
+            document.getElementById("totalRecords").textContent = records.length;
+
+            const employeeIds = new Set(
+                records.map(function (record) {
+                    return String(record.employeeId || record.id || record.employeeName || "");
+                }).filter(Boolean)
+            );
+
+            document.getElementById("totalEmployees").textContent = employeeIds.size;
+
+            const attendanceDays = new Set(
+                records.map(function (record) {
+                    return record.date;
+                }).filter(Boolean)
+            );
+
+            document.getElementById("totalDays").textContent = attendanceDays.size;
+
+            if (records.length === 0) {
+                tableBody.innerHTML =
+                    '<tr><td colspan="6" class="empty">No attendance records found for this month.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = records.map(function (record) {
+                const date = escapeHTML(displayValue(record.date));
+                const employeeId = escapeHTML(
+                    displayValue(record.employeeId || record.id)
+                );
+                const employeeName = escapeHTML(
+                    displayValue(record.employeeName || record.name)
+                );
+                const timeIn = escapeHTML(displayValue(record.timeIn));
+                const timeOut = escapeHTML(displayValue(record.timeOut));
+                const status = escapeHTML(displayValue(record.status || "Present"));
+
+                return `
                     <tr>
-                        <th>Date</th>
-                        <th>Employee ID</th>
-                        <th>Employee Name</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Status</th>
+                        <td>${date}</td>
+                        <td>${employeeId}</td>
+                        <td>${employeeName}</td>
+                        <td>${timeIn}</td>
+                        <td>${timeOut}</td>
+                        <td><span class="status">${status}</span></td>
                     </tr>
-                </thead>
-                <tbody id="monthlyRecords"></tbody>
-            </table>
-        </div>
-    </section>
-</main>
+                `;
+            }).join("");
+        }
 
-<script>
-const monthInput = document.getElementById("month");
-const yearInput = document.getElementById("year");
-const rows = document.getElementById("monthlyRecords");
-const message = document.getElementById("message");
+        viewButton.addEventListener("click", showRecords);
+        monthFilter.addEventListener("change", showRecords);
 
-const now = new Date();
-monthInput.value = String(now.getMonth());
-yearInput.value = now.getFullYear();
-
-document.getElementById("viewBtn").addEventListener("click", showRecords);
-
-function showRecords() {
-    rows.replaceChildren();
-
-    const month = Number(monthInput.value);
-    const year = Number(yearInput.value);
-
-    if (!Number.isInteger(year) || year < 2000 || year > 2100) {
-        message.textContent = "Please enter a valid year.";
-        return;
-    }
-
-    // Placeholder until attendance is connected to shared storage.
-    const records = [];
-
-    const filtered = records.filter(record => {
-        const d = new Date(record.date + "T00:00:00");
-        return d.getMonth() === month && d.getFullYear() === year;
-    });
-
-    let present = 0;
-    let absent = 0;
-
-    filtered.forEach(record => {
-        if (record.status === "Present") present++;
-        if (record.status === "Absent") absent++;
-
-        const tr = document.createElement("tr");
-        [
-            record.date,
-            record.id,
-            record.name,
-            record.timeIn || "—",
-            record.timeOut || "—",
-            record.status
-        ].forEach(value => {
-            const td = document.createElement("td");
-            td.textContent = value;
-            tr.appendChild(td);
-        });
-
-        rows.appendChild(tr);
-    });
-
-    document.getElementById("presentCount").textContent = present;
-    document.getElementById("absentCount").textContent = absent;
-    document.getElementById("totalCount").textContent = filtered.length;
-
-    message.textContent = filtered.length
-        ? "Records loaded."
-        : "No records available. Attendance data connection is not set up yet.";
-}
-
-showRecords();
-</script>
+        showRecords();
+    </script>
 </body>
 </html>
