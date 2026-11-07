@@ -1,20 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Attendance System</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Employee Attendance - Time In/Out</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <main class="welcome">
-        <section class="welcome-card">
-            <div class="logo">DA</div>
-            <h1>HELLO, WELCOME!</h1>
-            <h2>DIGITAL ATTENDANCE SYSTEM</h2>
-            <p>Faculty and Staff Attendance Management System</p>
-            <a class="start-btn" href="login.html">Get Started</a>
-        </section>
-    </main>
+<body class="kiosk-body">
+
+  <div class="kiosk-card">
+    <div style="margin-bottom: 25px;">
+      <i class="fa-regular fa-clock" style="font-size: 3.5rem; color: #0d6efd;"></i>
+      <h1 style="font-size: 1.8rem; margin-top: 10px;">Employee Attendance</h1>
+      <p style="color: var(--text-muted);">Time In and Time Out</p>
+    </div>
+
+    <form id="kioskForm">
+      <div class="form-group" style="text-align: left;">
+        <label>Employee ID</label>
+        <input type="text" id="kioskId" class="form-control" required placeholder="Enter Employee ID">
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label>Password</label>
+        <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px;">
+        <button type="button" onclick="handleAttendance('TIME_IN')" class="btn btn-success" style="padding: 15px; font-size: 1.1rem;">
+          <i class="fa-solid fa-right-to-bracket"></i> TIME IN
+        </button>
+        <button type="button" onclick="handleAttendance('TIME_OUT')" class="btn btn-primary" style="padding: 15px; font-size: 1.1rem;">
+          <i class="fa-solid fa-right-from-bracket"></i> TIME OUT
+        </button>
+      </div>
+    </form>
+
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+      <p style="color: var(--text-muted); font-size: 0.85rem;">— Be On Time. Be Productive. —</p>
+      <a href="login.html" style="display: inline-block; margin-top: 10px; font-size: 0.8rem; color: #6c757d;">Admin Access</a>
+    </div>
+  </div>
+
+  <script src="database.js"></script>
+  <script>
+    function handleAttendance(type) {
+      const id = document.getElementById('kioskId').value;
+      const pass = document.getElementById('kioskPass').value;
+
+      if(!id || !pass) {
+        alert('Mangyaring ilagay ang Employee ID at Password.');
+        return;
+      }
+
+      const employees = DB.getEmployees();
+      const emp = employees.find(e => e.id === id && e.password === pass);
+
+      if(!emp) {
+        alert('Maling Employee ID o Password!');
+        return;
+      }
+
+      const records = DB.getAttendance();
+      const todayStr = new Date().toISOString().split('T')[0];
+      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      let record = records.find(r => r.id === id && r.date === todayStr);
+
+      if (type === 'TIME_IN') {
+        if (record) {
+          alert('Naka-Time In ka na ngayong araw!');
+          return;
+        }
+        records.push({
+          id: emp.id,
+          name: emp.name,
+          date: todayStr,
+          timeIn: nowTime,
+          timeOut: '--',
+          status: 'Present'
+        });
+        alert(Success! Time In recorded for ${emp.name} at ${nowTime});
+      } else if (type === 'TIME_OUT') {
+        if (!record) {
+          alert('Kailangan mo munang mag-Time In bago mag-Time Out!');
+          return;
+        }
+        record.timeOut = nowTime;
+        alert(Success! Time Out recorded for ${emp.name} at ${nowTime});
+      }
+
+      DB.saveAttendance(records);
+      document.getElementById('kioskForm').reset();
+    }
+  </script>
 </body>
 </html>
