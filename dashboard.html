@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | Digital Attendance</title>
+<link rel="stylesheet" href="style.css">
+<style>
+* { box-sizing: border-box; }
+
+body { margin: 0; background: #f1f5f9; }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+    width: 245px;
+    background: #0f172a;
+    color: white;
+    padding: 25px 15px;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-size: 19px;
+    font-weight: bold;
+    padding: 10px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.brand span { color: #60a5fa; }
+
+.menu {
+    display: block;
+    color: #cbd5e1;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 9px;
+    margin: 7px 0;
+}
+
+.menu:hover, .menu.active {
+    background: #2563eb;
+    color: white;
+}
+
+.main { flex: 1; min-width: 0; }
+
+.topbar {
+    background: white;
+    padding: 22px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 2px 8px #00000008;
+}
+
+.topbar h2 { margin: 0; color: #0f172a; }
+
+.admin { color: #64748b; font-size: 14px; }
+
+.content { padding: 25px; }
+
+.welcome-box {
+    background: linear-gradient(120deg,#1d4ed8,#3b82f6);
+    color: white;
+    padding: 27px;
+    border-radius: 16px;
+    margin-bottom: 25px;
+}
+
+.welcome-box h2 { color: white; margin: 0 0 10px; }
+.welcome-box p { color: #e0ecff; }
+
+.section-title { margin: 25px 0 15px; }
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px;
+}
+
+.stat {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+}
+
+.stat p { font-size: 14px; }
+
+.number {
+    font-size: 30px;
+    font-weight: bold;
+    color: #1d4ed8;
+    margin-top: 10px;
+}
+
+.panel {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 22px;
+    border: 1px solid #e2e8f0;
+}
+
+.panel h3 { margin-top: 0; }
+
+.status {
+    display: inline-block;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 20px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.logout { margin-top: 25px; }
+
+@media(max-width:650px) {
+    .layout { display: block; }
+    .sidebar { width: 100%; padding: 15px; }
+    .brand { margin-bottom: 10px; }
+    .menu { display: inline-block; padding: 10px; font-size: 13px; }
+    .logout { margin-top: 5px; }
+    .topbar { padding: 18px; }
+    .content { padding: 15px; }
+    .cards { gap: 10px; }
+    .stat { padding: 15px; }
+    .number { font-size: 25px; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">DIGITAL<br><span>ATTENDANCE</span></div>
+
+        <a class="menu active" href="dashboard.html">⌂ Home</a>
+        <a class="menu" href="employees.html">♙ Employee Registration</a>
+        <a class="menu" href="attendance.html">◷ Attendance Record</a>
+        <a class="menu" href="monthly.html">▦ Monthly Record</a>
+        <a class="menu logout" href="login.html">⇥ Log Out</a>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <h2>Admin Dashboard</h2>
+            <span class="admin">Administrator</span>
+        </header>
+
+        <div class="content">
+            <section class="welcome-box">
+                <h2>Welcome, Admin!</h2>
+                <p>Manage faculty and staff attendance in one place.</p>
+                <span class="status">Attendance Management</span>
+            </section>
+
+            <h3 class="section-title">Attendance Overview</h3>
+
+            <div class="cards">
+                <div class="stat">
+                    <p>Total Employees</p>
+                    <div class="number">0</div>
+                </div>
+                <div class="stat">
+                    <p>Present Today</p>
+                    <div class="number">0</div>
+                </div>
+                <div class="stat">
+                    <p>Time In</p>
+                    <div class="number">0</div>
+                </div>
+                <div class="stat">
+                    <p>Time Out</p>
+                    <div class="number">0</div>
+                </div>
+            </div>
+
+            <section class="panel">
+                <h3>Quick Access</h3>
+                <p>Register faculty and staff, record attendance,
+                and review monthly attendance records.</p>
+                <p><a href="employees.html">Employee Registration →</a></p>
+                <p><a href="attendance.html">View Attendance →</a></p>
+                <p><a href="monthly.html">Monthly Record →</a></p>
+            </section>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
