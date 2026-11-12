@@ -2,44 +2,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Attendance Record - DAS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Attendance Record - DAS</title>
 
-  <link rel="stylesheet" href="./Daily Attendance Record - DAS_files/style.css">
-  <link rel="stylesheet" href="./Daily Attendance Record - DAS_files/all.min.css">
+<!-- ORIGINAL CSS DESIGN -->
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./all.min.css">
 
-  <style>
-    .daily-folder {
-      background: #fff;
-      padding: 15px 10px;
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      border: 2px solid var(--border-color);
-      transition: all 0.2s ease;
-      user-select: none;
-    }
+<style>
+.daily-folder {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  padding: 15px 10px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s ease;
+  user-select: none;
+}
 
-    .daily-folder:hover {
-      border-color: var(--primary-blue);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
+.daily-folder:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
 
-    .daily-folder.active-folder {
-      border-color: var(--primary-blue);
-      background-color: #f8fbff;
-      box-shadow: 0 2px 6px rgba(13,110,253,0.15);
-    }
-  </style>
+.daily-folder.active-folder {
+  border-color: var(--primary-blue);
+  background: #f8fbff;
+  box-shadow: 0 2px 6px rgba(13,110,253,0.15);
+}
+
+.daily-folder:focus {
+  outline: 3px solid rgba(13,110,253,0.25);
+}
+
+.daily-folder i {
+  font-size: 1.8rem;
+  color: #ffc107;
+  margin-bottom: 5px;
+  display: block;
+}
+</style>
 </head>
 
 <body>
 
-<script src="./Daily Attendance Record - DAS_files/app.js.download"></script>
+<script src="./app.js"></script>
 <script>
-  checkAuth();
+if (typeof checkAuth === 'function') checkAuth();
 </script>
 
 <div class="app-container">
@@ -79,7 +93,7 @@
       </li>
 
       <li>
-        <a href="#" onclick="logout()">
+        <a href="#" onclick="logout(); return false;">
           <i class="fa-solid fa-right-from-bracket"></i> Log Out
         </a>
       </li>
@@ -139,7 +153,6 @@
             id="dateFilter"
             class="form-control"
             style="display:inline-block;width:auto;"
-            onchange="filterDailyData()"
           >
         </div>
 
@@ -150,40 +163,41 @@
         Department Folders:
       </h3>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:25px;">
+      <div id="departmentFolders"
+        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:25px;">
 
-        <div class="daily-folder active-folder" id="dfolder-ALL" onclick="selectDailyDept('ALL')">
-          <i class="fa-solid fa-folder-open" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder active-folder" id="dfolder-ALL" role="button" tabindex="0">
+          <i class="fa-solid fa-folder-open"></i>
           <h4 style="font-size:0.85rem;margin:0;">All Depts</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BSHM" onclick="selectDailyDept('BSHM')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BSHM" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BSHM</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BSED" onclick="selectDailyDept('BSED')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BSED" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BSED</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BEED" onclick="selectDailyDept('BEED')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BEED" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BEED</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BSCRIM" onclick="selectDailyDept('BSCRIM')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BSCRIM" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BSCRIM</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BSIT" onclick="selectDailyDept('BSIT')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BSIT" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BSIT</h4>
         </div>
 
-        <div class="daily-folder" id="dfolder-BSBA" onclick="selectDailyDept('BSBA')">
-          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+        <div class="daily-folder" id="dfolder-BSBA" role="button" tabindex="0">
+          <i class="fa-solid fa-folder"></i>
           <h4 style="font-size:0.85rem;margin:0;">BSBA</h4>
         </div>
 
@@ -192,11 +206,13 @@
       <!-- ATTENDANCE TABLE -->
       <div class="card">
 
-        <h3 id="dailyFolderTitle" style="margin-bottom:15px;font-size:1.05rem;color:var(--primary-blue);">
+        <h3 id="dailyFolderTitle"
+          style="margin-bottom:15px;font-size:1.05rem;color:var(--primary-blue);">
           Daily Attendance Logs - All Departments
         </h3>
 
         <div style="overflow-x:auto;">
+
           <table>
             <thead>
               <tr>
@@ -213,8 +229,8 @@
 
             <tbody id="attendanceTable"></tbody>
           </table>
-        </div>
 
+        </div>
       </div>
 
     </div>
@@ -222,11 +238,219 @@
 </div>
 
 <!-- DATABASE -->
-<script src="./Daily Attendance Record - DAS_files/database.js.download"></script>
+<script src="./database.js"></script>
 
 <script>
 
-  // DISPLAY CURRENT DATE
+// ======================================
+// DAILY ATTENDANCE DEPARTMENT FILTER
+// ======================================
+
+let dailySelectedDept = 'ALL';
+
+// LOCAL DATE
+function localToday() {
+  const d = new Date();
+
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// SAFE TEXT
+function clean(value) {
+  return String(value ?? '').trim();
+}
+
+// PREVENT HTML INJECTION
+function escapeHTML(value) {
+  return clean(value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+// GET EMPLOYEE DEPARTMENT
+function getDepartment(employee, record) {
+  return clean(
+    employee?.department || record?.department || 'Unknown'
+  ).toUpperCase();
+}
+
+// SELECT DEPARTMENT
+function selectDailyDept(dept) {
+
+  dailySelectedDept = dept.toUpperCase();
+
+  // RESET ALL FOLDERS
+  document.querySelectorAll('.daily-folder').forEach(folder => {
+
+    folder.classList.remove('active-folder');
+
+    const icon = folder.querySelector('i');
+
+    if (icon) {
+      icon.classList.remove('fa-folder-open');
+      icon.classList.add('fa-folder');
+    }
+
+  });
+
+  // OPEN SELECTED FOLDER
+  const selectedFolder =
+    document.getElementById('dfolder-' + dailySelectedDept);
+
+  if (selectedFolder) {
+
+    selectedFolder.classList.add('active-folder');
+
+    const icon = selectedFolder.querySelector('i');
+
+    if (icon) {
+      icon.classList.remove('fa-folder');
+      icon.classList.add('fa-folder-open');
+    }
+
+  }
+
+  // UPDATE TITLE
+  document.getElementById('dailyFolderTitle').textContent =
+    dailySelectedDept === 'ALL'
+      ? 'Daily Attendance Logs - All Departments'
+      : 'Daily Attendance Logs - ' + dailySelectedDept;
+
+  // DISPLAY RECORDS
+  filterDailyData();
+}
+
+// ======================================
+// FILTER ATTENDANCE RECORDS
+// ======================================
+
+function filterDailyData() {
+
+  const tbody = document.getElementById('attendanceTable');
+
+  if (!window.DB ||
+      typeof DB.getAttendance !== 'function' ||
+      typeof DB.getEmployees !== 'function') {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;padding:25px;color:#dc3545;">
+          Database not loaded. Please check database.js.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const selectedDate =
+    document.getElementById('dateFilter').value;
+
+  const records = DB.getAttendance() || [];
+  const employees = DB.getEmployees() || [];
+
+  // MATCH EMPLOYEE INFORMATION
+  const rows = records.map(record => {
+
+    const employee = employees.find(emp =>
+      clean(emp.id) === clean(record.id)
+    );
+
+    return {
+      ...record,
+
+      name: record.name || employee?.name || 'Unknown',
+
+      department: getDepartment(employee, record),
+
+      position: record.position || employee?.position || '—'
+
+    };
+
+  }).filter(record => {
+
+    const matchesDate =
+      !selectedDate || clean(record.date) === selectedDate;
+
+    const matchesDept =
+      dailySelectedDept === 'ALL' ||
+      record.department === dailySelectedDept;
+
+    return matchesDate && matchesDept;
+
+  });
+
+  // EMPTY RECORDS
+  if (rows.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8"
+          style="text-align:center;color:#6c757d;padding:25px;">
+          No attendance records found for this date or department.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  // SHOW RECORDS
+  tbody.innerHTML = rows.map(record => `
+
+    <tr>
+
+      <td>${escapeHTML(record.id)}</td>
+
+      <td>
+        <strong>${escapeHTML(record.name)}</strong>
+      </td>
+
+      <td>
+        <span style="background:#e3f2fd;color:#0d6efd;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.85rem;">
+          ${escapeHTML(record.department)}
+        </span>
+      </td>
+
+      <td>${escapeHTML(record.position)}</td>
+
+      <td>${escapeHTML(record.date)}</td>
+
+      <td>
+        <span style="color:#198754;font-weight:600;">
+          ${escapeHTML(record.timeIn || '—')}
+        </span>
+      </td>
+
+      <td>
+        <span style="color:#0dcaf0;font-weight:600;">
+          ${escapeHTML(record.timeOut || '—')}
+        </span>
+      </td>
+
+      <td>
+        <span style="background:#d1e7dd;color:#0f5132;padding:3px 8px;border-radius:4px;font-weight:bold;font-size:0.85rem;">
+          ${escapeHTML(record.status || '—')}
+        </span>
+      </td>
+
+    </tr>
+
+  `).join('');
+
+}
+
+// ======================================
+// INITIALIZE PAGE
+// ======================================
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  // CURRENT DATE
   const now = new Date();
 
   document.getElementById('currentDate').textContent =
@@ -236,164 +460,43 @@
       day: 'numeric'
     });
 
-  // GET TODAY'S DATE USING LOCAL TIME
-  const todayStr =
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  // DEFAULT DATE FILTER
+  const dateFilter = document.getElementById('dateFilter');
 
-  document.getElementById('dateFilter').value = todayStr;
+  dateFilter.value = localToday();
 
-  // DEFAULT DEPARTMENT
-  let dailySelectedDept = 'ALL';
+  dateFilter.addEventListener('change', filterDailyData);
 
+  // CLICKABLE DEPARTMENT FOLDERS
+  document.querySelectorAll('.daily-folder').forEach(folder => {
 
-  // SELECT DEPARTMENT FOLDER
-  function selectDailyDept(dept) {
+    folder.addEventListener('click', function() {
 
-    dailySelectedDept = dept;
+      const dept = this.id.replace('dfolder-', '');
 
-    // REMOVE ACTIVE STATUS FROM ALL FOLDERS
-    document.querySelectorAll('.daily-folder').forEach(el => {
+      selectDailyDept(dept);
 
-      el.classList.remove('active-folder');
+    });
 
-      const icon = el.querySelector('i');
+    // KEYBOARD SUPPORT
+    folder.addEventListener('keydown', function(event) {
 
-      if (icon) {
-        icon.classList.remove('fa-folder-open');
-        icon.classList.add('fa-folder');
+      if (event.key === 'Enter' || event.key === ' ') {
+
+        event.preventDefault();
+
+        this.click();
+
       }
 
     });
 
-    // ACTIVATE SELECTED FOLDER
-    const activeEl = document.getElementById('dfolder-' + dept);
+  });
 
-    if (activeEl) {
+  // DEFAULT FOLDER
+  selectDailyDept('ALL');
 
-      activeEl.classList.add('active-folder');
-
-      const activeIcon = activeEl.querySelector('i');
-
-      if (activeIcon) {
-        activeIcon.classList.remove('fa-folder');
-        activeIcon.classList.add('fa-folder-open');
-      }
-
-    }
-
-    // UPDATE TITLE
-    document.getElementById('dailyFolderTitle').textContent =
-      `Daily Attendance Logs - Department: ${dept === 'ALL' ? 'All Departments' : dept}`;
-
-    // DISPLAY SELECTED DEPARTMENT RECORDS
-    filterDailyData();
-
-  }
-
-
-  // FILTER ATTENDANCE RECORDS
-  function filterDailyData() {
-
-    const selectedDate = document.getElementById('dateFilter').value;
-
-    const records = DB.getAttendance();
-
-    const employees = DB.getEmployees();
-
-    const tbody = document.getElementById('attendanceTable');
-
-
-    // MATCH ATTENDANCE WITH EMPLOYEE INFORMATION
-    const enhancedRecords = records.map(r => {
-
-      const emp = employees.find(e => e.id === r.id);
-
-      return {
-        ...r,
-        department: emp ? emp.department : 'BSIT',
-        position: emp ? emp.position : 'Staff'
-      };
-
-    });
-
-
-    // FILTER BY DATE AND DEPARTMENT
-    const filtered = enhancedRecords.filter(r => {
-
-      const matchDate = !selectedDate || r.date === selectedDate;
-
-      const matchDept =
-        dailySelectedDept === 'ALL' ||
-        r.department === dailySelectedDept;
-
-      return matchDate && matchDept;
-
-    });
-
-
-    // NO RECORDS FOUND
-    if (filtered.length === 0) {
-
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="8" style="text-align:center;color:var(--text-muted);padding:25px;">
-            No attendance records found for this date or department.
-          </td>
-        </tr>
-      `;
-
-      return;
-    }
-
-
-    // DISPLAY ATTENDANCE RECORDS
-    tbody.innerHTML = filtered.map(r => `
-
-      <tr>
-
-        <td>${r.id}</td>
-
-        <td>
-          <strong>${r.name}</strong>
-        </td>
-
-        <td>
-          <span style="background:#e3f2fd;color:#0d6efd;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.85rem;">
-            ${r.department}
-          </span>
-        </td>
-
-        <td>${r.position}</td>
-
-        <td>${r.date}</td>
-
-        <td>
-          <span style="color:#198754;font-weight:600;">
-            ${r.timeIn}
-          </span>
-        </td>
-
-        <td>
-          <span style="color:#0dcaf0;font-weight:600;">
-            ${r.timeOut}
-          </span>
-        </td>
-
-        <td>
-          <span style="background:#d1e7dd;color:#0f5132;padding:3px 8px;border-radius:4px;font-weight:bold;font-size:0.85rem;">
-            ${r.status}
-          </span>
-        </td>
-
-      </tr>
-
-    `).join('');
-
-  }
-
-
-  // LOAD DEFAULT ATTENDANCE RECORDS
-  filterDailyData();
+});
 
 </script>
 
