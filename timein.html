@@ -20,6 +20,8 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+      isolation: isolate;
     }
 
     .kiosk-card {
@@ -28,6 +30,9 @@
       margin: auto;
       padding: 30px;
       border-radius: 15px;
+      position: relative;
+      z-index: 10;
+      pointer-events: auto;
     }
 
     .kiosk-card input {
@@ -39,6 +44,9 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 25px;
+      position: relative;
+      z-index: 20;
+      pointer-events: auto;
     }
 
     .kiosk-buttons button {
@@ -50,6 +58,10 @@
       font-size: 1rem;
       font-weight: bold;
       transition: 0.2s;
+      position: relative;
+      z-index: 21;
+      pointer-events: auto !important;
+      touch-action: manipulation;
     }
 
     .kiosk-buttons button:hover {
@@ -65,12 +77,11 @@
       cursor: pointer;
     }
 
-    /* AUTOMATIC SUCCESS NOTIFICATION */
     .toast-message {
       position: fixed;
       top: 25px;
       right: 25px;
-      z-index: 9999;
+      z-index: 99999;
       width: min(360px, calc(100% - 40px));
       padding: 16px 20px;
       border-radius: 10px;
@@ -159,7 +170,7 @@
     <form id="kioskForm">
 
       <div class="form-group" style="text-align:left;">
-        <label>Employee ID</label>
+        <label for="kioskId">Employee ID</label>
         <input
           type="text"
           id="kioskId"
@@ -170,7 +181,7 @@
       </div>
 
       <div class="form-group" style="text-align:left;">
-        <label>Password</label>
+        <label for="kioskPass">Password</label>
 
         <div class="password-container">
           <input
@@ -185,24 +196,17 @@
         </div>
       </div>
 
+      <!-- TIME IN / TIME OUT BUTTONS -->
       <div class="kiosk-buttons">
 
-        <button type="button"
-                onclick="handleAttendance('TIME_IN')"
-                class="btn btn-success">
-
+        <button type="button" id="timeInBtn" class="btn btn-success">
           <i class="fa-solid fa-right-to-bracket"></i>
           TIME IN
-
         </button>
 
-        <button type="button"
-                onclick="handleAttendance('TIME_OUT')"
-                class="btn btn-primary">
-
+        <button type="button" id="timeOutBtn" class="btn btn-primary">
           <i class="fa-solid fa-right-from-bracket"></i>
           TIME OUT
-
         </button>
 
       </div>
@@ -225,7 +229,6 @@
   <script src="database.js"></script>
 
   <script>
-
     // =====================================
     // PASSWORD SHOW / HIDE
     // =====================================
@@ -234,12 +237,10 @@
     const kioskPass = document.getElementById("kioskPass");
 
     toggleKioskPass.addEventListener("click", function () {
-
       kioskPass.type =
         kioskPass.type === "password" ? "text" : "password";
 
       this.classList.toggle("fa-eye-slash");
-
     });
 
 
@@ -250,7 +251,6 @@
     let toastTimer;
 
     function showToast(title, message, type = "success") {
-
       const toast = document.getElementById("toastMessage");
       const icon = document.getElementById("toastIcon");
 
@@ -270,7 +270,6 @@
       toastTimer = setTimeout(() => {
         toast.classList.remove("show");
       }, 3500);
-
     }
 
 
@@ -279,7 +278,6 @@
     // =====================================
 
     function getLocalDate() {
-
       const now = new Date();
 
       const year = now.getFullYear();
@@ -287,7 +285,6 @@
       const day = String(now.getDate()).padStart(2, "0");
 
       return `${year}-${month}-${day}`;
-
     }
 
 
@@ -302,177 +299,190 @@
 
       // Check empty fields
       if (!id || !pass) {
-
         showToast(
           "Missing Information",
           "Please enter your Employee ID and Password.",
           "error"
         );
-
         return;
       }
 
       // Check database
-      if (typeof DB === "undefined") {
-
+      if (
+        typeof DB === "undefined" ||
+        typeof DB.getEmployees !== "function" ||
+        typeof DB.getAttendance !== "function" ||
+        typeof DB.saveAttendance !== "function"
+      ) {
         showToast(
           "Database Error",
           "Database not loaded. Please check database.js.",
           "error"
         );
-
         return;
       }
 
-      const employees = DB.getEmployees();
+      try {
 
-      // Verify employee
-      const emp = employees.find(e =>
-        String(e.id).trim() === id &&
-        String(e.password) === pass
-      );
+        const employees = DB.getEmployees();
 
-      if (!emp) {
+        // Verify employee
+        const emp = employees.find(e =>
+          String(e.id).trim() === id &&
+          String(e.password) === pass
+        );
+
+        if (!emp) {
+          showToast(
+            "Login Failed",
+            "Incorrect Employee ID or Password.",
+            "error"
+          );
+          return;
+        }
+
+        // Get attendance records
+        const records = DB.getAttendance();
+
+        const todayStr = getLocalDate();
+
+        const nowTime = new Date().toLocaleTimeString("en-PH", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        });
+
+        // Find today's record
+        let record = records.find(r =>
+          String(r.id) === String(id) &&
+          r.date === todayStr
+        );
+
+
+        // =================================
+        // TIME IN
+        // =================================
+
+        if (type === "TIME_IN") {
+
+          if (record && record.timeIn && record.timeIn !== "--") {
+            showToast(
+              "Already Timed In",
+              "You have already recorded your Time In today.",
+              "error"
+            );
+            return;
+          }
+
+          if (!record) {
+
+            records.push({
+              id: emp.id,
+              name: emp.name,
+              date: todayStr,
+              timeIn: nowTime,
+              timeOut: "--",
+              status: "Present"
+            });
+
+          } else {
+
+            record.name = emp.name;
+            record.timeIn = nowTime;
+            record.status = "Present";
+
+          }
+
+          if (!DB.saveAttendance(records)) {
+            showToast(
+              "Saving Failed",
+              "Unable to save your attendance. Please try again.",
+              "error"
+            );
+            return;
+          }
+
+          showToast(
+            "Time In Successful!",
+            `${emp.name}, your Time In was recorded at ${nowTime}.`,
+            "success"
+          );
+
+        }
+
+
+        // =================================
+        // TIME OUT
+        // =================================
+
+        else if (type === "TIME_OUT") {
+
+          if (!record || !record.timeIn || record.timeIn === "--") {
+            showToast(
+              "Time In Required",
+              "Please record your Time In before Time Out.",
+              "error"
+            );
+            return;
+          }
+
+          if (record.timeOut && record.timeOut !== "--") {
+            showToast(
+              "Already Timed Out",
+              "You have already recorded your Time Out today.",
+              "error"
+            );
+            return;
+          }
+
+          record.timeOut = nowTime;
+
+          if (!DB.saveAttendance(records)) {
+            showToast(
+              "Saving Failed",
+              "Unable to save your attendance. Please try again.",
+              "error"
+            );
+            return;
+          }
+
+          showToast(
+            "Time Out Successful!",
+            `${emp.name}, your Time Out was recorded at ${nowTime}.`,
+            "success"
+          );
+
+        }
+
+        // Clear form after successful attendance
+        document.getElementById("kioskForm").reset();
+
+        kioskPass.type = "password";
+        toggleKioskPass.classList.remove("fa-eye-slash");
+
+      } catch (error) {
+        console.error("Attendance Error:", error);
 
         showToast(
-          "Login Failed",
-          "Incorrect Employee ID or Password.",
+          "System Error",
+          "Something went wrong while recording attendance.",
           "error"
         );
-
-        return;
       }
-
-      // Get attendance records
-      const records = DB.getAttendance();
-
-      const todayStr = getLocalDate();
-
-      const nowTime = new Date().toLocaleTimeString("en-PH", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      });
-
-      // Find today's record
-      let record = records.find(r =>
-        String(r.id) === String(id) &&
-        r.date === todayStr
-      );
-
-
-      // =================================
-      // TIME IN
-      // =================================
-
-      if (type === "TIME_IN") {
-
-        if (record && record.timeIn && record.timeIn !== "--") {
-
-          showToast(
-            "Already Timed In",
-            "You have already recorded your Time In today.",
-            "error"
-          );
-
-          return;
-        }
-
-        if (!record) {
-
-          records.push({
-            id: emp.id,
-            name: emp.name,
-            date: todayStr,
-            timeIn: nowTime,
-            timeOut: "--",
-            status: "Present"
-          });
-
-        } else {
-
-          record.name = emp.name;
-          record.timeIn = nowTime;
-          record.status = "Present";
-
-        }
-
-        if (!DB.saveAttendance(records)) {
-
-          showToast(
-            "Saving Failed",
-            "Unable to save your attendance. Please try again.",
-            "error"
-          );
-
-          return;
-        }
-
-        showToast(
-          "Time In Successful!",
-          `${emp.name}, your Time In was recorded at ${nowTime}.`,
-          "success"
-        );
-
-      }
-
-
-      // =================================
-      // TIME OUT
-      // =================================
-
-      else if (type === "TIME_OUT") {
-
-        if (!record || !record.timeIn || record.timeIn === "--") {
-
-          showToast(
-            "Time In Required",
-            "Please record your Time In before Time Out.",
-            "error"
-          );
-
-          return;
-        }
-
-        if (record.timeOut && record.timeOut !== "--") {
-
-          showToast(
-            "Already Timed Out",
-            "You have already recorded your Time Out today.",
-            "error"
-          );
-
-          return;
-        }
-
-        record.timeOut = nowTime;
-
-        if (!DB.saveAttendance(records)) {
-
-          showToast(
-            "Saving Failed",
-            "Unable to save your attendance. Please try again.",
-            "error"
-          );
-
-          return;
-        }
-
-        showToast(
-          "Time Out Successful!",
-          `${emp.name}, your Time Out was recorded at ${nowTime}.`,
-          "success"
-        );
-
-      }
-
-      // Clear form after successful attendance
-      document.getElementById("kioskForm").reset();
-
-      kioskPass.type = "password";
-      toggleKioskPass.classList.remove("fa-eye-slash");
-
     }
+
+
+    // =====================================
+    // CONNECT BUTTON CLICK EVENTS
+    // =====================================
+
+    document.getElementById("timeInBtn").addEventListener("click", function () {
+      handleAttendance("TIME_IN");
+    });
+
+    document.getElementById("timeOutBtn").addEventListener("click", function () {
+      handleAttendance("TIME_OUT");
+    });
 
   </script>
 
