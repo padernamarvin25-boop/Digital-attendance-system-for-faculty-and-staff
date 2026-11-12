@@ -2,489 +2,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Employee Attendance - Time In/Out</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Employee Attendance - Time In/Out</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
 
-    .kiosk-body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      position: relative;
-      isolation: isolate;
-    }
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    .kiosk-card {
-      width: 100%;
-      max-width: 440px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 15px;
-      position: relative;
-      z-index: 10;
-      pointer-events: auto;
-    }
+    <style>
+        /* Attendance Page Design */
+        .kiosk-body {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px 15px;
+            background: #f4f6f9;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
 
-    .kiosk-card input {
-      width: 100%;
-    }
+        .kiosk-card {
+            width: 100%;
+            max-width: 460px;
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+            text-align: center;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
 
-    .kiosk-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 25px;
-      position: relative;
-      z-index: 20;
-      pointer-events: auto;
-    }
+        .kiosk-card h1 {
+            color: #212529;
+            font-size: 1.8rem;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
 
-    .kiosk-buttons button {
-      width: 100%;
-      min-height: 55px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: 0.2s;
-      position: relative;
-      z-index: 21;
-      pointer-events: auto !important;
-      touch-action: manipulation;
-    }
+        .kiosk-subtitle {
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
 
-    .kiosk-buttons button:hover {
-      opacity: 0.85;
-      transform: translateY(-2px);
-    }
+        .kiosk-card .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
 
-    .kiosk-buttons button:active {
-      transform: scale(0.97);
-    }
+        .kiosk-card label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333333;
+        }
 
-    #toggleKioskPass {
-      cursor: pointer;
-    }
+        .kiosk-card .form-control {
+            width: 100%;
+            height: 48px;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 7px;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+        }
 
-    .toast-message {
-      position: fixed;
-      top: 25px;
-      right: 25px;
-      z-index: 99999;
-      width: min(360px, calc(100% - 40px));
-      padding: 16px 20px;
-      border-radius: 10px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-15px);
-      transition: all 0.3s ease;
-      pointer-events: none;
-    }
+        .kiosk-card .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+        }
 
-    .toast-message.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
 
-    .toast-message.success {
-      background: #198754;
-    }
+        .password-container input {
+            padding-right: 45px;
+        }
 
-    .toast-message.error {
-      background: #dc3545;
-    }
+        .password-container i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            z-index: 2;
+        }
 
-    .toast-message i {
-      font-size: 23px;
-    }
+        .kiosk-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+            width: 100%;
+        }
 
-    .toast-content strong {
-      display: block;
-      margin-bottom: 3px;
-    }
+        .kiosk-buttons button {
+            width: 100%;
+            min-height: 55px;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 5;
+            transition: 0.2s ease;
+        }
 
-    .toast-content span {
-      font-size: 0.9rem;
-    }
+        .time-in-btn {
+            background: #198754;
+        }
 
-    @media (max-width: 480px) {
-      .kiosk-card {
-        padding: 22px 18px;
-      }
+        .time-in-btn:hover {
+            background: #146c43;
+        }
 
-      .kiosk-buttons {
-        grid-template-columns: 1fr;
-      }
+        .time-out-btn {
+            background: #0d6efd;
+        }
 
-      .toast-message {
-        top: 15px;
-        right: 15px;
-      }
-    }
-  </style>
+        .time-out-btn:hover {
+            background: #0b5ed7;
+        }
+
+        .kiosk-buttons button:active {
+            transform: scale(0.97);
+        }
+
+        .kiosk-footer {
+            margin-top: 30px;
+            border-top: 1px solid #eeeeee;
+            padding-top: 18px;
+        }
+
+        .kiosk-footer p {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .admin-link {
+            display: inline-block;
+            margin-top: 12px;
+            color: #6c757d;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .admin-link:hover {
+            color: #0d6efd;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .kiosk-card {
+                padding: 25px 20px;
+            }
+
+            .kiosk-card h1 {
+                font-size: 1.5rem;
+            }
+
+            .kiosk-buttons {
+                gap: 8px;
+            }
+
+            .kiosk-buttons button {
+                font-size: 14px;
+                padding: 12px 5px;
+            }
+        }
+    </style>
 </head>
 
 <body class="kiosk-body">
 
-  <!-- AUTOMATIC NOTIFICATION -->
-  <div id="toastMessage" class="toast-message" role="status" aria-live="polite">
-    <i id="toastIcon" class="fa-solid fa-circle-check"></i>
-    <div class="toast-content">
-      <strong id="toastTitle">Success!</strong>
-      <span id="toastText">Attendance recorded successfully.</span>
-    </div>
-  </div>
+    <div class="kiosk-card">
 
-  <div class="kiosk-card">
+        <div style="margin-bottom: 25px;">
 
-    <div style="margin-bottom:25px; text-align:center;">
-      <i class="fa-regular fa-clock"
-         style="font-size:3.5rem; color:#0d6efd;"></i>
+            <i class="fa-regular fa-clock"
+               style="font-size: 3.5rem; color: #0d6efd;">
+            </i>
 
-      <h1 style="font-size:1.8rem; margin-top:10px;">
-        Employee Attendance
-      </h1>
+            <h1>Employee Attendance</h1>
 
-      <p style="color:var(--text-muted);">
-        Time In and Time Out
-      </p>
-    </div>
+            <p class="kiosk-subtitle">
+                Time In and Time Out
+            </p>
 
-    <form id="kioskForm">
-
-      <div class="form-group" style="text-align:left;">
-        <label for="kioskId">Employee ID</label>
-        <input
-          type="text"
-          id="kioskId"
-          class="form-control"
-          required
-          placeholder="Enter Employee ID"
-          autocomplete="username">
-      </div>
-
-      <div class="form-group" style="text-align:left;">
-        <label for="kioskPass">Password</label>
-
-        <div class="password-container">
-          <input
-            type="password"
-            id="kioskPass"
-            class="form-control"
-            required
-            placeholder="Enter Password"
-            autocomplete="current-password">
-
-          <i class="fa-solid fa-eye" id="toggleKioskPass"></i>
         </div>
-      </div>
 
-      <!-- TIME IN / TIME OUT BUTTONS -->
-      <div class="kiosk-buttons">
+        <form id="kioskForm">
 
-        <button type="button" id="timeInBtn" class="btn btn-success">
-          <i class="fa-solid fa-right-to-bracket"></i>
-          TIME IN
-        </button>
+            <div class="form-group">
 
-        <button type="button" id="timeOutBtn" class="btn btn-primary">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          TIME OUT
-        </button>
+                <label for="kioskId">Employee ID</label>
 
-      </div>
-    </form>
+                <input
+                    type="text"
+                    id="kioskId"
+                    class="form-control"
+                    required
+                    placeholder="Enter Employee ID"
+                    autocomplete="username"
+                >
 
-    <div style="margin-top:30px; border-top:1px solid #eee; padding-top:15px; text-align:center;">
-      <p style="color:var(--text-muted); font-size:0.85rem;">
-        — Be On Time. Be Productive. —
-      </p>
+            </div>
 
-      <a href="login.html"
-         style="display:inline-block; margin-top:10px; font-size:0.8rem; color:#6c757d;">
-        Admin Access
-      </a>
+            <div class="form-group">
+
+                <label for="kioskPass">Password</label>
+
+                <div class="password-container">
+
+                    <input
+                        type="password"
+                        id="kioskPass"
+                        class="form-control"
+                        required
+                        placeholder="Enter Password"
+                        autocomplete="current-password"
+                    >
+
+                    <i class="fa-solid fa-eye"
+                       id="toggleKioskPass">
+                    </i>
+
+                </div>
+
+            </div>
+
+            <div class="kiosk-buttons">
+
+                <button
+                    type="button"
+                    id="timeInBtn"
+                    class="time-in-btn"
+                >
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    TIME IN
+                </button>
+
+                <button
+                    type="button"
+                    id="timeOutBtn"
+                    class="time-out-btn"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    TIME OUT
+                </button>
+
+            </div>
+
+        </form>
+
+        <div class="kiosk-footer">
+
+            <p>— Be On Time. Be Productive. —</p>
+
+            <a href="login.html" class="admin-link">
+                Admin Access
+            </a>
+
+        </div>
+
     </div>
 
-  </div>
+    <!-- Database -->
+    <script src="database.js"></script>
 
-  <!-- DATABASE -->
-  <script src="database.js"></script>
+    <script>
+        // Password visibility
+        const toggleKioskPass =
+            document.getElementById('toggleKioskPass');
 
-  <script>
-    // =====================================
-    // PASSWORD SHOW / HIDE
-    // =====================================
+        const kioskPass =
+            document.getElementById('kioskPass');
 
-    const toggleKioskPass = document.getElementById("toggleKioskPass");
-    const kioskPass = document.getElementById("kioskPass");
+        toggleKioskPass.addEventListener('click', function () {
 
-    toggleKioskPass.addEventListener("click", function () {
-      kioskPass.type =
-        kioskPass.type === "password" ? "text" : "password";
+            const type = kioskPass.type === 'password'
+                ? 'text'
+                : 'password';
 
-      this.classList.toggle("fa-eye-slash");
-    });
+            kioskPass.type = type;
 
+            this.classList.toggle('fa-eye-slash');
 
-    // =====================================
-    // AUTOMATIC NOTIFICATION
-    // =====================================
-
-    let toastTimer;
-
-    function showToast(title, message, type = "success") {
-      const toast = document.getElementById("toastMessage");
-      const icon = document.getElementById("toastIcon");
-
-      document.getElementById("toastTitle").textContent = title;
-      document.getElementById("toastText").textContent = message;
-
-      toast.className = "toast-message " + type;
-
-      icon.className = type === "success"
-        ? "fa-solid fa-circle-check"
-        : "fa-solid fa-circle-exclamation";
-
-      toast.classList.add("show");
-
-      clearTimeout(toastTimer);
-
-      toastTimer = setTimeout(() => {
-        toast.classList.remove("show");
-      }, 3500);
-    }
-
-
-    // =====================================
-    // LOCAL DATE
-    // =====================================
-
-    function getLocalDate() {
-      const now = new Date();
-
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-
-      return `${year}-${month}-${day}`;
-    }
-
-
-    // =====================================
-    // TIME IN / TIME OUT
-    // =====================================
-
-    function handleAttendance(type) {
-
-      const id = document.getElementById("kioskId").value.trim();
-      const pass = document.getElementById("kioskPass").value;
-
-      // Check empty fields
-      if (!id || !pass) {
-        showToast(
-          "Missing Information",
-          "Please enter your Employee ID and Password.",
-          "error"
-        );
-        return;
-      }
-
-      // Check database
-      if (
-        typeof DB === "undefined" ||
-        typeof DB.getEmployees !== "function" ||
-        typeof DB.getAttendance !== "function" ||
-        typeof DB.saveAttendance !== "function"
-      ) {
-        showToast(
-          "Database Error",
-          "Database not loaded. Please check database.js.",
-          "error"
-        );
-        return;
-      }
-
-      try {
-
-        const employees = DB.getEmployees();
-
-        // Verify employee
-        const emp = employees.find(e =>
-          String(e.id).trim() === id &&
-          String(e.password) === pass
-        );
-
-        if (!emp) {
-          showToast(
-            "Login Failed",
-            "Incorrect Employee ID or Password.",
-            "error"
-          );
-          return;
-        }
-
-        // Get attendance records
-        const records = DB.getAttendance();
-
-        const todayStr = getLocalDate();
-
-        const nowTime = new Date().toLocaleTimeString("en-PH", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true
         });
 
-        // Find today's record
-        let record = records.find(r =>
-          String(r.id) === String(id) &&
-          r.date === todayStr
-        );
+
+        // Get local date
+        function getLocalDate() {
+
+            const today = new Date();
+
+            const year = today.getFullYear();
+
+            const month = String(
+                today.getMonth() + 1
+            ).padStart(2, '0');
+
+            const day = String(
+                today.getDate()
+            ).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+
+        }
 
 
-        // =================================
-        // TIME IN
-        // =================================
+        // Attendance function
+        function handleAttendance(type) {
 
-        if (type === "TIME_IN") {
+            const id = document
+                .getElementById('kioskId')
+                .value.trim();
 
-          if (record && record.timeIn && record.timeIn !== "--") {
-            showToast(
-              "Already Timed In",
-              "You have already recorded your Time In today.",
-              "error"
-            );
-            return;
-          }
+            const pass = document
+                .getElementById('kioskPass')
+                .value;
 
-          if (!record) {
+            // Check empty fields
+            if (!id || !pass) {
 
-            records.push({
-              id: emp.id,
-              name: emp.name,
-              date: todayStr,
-              timeIn: nowTime,
-              timeOut: "--",
-              status: "Present"
+                alert(
+                    'Mangyaring ilagay ang Employee ID at Password.'
+                );
+
+                return;
+
+            }
+
+            // Check database
+            if (
+                typeof DB === 'undefined' ||
+                typeof DB.getEmployees !== 'function' ||
+                typeof DB.getAttendance !== 'function' ||
+                typeof DB.saveAttendance !== 'function'
+            ) {
+
+                alert(
+                    'Database not loaded. Pakisuri ang database.js.'
+                );
+
+                return;
+
+            }
+
+            try {
+
+                // Verify employee
+                const employees = DB.getEmployees();
+
+                const emp = employees.find(employee =>
+                    employee.id === id &&
+                    String(employee.password) === pass
+                );
+
+                if (!emp) {
+
+                    alert('Maling Employee ID o Password!');
+
+                    return;
+
+                }
+
+                // Get attendance records
+                const records = DB.getAttendance();
+
+                const todayStr = getLocalDate();
+
+                const nowTime = new Date().toLocaleTimeString(
+                    'en-US',
+                    {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }
+                );
+
+                // Find today's record
+                let record = records.find(item =>
+                    item.id === id &&
+                    item.date === todayStr
+                );
+
+
+                // TIME IN
+                if (type === 'TIME_IN') {
+
+                    if (record) {
+
+                        alert(
+                            'Naka-Time In ka na ngayong araw!'
+                        );
+
+                        return;
+
+                    }
+
+                    records.push({
+
+                        id: emp.id,
+
+                        name: emp.name,
+
+                        date: todayStr,
+
+                        timeIn: nowTime,
+
+                        timeOut: '--',
+
+                        status: 'Present'
+
+                    });
+
+                    DB.saveAttendance(records);
+
+                    alert(
+                        `SUCCESS! Time In recorded for ${emp.name} at ${nowTime}`
+                    );
+
+                }
+
+
+                // TIME OUT
+                else if (type === 'TIME_OUT') {
+
+                    if (!record) {
+
+                        alert(
+                            'Kailangan mo munang mag-Time In bago mag-Time Out!'
+                        );
+
+                        return;
+
+                    }
+
+                    if (
+                        record.timeOut &&
+                        record.timeOut !== '--'
+                    ) {
+
+                        alert(
+                            'Naka-Time Out ka na ngayong araw!'
+                        );
+
+                        return;
+
+                    }
+
+                    record.timeOut = nowTime;
+
+                    DB.saveAttendance(records);
+
+                    alert(
+                        `SUCCESS! Time Out recorded for ${emp.name} at ${nowTime}`
+                    );
+
+                }
+
+                else {
+
+                    alert('Invalid attendance action.');
+
+                    return;
+
+                }
+
+                // Reset form after successful attendance
+                document.getElementById('kioskForm').reset();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    'Attendance Error:',
+                    error
+                );
+
+                alert(
+                    'May error sa pag-save ng attendance. Pakisuri ang database.js.'
+                );
+
+            }
+
+        }
+
+
+        // Button click events
+        document
+            .getElementById('timeInBtn')
+            .addEventListener('click', function () {
+
+                handleAttendance('TIME_IN');
+
             });
 
-          } else {
 
-            record.name = emp.name;
-            record.timeIn = nowTime;
-            record.status = "Present";
+        document
+            .getElementById('timeOutBtn')
+            .addEventListener('click', function () {
 
-          }
+                handleAttendance('TIME_OUT');
 
-          if (!DB.saveAttendance(records)) {
-            showToast(
-              "Saving Failed",
-              "Unable to save your attendance. Please try again.",
-              "error"
-            );
-            return;
-          }
+            });
 
-          showToast(
-            "Time In Successful!",
-            `${emp.name}, your Time In was recorded at ${nowTime}.`,
-            "success"
-          );
-
-        }
-
-
-        // =================================
-        // TIME OUT
-        // =================================
-
-        else if (type === "TIME_OUT") {
-
-          if (!record || !record.timeIn || record.timeIn === "--") {
-            showToast(
-              "Time In Required",
-              "Please record your Time In before Time Out.",
-              "error"
-            );
-            return;
-          }
-
-          if (record.timeOut && record.timeOut !== "--") {
-            showToast(
-              "Already Timed Out",
-              "You have already recorded your Time Out today.",
-              "error"
-            );
-            return;
-          }
-
-          record.timeOut = nowTime;
-
-          if (!DB.saveAttendance(records)) {
-            showToast(
-              "Saving Failed",
-              "Unable to save your attendance. Please try again.",
-              "error"
-            );
-            return;
-          }
-
-          showToast(
-            "Time Out Successful!",
-            `${emp.name}, your Time Out was recorded at ${nowTime}.`,
-            "success"
-          );
-
-        }
-
-        // Clear form after successful attendance
-        document.getElementById("kioskForm").reset();
-
-        kioskPass.type = "password";
-        toggleKioskPass.classList.remove("fa-eye-slash");
-
-      } catch (error) {
-        console.error("Attendance Error:", error);
-
-        showToast(
-          "System Error",
-          "Something went wrong while recording attendance.",
-          "error"
-        );
-      }
-    }
-
-
-    // =====================================
-    // CONNECT BUTTON CLICK EVENTS
-    // =====================================
-
-    document.getElementById("timeInBtn").addEventListener("click", function () {
-      handleAttendance("TIME_IN");
-    });
-
-    document.getElementById("timeOutBtn").addEventListener("click", function () {
-      handleAttendance("TIME_OUT");
-    });
-
-  </script>
+    </script>
 
 </body>
 </html>
