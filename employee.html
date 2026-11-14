@@ -12,6 +12,12 @@
   <style>
     .password-container {
       position: relative;
+      width: 100%;
+    }
+
+    .password-container input {
+      width: 100%;
+      padding-right: 48px !important;
     }
 
     #toggleRegPass {
@@ -19,7 +25,12 @@
       right: 12px;
       top: 50%;
       transform: translateY(-50%);
+      border: none;
+      background: transparent;
       cursor: pointer;
+      font-size: 18px;
+      padding: 5px;
+      z-index: 2;
     }
 
     .department-buttons {
@@ -158,15 +169,27 @@
                 required placeholder="Enter Full Name">
             </div>
 
+            <!-- PASSWORD WITH EYE BUTTON -->
             <div class="form-group">
               <label>Password *</label>
 
               <div class="password-container">
-                <input type="password" id="empPass"
-                  class="form-control" required
-                  placeholder="Enter Password">
 
-                <i class="fa-solid fa-eye" id="toggleRegPass"></i>
+                <input
+                  type="password"
+                  id="empPass"
+                  class="form-control"
+                  required
+                  placeholder="Enter Password"
+                >
+
+                <button
+                  type="button"
+                  id="toggleRegPass"
+                  aria-label="Show password"
+                  title="Show Password"
+                >👁️</button>
+
               </div>
             </div>
 
@@ -301,15 +324,6 @@
 let selectedDepartment = "ALL";
 let editingEmployeeId = null;
 
-const departments = [
-  "BSHM",
-  "BSED",
-  "BEED",
-  "BSCRIM",
-  "BSIT",
-  "BSBA"
-];
-
 // CURRENT DATE
 document.getElementById("currentDate").textContent =
   new Date().toLocaleDateString("en-US", {
@@ -318,16 +332,28 @@ document.getElementById("currentDate").textContent =
     day: "numeric"
   });
 
-// PASSWORD VISIBILITY
+// SHOW / HIDE PASSWORD
 document.getElementById("toggleRegPass")
   .addEventListener("click", function() {
 
     const password = document.getElementById("empPass");
 
-    password.type =
-      password.type === "password" ? "text" : "password";
+    if (password.type === "password") {
 
-    this.classList.toggle("fa-eye-slash");
+      password.type = "text";
+      this.textContent = "🙈";
+      this.setAttribute("aria-label", "Hide password");
+      this.title = "Hide Password";
+
+    } else {
+
+      password.type = "password";
+      this.textContent = "👁️";
+      this.setAttribute("aria-label", "Show password");
+      this.title = "Show Password";
+
+    }
+
   });
 
 // GET EMPLOYEES
@@ -483,7 +509,6 @@ function showDepartment(department) {
       ? "All Registered Employees"
       : department + " Registered Employees";
 
-  // Update selected folder button
   document.querySelectorAll("#departmentFolders button")
     .forEach(button => {
 
@@ -498,9 +523,11 @@ function showDepartment(department) {
 
   buttons.forEach(button => {
 
-    if (button.textContent.trim().includes(department) ||
-        (department === "ALL" &&
-         button.textContent.includes("All Depts"))) {
+    const isSelected = department === "ALL"
+      ? button.textContent.includes("All Depts")
+      : button.textContent.trim().includes(department);
+
+    if (isSelected) {
 
       button.classList.remove("btn-outline");
       button.classList.add("btn-primary");
@@ -598,6 +625,9 @@ function editEmployee(id) {
   document.getElementById("empPos").value = employee.position;
   document.getElementById("empDept").value = employee.department;
 
+  document.getElementById("empPass").type = "password";
+  document.getElementById("toggleRegPass").textContent = "👁️";
+
   document.getElementById("formTitle").textContent =
     "Update Employee";
 
@@ -651,10 +681,15 @@ function resetForm() {
     '<i class="fa-solid fa-floppy-disk"></i> Save Employee';
 
   document.getElementById("empId").disabled = false;
+
   document.getElementById("empPass").type = "password";
 
-  document.getElementById("toggleRegPass")
-    .classList.remove("fa-eye-slash");
+  document.getElementById("toggleRegPass").textContent = "👁️";
+  document.getElementById("toggleRegPass").setAttribute(
+    "aria-label",
+    "Show password"
+  );
+  document.getElementById("toggleRegPass").title = "Show Password";
 
 }
 
