@@ -2,86 +2,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Attendance Record - DAS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Attendance Record - DAS</title>
 
-<link rel="stylesheet" href="./style.css">
-<link rel="stylesheet" href="./all.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./all.min.css">
 
-<style>
-.daily-folder {
-  background: #fff;
-  position: relative;
-  z-index: 1;
-  padding: 15px 10px;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  border: 2px solid var(--border-color);
-  transition: all 0.2s ease;
-  user-select: none;
-}
+  <style>
+    .daily-folder {
+      background: #fff;
+      position: relative;
+      z-index: 1;
+      padding: 15px 10px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid var(--border-color);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
 
-.daily-folder:hover {
-  border-color: var(--primary-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
+    .daily-folder:focus {
+      outline: 3px solid rgba(13,110,253,0.25);
+      outline-offset: 2px;
+    }
 
-.daily-folder.active-folder {
-  border-color: var(--primary-blue);
-  background-color: #f8fbff;
-  box-shadow: 0 2px 6px rgba(13,110,253,0.15);
-}
+    .daily-folder:hover {
+      border-color: var(--primary-blue);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
 
-.report-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
+    .daily-folder.active-folder {
+      border-color: var(--primary-blue);
+      background-color: #f8fbff;
+      box-shadow: 0 2px 6px rgba(13,110,253,0.15);
+    }
 
-.report-actions button {
-  border: none;
-  border-radius: 6px;
-  padding: 10px 15px;
-  cursor: pointer;
-  font-weight: 600;
-  color: white;
-}
+    .delete-attendance-btn {
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      background: white;
+      border-radius: 5px;
+      padding: 7px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
 
-.btn-report { background: #0d6efd; }
-.btn-excel { background: #198754; }
-.btn-pdf { background: #dc3545; }
-
-@media print {
-  .sidebar, .topbar, .report-actions,
-  .filter-section, .daily-folder-container {
-    display: none !important;
-  }
-
-  .main-content {
-    margin: 0 !important;
-    width: 100% !important;
-  }
-
-  body {
-    background: white !important;
-  }
-
-  .card {
-    box-shadow: none !important;
-  }
-}
-</style>
+    .delete-attendance-btn:hover {
+      color: white;
+      background: #dc3545;
+    }
+  </style>
 </head>
 
 <body>
 
 <script src="./app.js"></script>
 <script>
-if (typeof checkAuth === "function") checkAuth();
+  if (typeof checkAuth === 'function') checkAuth();
 </script>
 
 <div class="app-container">
@@ -96,7 +76,6 @@ if (typeof checkAuth === "function") checkAuth();
     </div>
 
     <ul class="sidebar-menu">
-
       <li>
         <a href="./dashboard.html">
           <i class="fa-solid fa-house"></i> Home
@@ -126,7 +105,6 @@ if (typeof checkAuth === "function") checkAuth();
           <i class="fa-solid fa-right-from-bracket"></i> Log Out
         </a>
       </li>
-
     </ul>
 
     <div class="sidebar-footer">
@@ -172,36 +150,18 @@ if (typeof checkAuth === "function") checkAuth();
           </p>
         </div>
 
-        <div class="filter-section">
+        <div>
           <label style="font-weight:600;font-size:0.9rem;margin-right:8px;">
             <i class="fa-regular fa-calendar-days"></i>
             Filter Date:
           </label>
 
-          <input type="date" id="dateFilter"
+          <input type="date"
+            id="dateFilter"
             class="form-control"
-            style="display:inline-block;width:auto;">
+            style="display:inline-block;width:auto;"
+            onchange="filterDailyData()">
         </div>
-
-      </div>
-
-      <!-- REPORT BUTTONS -->
-      <div class="report-actions">
-
-        <button class="btn-report" onclick="generateReport()">
-          <i class="fa-solid fa-file-lines"></i>
-          Generate Report
-        </button>
-
-        <button class="btn-excel" onclick="exportExcel()">
-          <i class="fa-solid fa-file-excel"></i>
-          Export to Excel
-        </button>
-
-        <button class="btn-pdf" onclick="exportPDF()">
-          <i class="fa-solid fa-file-pdf"></i>
-          Export to PDF
-        </button>
 
       </div>
 
@@ -210,8 +170,7 @@ if (typeof checkAuth === "function") checkAuth();
         Department Folders:
       </h3>
 
-      <div class="daily-folder-container"
-        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:25px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:25px;">
 
         <div class="daily-folder active-folder" id="dfolder-ALL">
           <i class="fa-solid fa-folder-open" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
@@ -253,14 +212,12 @@ if (typeof checkAuth === "function") checkAuth();
       <!-- ATTENDANCE TABLE -->
       <div class="card">
 
-        <h3 id="dailyFolderTitle"
-          style="margin-bottom:15px;font-size:1.05rem;color:var(--primary-blue);">
+        <h3 id="dailyFolderTitle" style="margin-bottom:15px;font-size:1.05rem;color:var(--primary-blue);">
           Daily Attendance Logs - All Departments
         </h3>
 
         <div style="overflow-x:auto;">
-
-          <table id="attendanceReportTable">
+          <table>
             <thead>
               <tr>
                 <th>Employee ID</th>
@@ -271,13 +228,14 @@ if (typeof checkAuth === "function") checkAuth();
                 <th>Time In</th>
                 <th>Time Out</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
             <tbody id="attendanceTable"></tbody>
           </table>
-
         </div>
+
       </div>
 
     </div>
@@ -289,399 +247,287 @@ if (typeof checkAuth === "function") checkAuth();
 
 <script>
 
-let dailySelectedDept = "ALL";
-let currentReportRows = [];
+  let dailySelectedDept = 'ALL';
 
-const localToday = () => {
-  const d = new Date();
+  const localToday = () => {
+    const d = new Date();
 
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-};
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
-function clean(value) {
-  return String(value ?? "").trim();
-}
-
-function escapeHTML(value) {
-  return clean(value).replace(/[&<>"']/g, ch => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  }[ch]));
-}
-
-function getDepartment(employee, record) {
-  return clean(employee?.department || record?.department || "Unknown").toUpperCase();
-}
-
-function selectDailyDept(dept) {
-
-  dailySelectedDept = clean(dept).toUpperCase();
-
-  document.querySelectorAll(".daily-folder").forEach(folder => {
-
-    folder.classList.remove("active-folder");
-
-    const icon = folder.querySelector("i");
-
-    if (icon) {
-      icon.classList.remove("fa-folder-open");
-      icon.classList.add("fa-folder");
-    }
-
-  });
-
-  const selectedFolder = document.getElementById("dfolder-" + dailySelectedDept);
-
-  if (selectedFolder) {
-
-    selectedFolder.classList.add("active-folder");
-
-    const icon = selectedFolder.querySelector("i");
-
-    if (icon) {
-      icon.classList.remove("fa-folder");
-      icon.classList.add("fa-folder-open");
-    }
-
+  function clean(value) {
+    return String(value ?? '').trim();
   }
 
-  const title = document.getElementById("dailyFolderTitle");
-
-  if (title) {
-    title.textContent = dailySelectedDept === "ALL"
-      ? "Daily Attendance Logs - All Departments"
-      : "Daily Attendance Logs - " + dailySelectedDept;
+  function escapeHTML(value) {
+    return clean(value).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch]));
   }
 
-  filterDailyData();
-}
-
-function filterDailyData() {
-
-  const tbody = document.getElementById("attendanceTable");
-
-  if (!tbody) return;
-
-  if (!window.DB ||
-      typeof DB.getAttendance !== "function" ||
-      typeof DB.getEmployees !== "function") {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align:center;padding:25px;color:#dc3545;">
-          Database not loaded. Check database.js.
-        </td>
-      </tr>
-    `;
-
-    return;
+  function getDepartment(employee, record) {
+    return clean(
+      employee?.department || record?.department || 'Unknown'
+    ).toUpperCase();
   }
 
-  const selectedDate = document.getElementById("dateFilter")?.value || "";
+  // SELECT DEPARTMENT
+  function selectDailyDept(dept) {
 
-  const records = DB.getAttendance() || [];
-  const employees = DB.getEmployees() || [];
+    dailySelectedDept = clean(dept).toUpperCase();
 
-  const rows = records.map(record => {
+    document.querySelectorAll('.daily-folder').forEach(folder => {
 
-    const employee = employees.find(emp =>
-      clean(emp.id) === clean(record.id)
-    );
+      folder.classList.remove('active-folder');
 
-    return {
-      ...record,
-      name: record.name || employee?.name || "Unknown",
-      department: getDepartment(employee, record),
-      position: record.position || employee?.position || "—"
-    };
+      const icon = folder.querySelector('i');
 
-  }).filter(record => {
-
-    const matchesDate = !selectedDate || clean(record.date) === selectedDate;
-
-    const matchesDept = dailySelectedDept === "ALL" ||
-      record.department === dailySelectedDept;
-
-    return matchesDate && matchesDept;
-
-  });
-
-  currentReportRows = rows;
-
-  if (!rows.length) {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align:center;color:#6c757d;padding:25px;">
-          No attendance records found for this date or department.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  tbody.innerHTML = rows.map(record => `
-    <tr>
-      <td>${escapeHTML(record.id)}</td>
-      <td><strong>${escapeHTML(record.name)}</strong></td>
-      <td>
-        <span style="background:#e3f2fd;color:#0d6efd;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.85rem;">
-          ${escapeHTML(record.department)}
-        </span>
-      </td>
-      <td>${escapeHTML(record.position)}</td>
-      <td>${escapeHTML(record.date)}</td>
-      <td style="color:#198754;font-weight:600;">
-        ${escapeHTML(record.timeIn || "—")}
-      </td>
-      <td style="color:#0dcaf0;font-weight:600;">
-        ${escapeHTML(record.timeOut || "—")}
-      </td>
-      <td>${escapeHTML(record.status || "—")}</td>
-    </tr>
-  `).join("");
-
-}
-
-/* GENERATE REPORT */
-function generateReport() {
-
-  filterDailyData();
-
-  const total = currentReportRows.length;
-  const completed = currentReportRows.filter(r => r.timeIn && r.timeOut).length;
-  const pending = currentReportRows.filter(r => r.timeIn && !r.timeOut).length;
-
-  alert(
-    "ATTENDANCE REPORT\n\n" +
-    "Department: " + dailySelectedDept + "\n" +
-    "Date: " + (document.getElementById("dateFilter").value || "All Dates") + "\n\n" +
-    "Total Records: " + total + "\n" +
-    "Completed Attendance: " + completed + "\n" +
-    "Pending Time Out: " + pending
-  );
-
-}
-
-/* EXPORT TO EXCEL (CSV) */
-function exportExcel() {
-
-  if (!currentReportRows.length) {
-    alert("No attendance records to export.");
-    return;
-  }
-
-  const headers = [
-    "Employee ID",
-    "Name",
-    "Department",
-    "Position",
-    "Date",
-    "Time In",
-    "Time Out",
-    "Status"
-  ];
-
-  const csvRows = [headers];
-
-  currentReportRows.forEach(record => {
-
-    csvRows.push([
-      record.id,
-      record.name,
-      record.department,
-      record.position,
-      record.date,
-      record.timeIn || "",
-      record.timeOut || "",
-      record.status || ""
-    ]);
-
-  });
-
-  const csvContent = "\uFEFF" + csvRows.map(row =>
-    row.map(value =>
-      '"' + String(value ?? "").replace(/"/g, '""') + '"'
-    ).join(",")
-  ).join("\r\n");
-
-  const blob = new Blob([csvContent], {
-    type: "text/csv;charset=utf-8;"
-  });
-
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "Attendance_Report_" + localToday() + ".csv";
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  URL.revokeObjectURL(url);
-
-}
-
-/* EXPORT TO PDF */
-function exportPDF() {
-
-  if (!currentReportRows.length) {
-    alert("No attendance records to print.");
-    return;
-  }
-
-  const rows = currentReportRows.map(record => `
-    <tr>
-      <td>${escapeHTML(record.id)}</td>
-      <td>${escapeHTML(record.name)}</td>
-      <td>${escapeHTML(record.department)}</td>
-      <td>${escapeHTML(record.position)}</td>
-      <td>${escapeHTML(record.date)}</td>
-      <td>${escapeHTML(record.timeIn || "—")}</td>
-      <td>${escapeHTML(record.timeOut || "—")}</td>
-      <td>${escapeHTML(record.status || "—")}</td>
-    </tr>
-  `).join("");
-
-  const printWindow = window.open("", "_blank");
-
-  if (!printWindow) {
-    alert("Please allow pop-ups to export the PDF.");
-    return;
-  }
-
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Attendance Report</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          padding: 25px;
-        }
-
-        h2, p {
-          text-align: center;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-          font-size: 11px;
-        }
-
-        th, td {
-          border: 1px solid #777;
-          padding: 8px;
-          text-align: left;
-        }
-
-        th {
-          background: #e9ecef;
-        }
-
-        @media print {
-          body { padding: 0; }
-        }
-      </style>
-    </head>
-
-    <body>
-
-      <h2>Digital Attendance System</h2>
-      <p>Daily Attendance Report</p>
-
-      <p>
-        Department: ${escapeHTML(dailySelectedDept)}<br>
-        Date: ${escapeHTML(document.getElementById("dateFilter").value || "All Dates")}
-      </p>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Position</th>
-            <th>Date</th>
-            <th>Time In</th>
-            <th>Time Out</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>${rows}</tbody>
-      </table>
-
-      <script>
-        window.onload = function() {
-          window.print();
-        };
-      <\/script>
-
-    </body>
-    </html>
-  `);
-
-  printWindow.document.close();
-
-}
-
-/* INITIALIZE PAGE */
-document.addEventListener("DOMContentLoaded", () => {
-
-  const dateFilter = document.getElementById("dateFilter");
-
-  const currentDate = document.getElementById("currentDate");
-
-  if (currentDate) {
-    currentDate.textContent = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-  }
-
-  if (dateFilter) {
-    dateFilter.value = localToday();
-    dateFilter.addEventListener("change", filterDailyData);
-  }
-
-  document.querySelectorAll(".daily-folder").forEach(folder => {
-
-    folder.addEventListener("click", () => {
-
-      const dept = folder.id.replace("dfolder-", "");
-
-      selectDailyDept(dept);
-
-    });
-
-    folder.setAttribute("role", "button");
-    folder.setAttribute("tabindex", "0");
-
-    folder.addEventListener("keydown", event => {
-
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        folder.click();
+      if (icon) {
+        icon.classList.remove('fa-folder-open');
+        icon.classList.add('fa-folder');
       }
 
     });
 
+    const selectedFolder = document.getElementById(
+      'dfolder-' + dailySelectedDept
+    );
+
+    if (selectedFolder) {
+
+      selectedFolder.classList.add('active-folder');
+
+      const icon = selectedFolder.querySelector('i');
+
+      if (icon) {
+        icon.classList.remove('fa-folder');
+        icon.classList.add('fa-folder-open');
+      }
+
+    }
+
+    const title = document.getElementById('dailyFolderTitle');
+
+    if (title) {
+      title.textContent = dailySelectedDept === 'ALL'
+        ? 'Daily Attendance Logs - All Departments'
+        : `Daily Attendance Logs - ${dailySelectedDept}`;
+    }
+
+    filterDailyData();
+  }
+
+  // DISPLAY ATTENDANCE RECORDS
+  function filterDailyData() {
+
+    const tbody = document.getElementById('attendanceTable');
+
+    if (!tbody) return;
+
+    if (
+      !window.DB ||
+      typeof DB.getAttendance !== 'function' ||
+      typeof DB.getEmployees !== 'function'
+    ) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align:center;padding:25px;color:#dc3545;">
+            Database not loaded. Check that database.js is in the same folder as attendance.html.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    const selectedDate =
+      document.getElementById('dateFilter')?.value || '';
+
+    const records = DB.getAttendance() || [];
+    const employees = DB.getEmployees() || [];
+
+    // Preserve original database index for accurate deletion.
+    const rows = records.map((record, recordIndex) => {
+
+      const employee = employees.find(
+        emp => clean(emp.id) === clean(record.id)
+      );
+
+      return {
+        ...record,
+        _recordIndex: recordIndex,
+        name: record.name || employee?.name || 'Unknown',
+        department: getDepartment(employee, record),
+        position: record.position || employee?.position || '—'
+      };
+
+    }).filter(record => {
+
+      const matchesDate =
+        !selectedDate || clean(record.date) === selectedDate;
+
+      const matchesDept =
+        dailySelectedDept === 'ALL' ||
+        record.department === dailySelectedDept;
+
+      return matchesDate && matchesDept;
+
+    });
+
+    if (!rows.length) {
+
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align:center;color:#6c757d;padding:25px;">
+            No attendance records found for this date or department.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+    tbody.innerHTML = rows.map(record => `
+
+      <tr>
+
+        <td>${escapeHTML(record.id)}</td>
+
+        <td>
+          <strong>${escapeHTML(record.name)}</strong>
+        </td>
+
+        <td>
+          <span style="background:#e3f2fd;color:#0d6efd;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.85rem;">
+            ${escapeHTML(record.department)}
+          </span>
+        </td>
+
+        <td>${escapeHTML(record.position)}</td>
+
+        <td>${escapeHTML(record.date)}</td>
+
+        <td>
+          <span style="color:#198754;font-weight:600;">
+            ${escapeHTML(record.timeIn || '—')}
+          </span>
+        </td>
+
+        <td>
+          <span style="color:#0dcaf0;font-weight:600;">
+            ${escapeHTML(record.timeOut || '—')}
+          </span>
+        </td>
+
+        <td>
+          <span style="background:#d1e7dd;color:#0f5132;padding:3px 8px;border-radius:4px;font-weight:bold;font-size:0.85rem;">
+            ${escapeHTML(record.status || '—')}
+          </span>
+        </td>
+
+        <td>
+          <button
+            type="button"
+            class="delete-attendance-btn"
+            onclick="deleteAttendanceRecord(${record._recordIndex})">
+
+            <i class="fa-solid fa-trash"></i>
+            Delete
+
+          </button>
+        </td>
+
+      </tr>
+
+    `).join('');
+
+  }
+
+  // DELETE SELECTED ATTENDANCE RECORD
+  function deleteAttendanceRecord(recordIndex) {
+
+    if (
+      !window.DB ||
+      typeof DB.getAttendance !== 'function' ||
+      typeof DB.saveAttendance !== 'function'
+    ) {
+      return;
+    }
+
+    const records = DB.getAttendance() || [];
+
+    if (
+      !Number.isInteger(recordIndex) ||
+      recordIndex < 0 ||
+      recordIndex >= records.length
+    ) {
+      return;
+    }
+
+    // Remove only the selected attendance record.
+    records.splice(recordIndex, 1);
+
+    DB.saveAttendance(records);
+
+    // Refresh attendance table immediately.
+    filterDailyData();
+
+  }
+
+  // INITIALIZE PAGE
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const dateFilter = document.getElementById('dateFilter');
+    const currentDate = document.getElementById('currentDate');
+
+    if (currentDate) {
+      currentDate.textContent = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    if (dateFilter) {
+      dateFilter.value = localToday();
+      dateFilter.addEventListener('change', filterDailyData);
+    }
+
+    // DEPARTMENT FOLDER CLICK EVENTS
+    document.querySelectorAll('.daily-folder').forEach(folder => {
+
+      folder.addEventListener('click', () => {
+
+        const dept = folder.id.replace('dfolder-', '');
+
+        selectDailyDept(dept);
+
+      });
+
+      folder.setAttribute('role', 'button');
+      folder.setAttribute('tabindex', '0');
+
+      folder.addEventListener('keydown', event => {
+
+        if (event.key === 'Enter' || event.key === ' ') {
+
+          event.preventDefault();
+          folder.click();
+
+        }
+
+      });
+
+    });
+
+    selectDailyDept('ALL');
+
   });
-
-  selectDailyDept("ALL");
-
-});
 
 </script>
 
