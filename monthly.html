@@ -1,205 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Monthly Record - DAS</title>
-  <link rel="stylesheet" href="./style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .monthly-folder {
-      background: #fff;
-      padding: 15px 10px;
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      border: 2px solid var(--border-color);
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-    .monthly-folder:hover {
-      border-color: var(--primary-blue);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-    .monthly-folder.active-folder {
-      border-color: var(--primary-blue);
-      background-color: #f8fbff;
-      box-shadow: 0 2px 6px rgba(13,110,253,0.15);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Record - DAS</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
-  <script src="app.js"></script>
-  <script>checkAuth();</script>
 
-  <div class="app-container">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <i class="fa-solid fa-graduation-cap"></i>
-        <h2>Digital Attendance System</h2>
-        <p>Admin Panel</p>
-      </div>
-      <ul class="sidebar-menu">
-        <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
-        <li><a href="attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
-        <li class="active"><a href="monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
-        <li><a href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
-      </ul>
-      <div class="sidebar-footer">
-        <i class="fa-solid fa-user-circle" style="font-size: 1.5rem;"></i>
-        <div>
-          <strong style="display:block; font-size:0.85rem;">Welcome,</strong>
-          <span style="font-size:0.80rem; color:#90caf9;">Admin</span>
-        </div>
-      </div>
+    <script src="app.js"></script>
+    <script>checkAuth();</script>
+
+    <div class="app-container">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <h2>Digital Attendance System</h2>
+                <p>Admin Panel</p>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fa-solid fa-house"></i> Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="employee.html">
+                        <i class="fa-solid fa-user-plus"></i> Employee Registration
+                    </a>
+                </li>
+
+                <li>
+                    <a href="attendance.html">
+                        <i class="fa-solid fa-clipboard-check"></i> Attendance Record
+                    </a>
+                </li>
+
+                <li class="active">
+                    <a href="monthly.html">
+                        <i class="fa-solid fa-calendar-days"></i> Monthly Record
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" onclick="logout(); return false;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <i class="fa-solid fa-user-circle"></i>
+                <div>
+                    <strong>Welcome,</strong>
+                    <span>Admin</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+
+            <div class="topbar">
+                <div><i class="fa-solid fa-bars"></i></div>
+
+                <div class="topbar-info">
+                    <span>
+                        <i class="fa-regular fa-calendar"></i>
+                        <span id="currentDate"></span>
+                    </span>
+                    <i class="fa-regular fa-bell"></i>
+                </div>
+            </div>
+
+            <div class="content-area">
+
+                <div class="page-header-row">
+                    <div>
+                        <h1 class="page-heading">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            Monthly Attendance Summary
+                        </h1>
+
+                        <p class="page-subheading">
+                            View total attendance count per employee for the selected month.
+                        </p>
+                    </div>
+
+                    <a href="dashboard.html" class="btn btn-outline">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+
+                <div class="month-filter">
+                    <label for="monthFilter">
+                        <i class="fa-regular fa-calendar"></i>
+                        Select Month:
+                    </label>
+
+                    <input
+                        type="month"
+                        id="monthFilter"
+                        class="form-control"
+                    >
+                </div>
+
+                <h3 class="folder-section-title">Department Folders</h3>
+
+                <div class="monthly-folder-grid">
+
+                    <button type="button"
+                            class="monthly-folder active-folder"
+                            id="mfolder-ALL"
+                            data-department="ALL">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>All Depts</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BSHM"
+                            data-department="BSHM">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BSHM</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BSED"
+                            data-department="BSED">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BSED</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BEED"
+                            data-department="BEED">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BEED</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BSCRIM"
+                            data-department="BSCRIM">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BSCRIM</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BSIT"
+                            data-department="BSIT">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BSIT</span>
+                    </button>
+
+                    <button type="button"
+                            class="monthly-folder"
+                            id="mfolder-BSBA"
+                            data-department="BSBA">
+                        <i class="fa-solid fa-folder"></i>
+                        <span>BSBA</span>
+                    </button>
+
+                </div>
+
+                <div class="card">
+                    <h3 id="monthlyFolderTitle" class="monthly-table-title">
+                        Monthly Summary - All Departments
+                    </h3>
+
+                    <div class="table-wrapper">
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Position</th>
+                                    <th>Total Days Present</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="monthlyTable">
+                                <tr>
+                                    <td colspan="5" class="empty-message">
+                                        Loading monthly records...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
     </div>
 
-    <div class="main-content">
-      <div class="topbar">
-        <div><i class="fa-solid fa-bars"></i></div>
-        <div class="topbar-info">
-          <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
-          <i class="fa-regular fa-bell"></i>
-        </div>
-      </div>
+    <script src="database.js"></script>
 
-      <div class="content-area">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-          <div>
-            <h1 style="font-size: 1.5rem; margin-bottom: 5px;"><i class="fa-solid fa-calendar-days" style="color: var(--primary-blue);"></i> Monthly Attendance Summary</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">View total attendance count per employee for the selected month.</p>
-          </div>
-          <div>
-            <label style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;"><i class="fa-regular fa-calendar"></i> Select Month:</label>
-            <input type="month" id="monthFilter" class="form-control" style="display: inline-block; width: auto;" onchange="filterMonthlyData()">
-          </div>
-        </div>
+    <script>
+        const monthFilter = document.getElementById("monthFilter");
+        const monthlyTable = document.getElementById("monthlyTable");
+        const monthlyFolderTitle = document.getElementById("monthlyFolderTitle");
 
-        <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-muted);">Department Folders:</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 25px;">
-          <div class="monthly-folder active-folder" id="mfolder-ALL" onclick="selectMonthlyDept('ALL')">
-            <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">All Depts</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BSHM" onclick="selectMonthlyDept('BSHM')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BSHM</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BSED" onclick="selectMonthlyDept('BSED')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BSED</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BEED" onclick="selectMonthlyDept('BEED')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BEED</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BSCRIM" onclick="selectMonthlyDept('BSCRIM')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BSCRIM</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BSIT" onclick="selectMonthlyDept('BSIT')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BSIT</h4>
-          </div>
-          <div class="monthly-folder" id="mfolder-BSBA" onclick="selectMonthlyDept('BSBA')">
-            <i class="fa-solid fa-folder" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 5px; display:block;"></i>
-            <h4 style="font-size: 0.85rem; margin:0;">BSBA</h4>
-          </div>
-        </div>
+        let monthlySelectedDept = "ALL";
 
-        <div class="card">
-          <h3 id="monthlyFolderTitle" style="margin-bottom: 15px; font-size: 1.05rem; color: var(--primary-blue);">Monthly Summary - All Departments</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Total Days Present</th>
-              </tr>
-            </thead>
-            <tbody id="monthlyTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+        // Display current date
+        document.getElementById("currentDate").textContent =
+            new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+            });
 
-  <script src="database.js"></script>
-  <script>
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    document.getElementById('monthFilter').value = ${year}-${month};
-    let monthlySelectedDept = 'ALL';
+        // Set current month automatically
+        function getCurrentMonth() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, "0");
 
-    function selectMonthlyDept(dept) {
-      monthlySelectedDept = dept;
-      document.querySelectorAll('.monthly-folder').forEach(el => {
-        el.classList.remove('active-folder');
-        const icon = el.querySelector('i');
-        if (icon) {
-          icon.classList.remove('fa-folder-open');
-          icon.classList.add('fa-folder');
+            return `${year}-${month}`;
         }
-      });
-      const activeEl = document.getElementById('mfolder-' + dept);
-      if (activeEl) {
-        activeEl.classList.add('active-folder');
-        const activeIcon = activeEl.querySelector('i');
-        if (activeIcon) {
-          activeIcon.classList.remove('fa-folder');
-          activeIcon.classList.add('fa-folder-open');
+
+        monthFilter.value = getCurrentMonth();
+
+        // Protect table output
+        function escapeHTML(value) {
+            return String(value ?? "").replace(/[&<>"']/g, function (char) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[char];
+            });
         }
-      }
-      document.getElementById('monthlyFolderTitle').textContent = Monthly Summary - Department: ${dept === 'ALL' ? 'All Departments' : dept};
-      filterMonthlyData();
-    }
 
-    function filterMonthlyData() {
-      const selectedMonth = document.getElementById('monthFilter').value;
-      const records = DB.getAttendance();
-      const employees = DB.getEmployees();
-      const tbody = document.getElementById('monthlyTable');
+        // Select department folder
+        function selectMonthlyDept(department) {
+            monthlySelectedDept = department;
 
-      const filteredEmployees = employees.filter(emp => {
-        const matchDept = monthlySelectedDept === 'ALL' || emp.department === monthlySelectedDept;
-        return matchDept;
-      });
+            document.querySelectorAll(".monthly-folder").forEach(function (folder) {
+                folder.classList.remove("active-folder");
 
-      const summaryData = filteredEmployees.map(emp => {
-        const daysPresent = records.filter(r => {
-          return r.id === emp.id && r.date && r.date.startsWith(selectedMonth);
-        }).length;
+                const icon = folder.querySelector("i");
 
-        return {
-          id: emp.id,
-          name: emp.name,
-          department: emp.department || 'BSIT',
-          position: emp.position || 'Staff',
-          totalDays: daysPresent
-        };
-      });
+                if (icon) {
+                    icon.classList.remove("fa-folder-open");
+                    icon.classList.add("fa-folder");
+                }
+            });
 
-      if (summaryData.length === 0) {
-        tbody.innerHTML = <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 25px;">No employee records found for this department.</td></tr>;
-        return;
-      }
+            const activeFolder =
+                document.getElementById("mfolder-" + department);
 
-      tbody.innerHTML = summaryData.map(s => `
-        <tr>
-          <td>${s.id}</td>
-          <td><strong>${s.name}</strong></td>
-          <td><span style="background: #e3f2fd; color: #0d6efd; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">${s.department}</span></td>
-          <td>${s.position}</td>
-          <td><span style="background: #d1e7dd; color: #0f5132; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 0.9rem;">${s.totalDays} day(s)</span></td>
-        </tr>
-      `).join('');
-    }
+            if (activeFolder) {
+                activeFolder.classList.add("active-folder");
 
-    filterMonthlyData();
-  </script>
+                const icon = activeFolder.querySelector("i");
+
+                if (icon) {
+                    icon.classList.remove("fa-folder");
+                    icon.classList.add("fa-folder-open");
+                }
+            }
+
+            monthlyFolderTitle.textContent =
+                `Monthly Summary - Department: ${
+                    department === "ALL" ? "All Departments" : department
+                }`;
+
+            filterMonthlyData();
+        }
+
+        // Load and filter monthly attendance
+        function filterMonthlyData() {
+            if (
+                typeof DB === "undefined" ||
+                typeof DB.getEmployees !== "function" ||
+                typeof DB.getAttendance !== "function"
+            ) {
+                monthlyTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-message">
+                            Database not loaded. Check database.js.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const selectedMonth = monthFilter.value;
+            const employees = DB.getEmployees() || [];
+            const records = DB.getAttendance() || [];
+
+            const filteredEmployees = employees.filter(function (employee) {
+                const department =
+                    String(employee.department || "Unassigned")
+                        .trim()
+                        .toUpperCase();
+
+                return monthlySelectedDept === "ALL" ||
+                       department === monthlySelectedDept;
+            });
+
+            if (filteredEmployees.length === 0) {
+                monthlyTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-message">
+                            No employee records found for this department.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const summaryData = filteredEmployees.map(function (employee) {
+                const employeeRecords = records.filter(function (record) {
+                    return String(record.id) === String(employee.id) &&
+                           record.date &&
+                           record.date.startsWith(selectedMonth) &&
+                           record.timeIn &&
+                           record.timeIn !== "--";
+                });
+
+                // Count each attendance date only once
+                const uniqueDates = new Set(
+                    employeeRecords.map(record => record.date)
+                );
+
+                return {
+                    id: employee.id,
+                    name: employee.name,
+                    department: employee.department || "Unassigned",
+                    position: employee.position || "N/A",
+                    totalDays: uniqueDates.size
+                };
+            });
+
+            monthlyTable.innerHTML = summaryData.map(function (employee) {
+                return `
+                    <tr>
+                        <td>${escapeHTML(employee.id)}</td>
+                        <td><strong>${escapeHTML(employee.name)}</strong></td>
+                        <td>
+                            <span class="department-tag">
+                                ${escapeHTML(employee.department)}
+                            </span>
+                        </td>
+                        <td>${escapeHTML(employee.position)}</td>
+                        <td>
+                            <span class="days-tag">
+                                ${employee.totalDays} day(s)
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        // Folder click events
+        document.querySelectorAll(".monthly-folder").forEach(function (folder) {
+            folder.addEventListener("click", function () {
+                selectMonthlyDept(this.dataset.department);
+            });
+        });
+
+        // Month change event
+        monthFilter.addEventListener("change", filterMonthlyData);
+
+        // Initial load
+        filterMonthlyData();
+    </script>
+
 </body>
 </html>
