@@ -1,63 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Login - Digital Attendance System</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Digital Attendance System</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="login-body">
 
-  <div class="login-card">
-    <div style="text-align: center; margin-bottom: 20px;">
-      <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: #0d6efd;"></i>
-      <h2 style="margin-top: 10px;">Admin Login</h2>
-      <p style="color: #6c757d; font-size: 0.85rem;">Sign in to access the dashboard</p>
+    <div class="login-card">
+
+        <div class="login-heading">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h2>Admin Login</h2>
+            <p>Sign in to access the dashboard</p>
+        </div>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+                <label for="username">
+                    <i class="fa-solid fa-user"></i> Admin Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    class="form-control"
+                    placeholder="Enter Username"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fa-solid fa-lock"></i> Admin Password
+                </label>
+
+                <div class="password-container">
+                    <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        placeholder="Enter Password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <i class="fa-solid fa-eye" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <div class="forgot-password-row">
+                <button type="button" id="forgotPasswordBtn">
+                    Forgot Password?
+                </button>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block login-button">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                LOG IN
+            </button>
+
+        </form>
+
+        <div id="forgotPasswordPanel" class="forgot-password-panel">
+            <h3>Reset Admin Password</h3>
+            <p>
+                This demo system can reset the admin password to its
+                default password.
+            </p>
+
+            <p class="default-login-info">
+                Default username: <strong>admin</strong><br>
+                Default password: <strong>admin123</strong>
+            </p>
+
+            <button type="button" id="resetPasswordBtn" class="btn btn-outline btn-block">
+                Reset to Default Password
+            </button>
+        </div>
+
     </div>
 
-    <form id="loginForm">
-      <div class="form-group">
-        <label><i class="fa-solid fa-user"></i> Admin Username</label>
-        <input type="text" id="username" class="form-control" required placeholder="Enter Username">
-      </div>
-      
-      <div class="form-group">
-        <label><i class="fa-solid fa-lock"></i> Admin Password</label>
-        <div class="password-container">
-          <input type="password" id="password" class="form-control" required placeholder="Enter Password">
-          <i class="fa-solid fa-eye" id="togglePassword"></i>
-        </div>
-      </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-      <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
-        <i class="fa-solid fa-right-to-bracket"></i> LOG IN
-      </button>
-    </form>
-  </div>
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const toast = document.getElementById("toast");
+        const forgotPanel = document.getElementById("forgotPasswordPanel");
 
-  <script>
-    // Password toggle function para sa Admin Login
-    const togglePassword = document.getElementById('togglePassword');
-    const password = document.getElementById('password');
+        const DEFAULT_USERNAME = "admin";
+        const DEFAULT_PASSWORD = "admin123";
+        const ADMIN_PASSWORD_KEY = "das_admin_password";
 
-    togglePassword.addEventListener('click', function () {
-      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-      password.setAttribute('type', type);
-      this.classList.toggle('fa-eye-slash');
-    });
+        let toastTimer;
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u = document.getElementById('username').value;
-      const p = document.getElementById('password').value;
+        function showToast(message, type = "success") {
+            toast.textContent = message;
+            toast.className = "toast show " + type;
 
-      if(u === 'admin' && p === 'admin123') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        window.location.href = 'dashboard.html';
-      } else {
-        alert('Maling Username o Password! (Use: admin / admin123)');
-      }
-    });
-  </script>
+            clearTimeout(toastTimer);
+
+            toastTimer = setTimeout(function () {
+                toast.className = "toast";
+            }, 3000);
+        }
+
+        // Show / hide password
+        document.getElementById("togglePassword")
+            .addEventListener("click", function () {
+                const isPassword = passwordInput.type === "password";
+
+                passwordInput.type = isPassword ? "text" : "password";
+                this.classList.toggle("fa-eye-slash", isPassword);
+                this.classList.toggle("fa-eye", !isPassword);
+            });
+
+        // Login
+        loginForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            const savedPassword =
+                localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD;
+
+            if (
+                username === DEFAULT_USERNAME &&
+                password === savedPassword
+            ) {
+                sessionStorage.setItem("isLoggedIn", "true");
+                window.location.href = "dashboard.html";
+            } else {
+                showToast("Incorrect username or password.", "error");
+            }
+        });
+
+        // Show Forgot Password instructions
+        document.getElementById("forgotPasswordBtn")
+            .addEventListener("click", function () {
+                forgotPanel.classList.toggle("show");
+            });
+
+        // Reset password to the default demo password
+        document.getElementById("resetPasswordBtn")
+            .addEventListener("click", function () {
+                localStorage.setItem(
+                    ADMIN_PASSWORD_KEY,
+                    DEFAULT_PASSWORD
+                );
+
+                usernameInput.value = DEFAULT_USERNAME;
+                passwordInput.value = "";
+
+                forgotPanel.classList.remove("show");
+
+                showToast(
+                    "Admin password reset. Use admin123 to log in.",
+                    "success"
+                );
+            });
+    </script>
+
 </body>
 </html>
