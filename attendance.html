@@ -2,527 +2,687 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Attendance Record | DAS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Attendance Record - DAS</title>
 
-    <link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./all.min.css">
 
-    <style>
-        .department-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
+<style>
+.daily-folder {
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  padding: 15px 10px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s ease;
+  user-select: none;
+}
 
-        .department-folder {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 18px 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: .2s;
-        }
+.daily-folder:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
 
-        .department-folder:hover,
-        .department-folder.active {
-            border: 2px solid #0d6efd;
-            background: #eef5ff;
-            transform: translateY(-2px);
-        }
+.daily-folder.active-folder {
+  border-color: var(--primary-blue);
+  background-color: #f8fbff;
+  box-shadow: 0 2px 6px rgba(13,110,253,0.15);
+}
 
-        .department-folder .folder-icon {
-            font-size: 30px;
-            margin-bottom: 8px;
-        }
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
 
-        .department-folder h4 {
-            margin: 5px 0;
-            color: #212529;
-        }
+.report-actions button {
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+}
 
-        .department-folder p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 12px;
-        }
+.btn-report { background: #0d6efd; }
+.btn-excel { background: #198754; }
+.btn-pdf { background: #dc3545; }
 
-        .filter-area {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-        }
+@media print {
+  .sidebar, .topbar, .report-actions,
+  .filter-section, .daily-folder-container {
+    display: none !important;
+  }
 
-        .filter-area input,
-        .filter-area select {
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-        }
+  .main-content {
+    margin: 0 !important;
+    width: 100% !important;
+  }
 
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
+  body {
+    background: white !important;
+  }
 
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 850px;
-        }
-
-        .attendance-table th,
-        .attendance-table td {
-            padding: 13px;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-            font-size: 13px;
-        }
-
-        .attendance-table th {
-            background: #f4f7fc;
-            color: #212529;
-        }
-
-        .status-present {
-            color: #198754;
-            font-weight: bold;
-        }
-
-        .status-absent {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .status-late {
-            color: #6f42c1;
-            font-weight: bold;
-        }
-
-        .empty-message {
-            text-align: center !important;
-            padding: 30px !important;
-            color: #6c757d;
-        }
-
-        .record-count {
-            margin-bottom: 12px;
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .database-message {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            background: #e8f5e9;
-            color: #198754;
-            display: none;
-        }
-
-        @media(max-width: 600px) {
-            .department-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .filter-area {
-                align-items: stretch;
-                flex-direction: column;
-            }
-        }
-    </style>
+  .card {
+    box-shadow: none !important;
+  }
+}
+</style>
 </head>
 
 <body>
 
+<script src="./app.js"></script>
+<script>
+if (typeof checkAuth === "function") checkAuth();
+</script>
+
 <div class="app-container">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
 
-        <div class="sidebar-header">
-            <h2>DAS</h2>
-            <p>Digital Attendance System</p>
+    <div class="sidebar-header">
+      <i class="fa-solid fa-graduation-cap"></i>
+      <h2>Digital Attendance System</h2>
+      <p>Admin Panel</p>
+    </div>
+
+    <ul class="sidebar-menu">
+
+      <li>
+        <a href="./dashboard.html">
+          <i class="fa-solid fa-house"></i> Home
+        </a>
+      </li>
+
+      <li>
+        <a href="./employee.html">
+          <i class="fa-solid fa-user-plus"></i> Employee Registration
+        </a>
+      </li>
+
+      <li class="active">
+        <a href="./attendance.html">
+          <i class="fa-solid fa-clipboard-check"></i> Attendance Record
+        </a>
+      </li>
+
+      <li>
+        <a href="./monthly.html">
+          <i class="fa-solid fa-calendar-days"></i> Monthly Record
+        </a>
+      </li>
+
+      <li>
+        <a href="#" onclick="logout(); return false;">
+          <i class="fa-solid fa-right-from-bracket"></i> Log Out
+        </a>
+      </li>
+
+    </ul>
+
+    <div class="sidebar-footer">
+      <i class="fa-solid fa-user-circle" style="font-size:1.5rem;"></i>
+      <div>
+        <strong style="display:block;font-size:0.85rem;">Welcome,</strong>
+        <span style="font-size:0.80rem;color:#90caf9;">Admin</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div>
+        <i class="fa-solid fa-bars"></i>
+      </div>
+
+      <div class="topbar-info">
+        <span>
+          <i class="fa-regular fa-calendar"></i>
+          <span id="currentDate"></span>
+        </span>
+        <i class="fa-regular fa-bell"></i>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- PAGE HEADER -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:15px;">
+
+        <div>
+          <h1 style="font-size:1.5rem;margin-bottom:5px;">
+            <i class="fa-solid fa-clipboard-check" style="color:var(--primary-blue);"></i>
+            Daily Attendance Record
+          </h1>
+
+          <p style="color:var(--text-muted);font-size:0.9rem;">
+            Track employee Time In and Time Out daily.
+          </p>
         </div>
 
-        <ul class="sidebar-menu">
-            <li>
-                <a href="./dashboard.html">Dashboard</a>
-            </li>
-            <li>
-                <a href="./employee.html">Employee Management</a>
-            </li>
-            <li>
-                <a href="./timein.html">Time In / Time Out</a>
-            </li>
-            <li class="active">
-                <a href="./attendance.html">Daily Attendance Record</a>
-            </li>
-            <li>
-                <a href="./reports.html">Reports</a>
-            </li>
-        </ul>
+        <div class="filter-section">
+          <label style="font-weight:600;font-size:0.9rem;margin-right:8px;">
+            <i class="fa-regular fa-calendar-days"></i>
+            Filter Date:
+          </label>
 
-        <div class="sidebar-footer">
-            <p>Digital Attendance System</p>
+          <input type="date" id="dateFilter"
+            class="form-control"
+            style="display:inline-block;width:auto;">
         </div>
 
-    </aside>
+      </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
+      <!-- REPORT BUTTONS -->
+      <div class="report-actions">
 
-        <header class="topbar">
-            <div class="topbar-info">
-                <h3>Daily Attendance Record</h3>
-                <p>View and manage employee attendance records.</p>
-            </div>
-        </header>
+        <button class="btn-report" onclick="generateReport()">
+          <i class="fa-solid fa-file-lines"></i>
+          Generate Report
+        </button>
 
-        <section class="content-area">
+        <button class="btn-excel" onclick="exportExcel()">
+          <i class="fa-solid fa-file-excel"></i>
+          Export to Excel
+        </button>
 
-            <div id="databaseMessage" class="database-message">
-                Database loaded successfully!
-            </div>
+        <button class="btn-pdf" onclick="exportPDF()">
+          <i class="fa-solid fa-file-pdf"></i>
+          Export to PDF
+        </button>
 
-            <!-- DEPARTMENT FOLDERS -->
-            <div class="card">
+      </div>
 
-                <h3>Department Folders</h3>
-                <p>Select a department to view its attendance records.</p>
+      <!-- DEPARTMENT FOLDERS -->
+      <h3 style="font-size:1rem;margin-bottom:10px;color:var(--text-muted);">
+        Department Folders:
+      </h3>
 
-                <div class="department-grid">
+      <div class="daily-folder-container"
+        style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:25px;">
 
-                    <div class="department-folder active"
-                         data-department="ALL">
-                        <div class="folder-icon">📁</div>
-                        <h4>All Depts</h4>
-                        <p>All employees</p>
-                    </div>
+        <div class="daily-folder active-folder" id="dfolder-ALL">
+          <i class="fa-solid fa-folder-open" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">All Depts</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BSHM">
-                        <div class="folder-icon">📂</div>
-                        <h4>BSHM</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BSHM">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BSHM</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BSED">
-                        <div class="folder-icon">📂</div>
-                        <h4>BSED</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BSED">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BSED</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BEED">
-                        <div class="folder-icon">📂</div>
-                        <h4>BEED</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BEED">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BEED</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BSCRIM">
-                        <div class="folder-icon">📂</div>
-                        <h4>BSCRIM</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BSCRIM">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BSCRIM</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BSIT">
-                        <div class="folder-icon">📂</div>
-                        <h4>BSIT</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BSIT">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BSIT</h4>
+        </div>
 
-                    <div class="department-folder"
-                         data-department="BSBA">
-                        <div class="folder-icon">📂</div>
-                        <h4>BSBA</h4>
-                        <p>Department</p>
-                    </div>
+        <div class="daily-folder" id="dfolder-BSBA">
+          <i class="fa-solid fa-folder" style="font-size:1.8rem;color:#ffc107;margin-bottom:5px;display:block;"></i>
+          <h4 style="font-size:0.85rem;margin:0;">BSBA</h4>
+        </div>
 
-                </div>
-            </div>
+      </div>
 
-            <!-- ATTENDANCE TABLE -->
-            <div class="card">
+      <!-- ATTENDANCE TABLE -->
+      <div class="card">
 
-                <h3 id="selectedDepartment">
-                    All Department Attendance
-                </h3>
+        <h3 id="dailyFolderTitle"
+          style="margin-bottom:15px;font-size:1.05rem;color:var(--primary-blue);">
+          Daily Attendance Logs - All Departments
+        </h3>
 
-                <div class="filter-area">
+        <div style="overflow-x:auto;">
 
-                    <label for="attendanceDate">Select Date:</label>
+          <table id="attendanceReportTable">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Date</th>
+                <th>Time In</th>
+                <th>Time Out</th>
+                <th>Status</th>
+              </tr>
+            </thead>
 
-                    <input
-                        type="date"
-                        id="attendanceDate"
-                    >
+            <tbody id="attendanceTable"></tbody>
+          </table>
 
-                    <input
-                        type="text"
-                        id="searchAttendance"
-                        placeholder="Search employee..."
-                    >
+        </div>
+      </div>
 
-                    <button
-                        type="button"
-                        class="btn"
-                        id="refreshAttendance">
-                        Refresh Records
-                    </button>
-
-                </div>
-
-                <p class="record-count" id="recordCount">
-                    Total Records: 0
-                </p>
-
-                <div class="table-wrapper">
-
-                    <table class="attendance-table">
-
-                        <thead>
-                            <tr>
-                                <th>Employee ID</th>
-                                <th>Name</th>
-                                <th>Department</th>
-                                <th>Position</th>
-                                <th>Date</th>
-                                <th>Time In</th>
-                                <th>Time Out</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="attendanceTableBody">
-                            <tr>
-                                <td colspan="8" class="empty-message">
-                                    Loading attendance records...
-                                </td>
-                            </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
+    </div>
+  </div>
 </div>
 
-<!-- DATABASE MUST LOAD FIRST -->
+<!-- DATABASE -->
 <script src="./database.js"></script>
 
-<!-- EXISTING APPLICATION SCRIPT -->
-<script src="./app.js"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
 
-    let selectedDepartment = "ALL";
+let dailySelectedDept = "ALL";
+let currentReportRows = [];
 
-    const tableBody = document.getElementById("attendanceTableBody");
-    const dateInput = document.getElementById("attendanceDate");
-    const searchInput = document.getElementById("searchAttendance");
-    const countDisplay = document.getElementById("recordCount");
-    const departmentTitle = document.getElementById("selectedDepartment");
+const localToday = () => {
+  const d = new Date();
 
-    function escapeHTML(value) {
-        return String(value ?? "").replace(/[&<>"']/g, function (char) {
-            return {
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
-            }[char];
-        });
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+
+function clean(value) {
+  return String(value ?? "").trim();
+}
+
+function escapeHTML(value) {
+  return clean(value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+function getDepartment(employee, record) {
+  return clean(employee?.department || record?.department || "Unknown").toUpperCase();
+}
+
+function selectDailyDept(dept) {
+
+  dailySelectedDept = clean(dept).toUpperCase();
+
+  document.querySelectorAll(".daily-folder").forEach(folder => {
+
+    folder.classList.remove("active-folder");
+
+    const icon = folder.querySelector("i");
+
+    if (icon) {
+      icon.classList.remove("fa-folder-open");
+      icon.classList.add("fa-folder");
     }
 
-    function getToday() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
+  });
+
+  const selectedFolder = document.getElementById("dfolder-" + dailySelectedDept);
+
+  if (selectedFolder) {
+
+    selectedFolder.classList.add("active-folder");
+
+    const icon = selectedFolder.querySelector("i");
+
+    if (icon) {
+      icon.classList.remove("fa-folder");
+      icon.classList.add("fa-folder-open");
     }
 
-    dateInput.value = getToday();
+  }
 
-    function getDepartment(employee, record) {
-        return String(
-            employee?.department ||
-            record?.department ||
-            "Unassigned"
-        ).trim().toUpperCase();
-    }
+  const title = document.getElementById("dailyFolderTitle");
 
-    function getStatusClass(status) {
-        const value = String(status || "").toLowerCase();
+  if (title) {
+    title.textContent = dailySelectedDept === "ALL"
+      ? "Daily Attendance Logs - All Departments"
+      : "Daily Attendance Logs - " + dailySelectedDept;
+  }
 
-        if (value.includes("present")) return "status-present";
-        if (value.includes("absent")) return "status-absent";
-        if (value.includes("late")) return "status-late";
+  filterDailyData();
+}
 
-        return "";
-    }
+function filterDailyData() {
 
-    function loadAttendance() {
+  const tbody = document.getElementById("attendanceTable");
 
-        if (!window.DB) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="empty-message">
-                        Database not loaded. Check database.js file path.
-                    </td>
-                </tr>`;
-            return;
+  if (!tbody) return;
+
+  if (!window.DB ||
+      typeof DB.getAttendance !== "function" ||
+      typeof DB.getEmployees !== "function") {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;padding:25px;color:#dc3545;">
+          Database not loaded. Check database.js.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const selectedDate = document.getElementById("dateFilter")?.value || "";
+
+  const records = DB.getAttendance() || [];
+  const employees = DB.getEmployees() || [];
+
+  const rows = records.map(record => {
+
+    const employee = employees.find(emp =>
+      clean(emp.id) === clean(record.id)
+    );
+
+    return {
+      ...record,
+      name: record.name || employee?.name || "Unknown",
+      department: getDepartment(employee, record),
+      position: record.position || employee?.position || "—"
+    };
+
+  }).filter(record => {
+
+    const matchesDate = !selectedDate || clean(record.date) === selectedDate;
+
+    const matchesDept = dailySelectedDept === "ALL" ||
+      record.department === dailySelectedDept;
+
+    return matchesDate && matchesDept;
+
+  });
+
+  currentReportRows = rows;
+
+  if (!rows.length) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;color:#6c757d;padding:25px;">
+          No attendance records found for this date or department.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  tbody.innerHTML = rows.map(record => `
+    <tr>
+      <td>${escapeHTML(record.id)}</td>
+      <td><strong>${escapeHTML(record.name)}</strong></td>
+      <td>
+        <span style="background:#e3f2fd;color:#0d6efd;padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.85rem;">
+          ${escapeHTML(record.department)}
+        </span>
+      </td>
+      <td>${escapeHTML(record.position)}</td>
+      <td>${escapeHTML(record.date)}</td>
+      <td style="color:#198754;font-weight:600;">
+        ${escapeHTML(record.timeIn || "—")}
+      </td>
+      <td style="color:#0dcaf0;font-weight:600;">
+        ${escapeHTML(record.timeOut || "—")}
+      </td>
+      <td>${escapeHTML(record.status || "—")}</td>
+    </tr>
+  `).join("");
+
+}
+
+/* GENERATE REPORT */
+function generateReport() {
+
+  filterDailyData();
+
+  const total = currentReportRows.length;
+  const completed = currentReportRows.filter(r => r.timeIn && r.timeOut).length;
+  const pending = currentReportRows.filter(r => r.timeIn && !r.timeOut).length;
+
+  alert(
+    "ATTENDANCE REPORT\n\n" +
+    "Department: " + dailySelectedDept + "\n" +
+    "Date: " + (document.getElementById("dateFilter").value || "All Dates") + "\n\n" +
+    "Total Records: " + total + "\n" +
+    "Completed Attendance: " + completed + "\n" +
+    "Pending Time Out: " + pending
+  );
+
+}
+
+/* EXPORT TO EXCEL (CSV) */
+function exportExcel() {
+
+  if (!currentReportRows.length) {
+    alert("No attendance records to export.");
+    return;
+  }
+
+  const headers = [
+    "Employee ID",
+    "Name",
+    "Department",
+    "Position",
+    "Date",
+    "Time In",
+    "Time Out",
+    "Status"
+  ];
+
+  const csvRows = [headers];
+
+  currentReportRows.forEach(record => {
+
+    csvRows.push([
+      record.id,
+      record.name,
+      record.department,
+      record.position,
+      record.date,
+      record.timeIn || "",
+      record.timeOut || "",
+      record.status || ""
+    ]);
+
+  });
+
+  const csvContent = "\uFEFF" + csvRows.map(row =>
+    row.map(value =>
+      '"' + String(value ?? "").replace(/"/g, '""') + '"'
+    ).join(",")
+  ).join("\r\n");
+
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "Attendance_Report_" + localToday() + ".csv";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+
+}
+
+/* EXPORT TO PDF */
+function exportPDF() {
+
+  if (!currentReportRows.length) {
+    alert("No attendance records to print.");
+    return;
+  }
+
+  const rows = currentReportRows.map(record => `
+    <tr>
+      <td>${escapeHTML(record.id)}</td>
+      <td>${escapeHTML(record.name)}</td>
+      <td>${escapeHTML(record.department)}</td>
+      <td>${escapeHTML(record.position)}</td>
+      <td>${escapeHTML(record.date)}</td>
+      <td>${escapeHTML(record.timeIn || "—")}</td>
+      <td>${escapeHTML(record.timeOut || "—")}</td>
+      <td>${escapeHTML(record.status || "—")}</td>
+    </tr>
+  `).join("");
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    alert("Please allow pop-ups to export the PDF.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Attendance Report</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 25px;
         }
 
-        try {
-
-            const employees = DB.getEmployees() || [];
-            const attendance = DB.getAttendance() || [];
-
-            const selectedDate = dateInput.value;
-            const searchText = searchInput.value.toLowerCase().trim();
-
-            const filteredRecords = attendance.filter(function (record) {
-
-                const employee = employees.find(function (emp) {
-                    return String(emp.id) === String(record.id);
-                });
-
-                const department = getDepartment(employee, record);
-
-                const matchesDepartment =
-                    selectedDepartment === "ALL" ||
-                    department === selectedDepartment;
-
-                const matchesDate =
-                    !selectedDate || record.date === selectedDate;
-
-                const name = record.name || employee?.name || "";
-                const employeeId = record.id || "";
-
-                const matchesSearch =
-                    name.toLowerCase().includes(searchText) ||
-                    String(employeeId).toLowerCase().includes(searchText);
-
-                return matchesDepartment && matchesDate && matchesSearch;
-            });
-
-            countDisplay.textContent =
-                "Total Records: " + filteredRecords.length;
-
-            if (filteredRecords.length === 0) {
-
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="empty-message">
-                            No attendance records found.
-                        </td>
-                    </tr>`;
-
-                return;
-            }
-
-            tableBody.innerHTML = filteredRecords.map(function (record) {
-
-                const employee = employees.find(function (emp) {
-                    return String(emp.id) === String(record.id);
-                });
-
-                const name = record.name || employee?.name || "Unknown";
-                const department = getDepartment(employee, record);
-                const position = employee?.position || record.position || "N/A";
-                const status = record.status || "Present";
-
-                return `
-                    <tr>
-                        <td>${escapeHTML(record.id)}</td>
-                        <td>${escapeHTML(name)}</td>
-                        <td>${escapeHTML(department)}</td>
-                        <td>${escapeHTML(position)}</td>
-                        <td>${escapeHTML(record.date)}</td>
-                        <td>${escapeHTML(record.timeIn || "--")}</td>
-                        <td>${escapeHTML(record.timeOut || "--")}</td>
-                        <td>
-                            <span class="${getStatusClass(status)}">
-                                ${escapeHTML(status)}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-
-            }).join("");
-
-        } catch (error) {
-
-            console.error("Attendance loading error:", error);
-
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="empty-message">
-                        Error loading attendance records.
-                        Check the browser console.
-                    </td>
-                </tr>`;
+        h2, p {
+          text-align: center;
         }
-    }
 
-    // DEPARTMENT FOLDER CLICK EVENTS
-    document.querySelectorAll(".department-folder").forEach(function (folder) {
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+          font-size: 11px;
+        }
 
-        folder.addEventListener("click", function () {
+        th, td {
+          border: 1px solid #777;
+          padding: 8px;
+          text-align: left;
+        }
 
-            document.querySelectorAll(".department-folder").forEach(function (item) {
-                item.classList.remove("active");
-            });
+        th {
+          background: #e9ecef;
+        }
 
-            this.classList.add("active");
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
 
-            selectedDepartment = this.dataset.department;
+    <body>
 
-            departmentTitle.textContent =
-                selectedDepartment === "ALL"
-                ? "All Department Attendance"
-                : selectedDepartment + " Attendance";
+      <h2>Digital Attendance System</h2>
+      <p>Daily Attendance Report</p>
 
-            loadAttendance();
+      <p>
+        Department: ${escapeHTML(dailySelectedDept)}<br>
+        Date: ${escapeHTML(document.getElementById("dateFilter").value || "All Dates")}
+      </p>
 
-        });
+      <table>
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Date</th>
+            <th>Time In</th>
+            <th>Time Out</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>${rows}</tbody>
+      </table>
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      <\/script>
+
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
+}
+
+/* INITIALIZE PAGE */
+document.addEventListener("DOMContentLoaded", () => {
+
+  const dateFilter = document.getElementById("dateFilter");
+
+  const currentDate = document.getElementById("currentDate");
+
+  if (currentDate) {
+    currentDate.textContent = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  }
+
+  if (dateFilter) {
+    dateFilter.value = localToday();
+    dateFilter.addEventListener("change", filterDailyData);
+  }
+
+  document.querySelectorAll(".daily-folder").forEach(folder => {
+
+    folder.addEventListener("click", () => {
+
+      const dept = folder.id.replace("dfolder-", "");
+
+      selectDailyDept(dept);
 
     });
 
-    // FILTER EVENTS
-    dateInput.addEventListener("change", loadAttendance);
-    searchInput.addEventListener("input", loadAttendance);
+    folder.setAttribute("role", "button");
+    folder.setAttribute("tabindex", "0");
 
-    document.getElementById("refreshAttendance")
-        .addEventListener("click", loadAttendance);
+    folder.addEventListener("keydown", event => {
 
-    // DATABASE STATUS
-    if (window.DB) {
-        document.getElementById("databaseMessage").style.display = "block";
-        console.log("Attendance page connected to database.");
-    }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        folder.click();
+      }
 
-    // INITIAL LOAD
-    loadAttendance();
+    });
+
+  });
+
+  selectDailyDept("ALL");
 
 });
+
 </script>
 
 </body>
