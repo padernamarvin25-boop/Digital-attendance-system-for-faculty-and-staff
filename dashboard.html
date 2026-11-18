@@ -1,19 +1,153 @@
-<!-- Search and Filter -->
-<div class="card attendance-search-card">
-    <div class="card-title">Employee Attendance Search</div>
+<script>
+(function () {
 
-    <div class="search-filter-container">
-        <div class="search-box">
-            <i class="fa-solid fa-search"></i>
+    // Create a completely separate search and filter section
+    const dashboardDetails = document.querySelector(".dashboard-details");
+    const contentArea = document.querySelector(".content-area");
+
+    if (!contentArea) {
+        console.error("Dashboard content area not found.");
+        return;
+    }
+
+    // Prevent duplicate search sections
+    if (document.getElementById("githubAttendanceSearch")) {
+        return;
+    }
+
+    // Create styles
+    const styles = document.createElement("style");
+
+    styles.textContent = `
+        #githubAttendanceSearch {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin: 25px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #githubAttendanceSearch h3 {
+            margin: 0 0 18px 0;
+            font-size: 18px;
+        }
+
+        #githubAttendanceSearch .search-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #githubAttendanceSearch input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #githubAttendanceSearch input:focus {
+            border-color: #007bff;
+        }
+
+        #githubAttendanceSearch select {
+            min-width: 180px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 14px;
+            background: white;
+        }
+
+        #githubAttendanceSearch table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #githubAttendanceSearch th,
+        #githubAttendanceSearch td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        #githubAttendanceSearch th {
+            background: #f5f5f5;
+        }
+
+        #githubAttendanceSearch tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        #githubAttendanceSearch .search-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        #githubAttendanceSearch .present {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        #githubAttendanceSearch .absent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #githubAttendanceSearch .late {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        #githubAttendanceSearch .result-count {
+            color: #777;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+
+        #githubAttendanceSearch .table-wrapper {
+            overflow-x: auto;
+        }
+
+        @media(max-width:600px) {
+            #githubAttendanceSearch .search-controls {
+                flex-direction: column;
+            }
+
+            #githubAttendanceSearch input,
+            #githubAttendanceSearch select {
+                width: 100%;
+            }
+        }
+    `;
+
+    document.head.appendChild(styles);
+
+    // Create the actual search interface
+    const searchSection = document.createElement("div");
+
+    searchSection.id = "githubAttendanceSearch";
+
+    searchSection.innerHTML = `
+        <h3>Employee Search & Attendance Filter</h3>
+
+        <div class="search-controls">
             <input
                 type="text"
-                id="employeeSearch"
-                placeholder="Search employee name or ID..."
+                id="githubEmployeeSearch"
+                placeholder="Search by employee name or ID..."
             >
-        </div>
 
-        <div class="filter-box">
-            <select id="attendanceFilter">
+            <select id="githubAttendanceFilter">
                 <option value="all">All Employees</option>
                 <option value="present">Present</option>
                 <option value="absent">Absent</option>
@@ -21,26 +155,184 @@
                 <option value="late">Late</option>
             </select>
         </div>
-    </div>
 
-    <div class="table-responsive">
-        <table class="attendance-search-table">
-            <thead>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
+                        <th>Time In</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="githubEmployeeTable">
+                    <tr>
+                        <td colspan="4">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="result-count" id="githubSearchCount"></div>
+    `;
+
+    // Insert above chart and quick actions
+    if (dashboardDetails) {
+        contentArea.insertBefore(searchSection, dashboardDetails);
+    } else {
+        contentArea.appendChild(searchSection);
+    }
+
+    // Search functionality
+    const searchInput =
+        document.getElementById("githubEmployeeSearch");
+
+    const filterSelect =
+        document.getElementById("githubAttendanceFilter");
+
+    const tableBody =
+        document.getElementById("githubEmployeeTable");
+
+    const countDisplay =
+        document.getElementById("githubSearchCount");
+
+    function todayDate() {
+        const date = new Date();
+
+        return date.getFullYear() + "-" +
+            String(date.getMonth() + 1).padStart(2, "0") + "-" +
+            String(date.getDate()).padStart(2, "0");
+    }
+
+    function escapeText(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (c) {
+            return {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[c];
+        });
+    }
+
+    function getStatus(employee, records) {
+        const record = records.find(function (r) {
+            return String(r.id) === String(employee.id) &&
+                r.date === todayDate() &&
+                r.timeIn &&
+                r.timeIn !== "--";
+        });
+
+        if (!record) {
+            return {
+                status: "Absent",
+                time: "--",
+                filter: "absent",
+                css: "absent"
+            };
+        }
+
+        const late =
+            String(record.status || "").toLowerCase() === "late";
+
+        return {
+            status: late ? "Late" : "On Time",
+            time: record.timeIn || "--",
+            filter: late ? "late" : "ontime",
+            css: late ? "late" : "present"
+        };
+    }
+
+    function searchEmployees() {
+
+        if (typeof DB === "undefined") {
+            tableBody.innerHTML = `
                 <tr>
-                    <th>Employee ID</th>
-                    <th>Employee Name</th>
-                    <th>Time In</th>
-                    <th>Status</th>
+                    <td colspan="4">Database unavailable.</td>
                 </tr>
-            </thead>
+            `;
+            return;
+        }
 
-            <tbody id="employeeSearchResults">
+        const employees = DB.getEmployees() || [];
+        const records = DB.getAttendance() || [];
+
+        const keyword = searchInput.value.trim().toLowerCase();
+        const filter = filterSelect.value;
+
+        const filtered = employees.filter(function (employee) {
+
+            const id = String(employee.id || "").toLowerCase();
+            const name = String(employee.name || "").toLowerCase();
+
+            const matchesKeyword =
+                name.includes(keyword) || id.includes(keyword);
+
+            const attendance = getStatus(employee, records);
+
+            let matchesFilter = true;
+
+            if (filter === "present") {
+                matchesFilter =
+                    attendance.filter === "ontime" ||
+                    attendance.filter === "late";
+            }
+
+            if (filter === "absent") {
+                matchesFilter = attendance.filter === "absent";
+            }
+
+            if (filter === "ontime") {
+                matchesFilter = attendance.filter === "ontime";
+            }
+
+            if (filter === "late") {
+                matchesFilter = attendance.filter === "late";
+            }
+
+            return matchesKeyword && matchesFilter;
+        });
+
+        if (filtered.length === 0) {
+            tableBody.innerHTML = `
                 <tr>
-                    <td colspan="4">Loading employees...</td>
+                    <td colspan="4" style="text-align:center;">
+                        No employees found.
+                    </td>
                 </tr>
-            </tbody>
-        </table>
-    </div>
+            `;
+        } else {
+            tableBody.innerHTML = filtered.map(function (employee) {
 
-    <p id="searchResultCount" class="search-result-count"></p>
-</div>
+                const attendance = getStatus(employee, records);
+
+                return `
+                    <tr>
+                        <td>${escapeText(employee.id)}</td>
+                        <td>${escapeText(employee.name)}</td>
+                        <td>${escapeText(attendance.time)}</td>
+                        <td>
+                            <span class="search-status ${attendance.css}">
+                                ${escapeText(attendance.status)}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        countDisplay.textContent =
+            "Showing " + filtered.length +
+            " employee(s) out of " + employees.length;
+    }
+
+    searchInput.addEventListener("input", searchEmployees);
+    filterSelect.addEventListener("change", searchEmployees);
+
+    searchEmployees();
+
+})();
+</script>
