@@ -13,25 +13,36 @@
       position: relative;
       display: flex;
       align-items: center;
-    }
-
-    .password-container input {
       width: 100%;
-      padding-right: 44px !important;
     }
 
-    #toggleKioskPass {
+    .password-container input.form-control {
+      width: 100%;
+      padding-right: 48px !important;
+    }
+
+    .eye-toggle-btn {
       position: absolute;
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      border: none;
-      background: transparent;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 1rem;
-      color: #555;
-      padding: 4px 6px;
-      z-index: 2;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      line-height: 1;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .eye-toggle-btn:hover {
+      background: #e2e8f0;
     }
   </style>
 </head>
@@ -54,8 +65,8 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <button type="button" id="toggleKioskPass" aria-label="Show password" title="Show Password">
-            <i class="fa-solid fa-eye"></i>
+          <button type="button" id="toggleKioskPass" class="eye-toggle-btn" title="Show Password" aria-label="Show Password" onclick="toggleKioskPassword()">
+            👁 Show
           </button>
         </div>
       </div>
@@ -101,34 +112,23 @@
       kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
     }
 
-    function resetKioskPasswordEye() {
-      if (kioskPass) kioskPass.type = "password";
+    function setKioskEyeState(isVisible) {
+      if (kioskPass) {
+        kioskPass.type = isVisible ? "text" : "password";
+      }
       if (toggleKioskPass) {
-        const icon = toggleKioskPass.querySelector("i");
-        if (icon) {
-          icon.classList.remove("fa-eye-slash");
-          icon.classList.add("fa-eye");
-        }
-        toggleKioskPass.setAttribute("aria-label", "Show password");
-        toggleKioskPass.setAttribute("title", "Show Password");
+        toggleKioskPass.textContent = isVisible ? "🙈 Hide" : "👁 Show";
+        toggleKioskPass.setAttribute("title", isVisible ? "Hide Password" : "Show Password");
+        toggleKioskPass.setAttribute("aria-label", isVisible ? "Hide Password" : "Show Password");
       }
     }
 
-    setDefaultSlot();
-
-    if (toggleKioskPass && kioskPass) {
-      toggleKioskPass.addEventListener("click", function () {
-        const isHidden = kioskPass.type === "password";
-        kioskPass.type = isHidden ? "text" : "password";
-        const icon = this.querySelector("i");
-        if (icon) {
-          icon.classList.toggle("fa-eye", !isHidden);
-          icon.classList.toggle("fa-eye-slash", isHidden);
-        }
-        this.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
-        this.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
-      });
+    function toggleKioskPassword() {
+      if (!kioskPass) return;
+      setKioskEyeState(kioskPass.type === "password");
     }
+
+    setDefaultSlot();
 
     function runKioskAction(actionType) {
       const id = document.getElementById("kioskId").value.trim();
@@ -157,7 +157,7 @@
 
       if (result.ok) {
         document.getElementById("kioskForm").reset();
-        resetKioskPasswordEye();
+        setKioskEyeState(false);
         setDefaultSlot();
       }
     }
