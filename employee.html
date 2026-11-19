@@ -64,6 +64,10 @@
       white-space: nowrap;
     }
 
+    .group-section-card {
+      margin-top: 24px;
+    }
+
     .delete-attendance-btn {
       color: #dc3545;
       border: 1px solid #dc3545;
@@ -134,7 +138,7 @@
         <i class="fa-solid fa-user-plus" style="color:var(--primary-blue);"></i>
         Employee Registration
       </h1>
-      <p class="page-subheading">Register Faculty or Staff under their department (Descending list).</p>
+      <p class="page-subheading">Register Faculty or Staff under their department (Separate Faculty &amp; Staff records in descending order).</p>
 
       <!-- REGISTRATION FORM -->
       <div class="card">
@@ -197,13 +201,50 @@
         </form>
       </div>
 
-      <!-- EMPLOYEE RECORDS -->
-      <div class="card" style="margin-top:25px;">
-        <h2 class="card-title">
-          <i class="fa-solid fa-folder-open"></i>
-          Employee Records (Descending)
+      <!-- SEPARATE LAGAYAN: FACULTY RECORDS (DESCENDING) -->
+      <div class="card group-section-card">
+        <h2 class="card-title" style="color:var(--primary-blue);">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          Faculty Records (Descending)
         </h2>
+        <div style="overflow-x:auto;">
+          <table class="employee-table">
+            <thead>
+              <tr>
+                <th>Employee ID (PK)</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="facultyEmployeeTableBody"></tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- SEPARATE LAGAYAN: STAFF RECORDS (DESCENDING) -->
+      <div class="card group-section-card">
+        <h2 class="card-title" style="color:#198754;">
+          <i class="fa-solid fa-user-tie"></i>
+          Staff Records (Descending)
+        </h2>
+        <div style="overflow-x:auto;">
+          <table class="employee-table">
+            <thead>
+              <tr>
+                <th>Employee ID (PK)</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffEmployeeTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
