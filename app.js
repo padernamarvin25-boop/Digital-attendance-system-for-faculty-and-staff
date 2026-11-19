@@ -150,54 +150,19 @@ function logout() {
 }
 
 // ==========================================
-// EMPLOYEE REGISTRATION & RECORD (DESC, UNIQUE PK & NAME)
+// EMPLOYEE REGISTRATION & RECORD (SEPARATE FACULTY & STAFF, DESC, UNIQUE PK & NAME)
 // ==========================================
 
-function renderEmployeeTable() {
-    const cards = document.querySelectorAll(".card");
-    const container = cards.length > 0 ? cards[cards.length - 1] : null;
-    if (!container || !window.DB || typeof DB.getEmployees !== "function") return;
-
-    let tableBody = document.getElementById("employeeTableBody");
-
-    if (!tableBody) {
-        const wrapper = document.createElement("div");
-        wrapper.style.overflowX = "auto";
-        wrapper.innerHTML = `
-            <table class="employee-table">
-                <thead>
-                    <tr>
-                        <th>Employee ID (PK)</th>
-                        <th>Full Name</th>
-                        <th>Department</th>
-                        <th>Position</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="employeeTableBody"></tbody>
-            </table>
-        `;
-        container.appendChild(wrapper);
-        tableBody = document.getElementById("employeeTableBody");
+function getEmployeeGroup(emp) {
+    const pos = cleanText(emp?.position).toLowerCase();
+    if (pos === "faculty" || pos.includes("faculty") || pos.includes("instructor") || pos.includes("teacher")) {
+        return "Faculty";
     }
+    return "Staff";
+}
 
-    // Descending order (pinakabagong entry nasa pinakataas)
-    const employees = (DB.getEmployees() || [])
-        .map((emp, originalIndex) => ({ ...emp, _idx: originalIndex }))
-        .sort((a, b) => b._idx - a._idx);
-
-    if (!employees.length) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">
-                    No registered employees found.
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    tableBody.innerHTML = employees.map(emp => `
+function buildEmployeeRowHtml(emp) {
+    return `
         <tr>
             <td>${escapeStr(emp.id)}</td>
             <td><strong>${escapeStr(emp.name)}</strong></td>
@@ -212,7 +177,41 @@ function renderEmployeeTable() {
                 </button>
             </td>
         </tr>
-    `).join("");
+    `;
+}
+
+function renderEmployeeTable() {
+    const facultyBody = document.getElementById("facultyEmployeeTableBody");
+    const staffBody = document.getElementById("staffEmployeeTableBody");
+
+    if (!facultyBody || !staffBody || !window.DB || typeof DB.getEmployees !== "function") return;
+
+    const sortedEmployees = (DB.getEmployees() || [])
+        .map((emp, originalIndex) => ({ ...emp, _idx: originalIndex }))
+        .sort((a, b) => b._idx - a._idx);
+
+    const facultyRows = sortedEmployees.filter(emp => getEmployeeGroup(emp) === "Faculty");
+    const staffRows = sortedEmployees.filter(emp => getEmployeeGroup(emp) === "Staff");
+
+    facultyBody.innerHTML = facultyRows.length
+        ? facultyRows.map(buildEmployeeRowHtml).join("")
+        : `
+            <tr>
+                <td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">
+                    No registered faculty found.
+                </td>
+            </tr>
+        `;
+
+    staffBody.innerHTML = staffRows.length
+        ? staffRows.map(buildEmployeeRowHtml).join("")
+        : `
+            <tr>
+                <td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">
+                    No registered staff found.
+                </td>
+            </tr>
+        `;
 }
 
 function editEmployee(index) {
@@ -299,7 +298,6 @@ function handleEmployeeFormSubmit(event) {
     const normalizedNewId = normalizeId(id);
     const normalizedNewName = normalizeName(name);
 
-    // 1. Check duplicate Employee ID (Primary Key)
     const duplicateIdIndex = employees.findIndex(
         (e, idx) => normalizeId(e.id) === normalizedNewId && idx !== editIndex
     );
@@ -313,7 +311,6 @@ function handleEmployeeFormSubmit(event) {
         return;
     }
 
-    // 2. Check duplicate Full Name (hindi puwede ang parehong pangalan kahit ibang ID)
     const duplicateNameIndex = employees.findIndex(
         (e, idx) => normalizeName(e.name) === normalizedNewName && idx !== editIndex
     );
@@ -361,7 +358,6 @@ function handleEmployeeFormSubmit(event) {
         return;
     }
 
-    // Bagong employee: ilagay sa dulo para lumabas sa pinakataas (Descending)
     employees.push(data);
     DB.saveEmployees(employees);
     resetForm();
