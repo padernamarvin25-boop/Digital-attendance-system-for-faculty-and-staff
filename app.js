@@ -216,9 +216,18 @@ function resetForm() {
     const form = document.getElementById("regForm");
     const formTitle = document.getElementById("formTitle");
     const saveBtn = document.getElementById("saveBtn");
+    const passInput = document.getElementById("empPass");
+    const toggleBtn = document.getElementById("toggleRegPass");
 
     if (form) form.reset();
     sessionStorage.removeItem(EDIT_INDEX_KEY);
+
+    if (passInput) passInput.type = "password";
+    if (toggleBtn) {
+        toggleBtn.textContent = "👁️";
+        toggleBtn.setAttribute("aria-label", "Show password");
+        toggleBtn.setAttribute("title", "Show Password");
+    }
 
     if (formTitle) formTitle.textContent = "Register New Employee";
     if (saveBtn) saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Employee`;
@@ -273,6 +282,7 @@ function setupPasswordToggle() {
     toggleBtn.addEventListener("click", () => {
         const isHidden = passInput.type === "password";
         passInput.type = isHidden ? "text" : "password";
+        toggleBtn.textContent = isHidden ? "🙈" : "👁️";
         toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
         toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
     });
