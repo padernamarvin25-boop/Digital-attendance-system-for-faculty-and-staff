@@ -21,26 +21,33 @@
       padding-right: 42px !important;
     }
 
-    .eye-icon-btn {
+    .eye-toggle-btn {
       position: absolute;
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
       border: none;
       background: transparent;
-      color: #555;
+      color: #475569;
       cursor: pointer;
-      font-size: 1rem;
-      padding: 4px;
-      line-height: 1;
-      z-index: 5;
+      padding: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      z-index: 10;
     }
 
-    .eye-icon-btn:hover {
+    .eye-toggle-btn:hover {
       color: #0d6efd;
+    }
+
+    .eye-toggle-btn svg {
+      width: 19px;
+      height: 19px;
+      display: block;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -63,8 +70,11 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <button type="button" id="toggleKioskPass" class="eye-icon-btn" title="Show Password" aria-label="Show Password" onclick="toggleKioskPassword()">
-            <i class="fa-solid fa-eye"></i>
+          <button type="button" id="toggleKioskPass" class="eye-toggle-btn" title="Show Password" aria-label="Show Password" onclick="toggleKioskPassword()">
+            <svg id="kioskEyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </button>
         </div>
       </div>
@@ -100,8 +110,20 @@
   <script src="./database.js"></script>
   <script src="./app.js"></script>
   <script>
+    const EYE_OPEN_SVG = `
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    `;
+
+    const EYE_CLOSED_SVG = `
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-5.94"></path>
+      <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-3.17 4.62"></path>
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+    `;
+
     const toggleKioskPass = document.getElementById("toggleKioskPass");
     const kioskPass = document.getElementById("kioskPass");
+    const kioskEyeSvg = document.getElementById("kioskEyeSvg");
     const kioskSlot = document.getElementById("kioskSlot");
 
     function setDefaultSlot() {
@@ -114,12 +136,10 @@
       if (kioskPass) {
         kioskPass.type = isVisible ? "text" : "password";
       }
+      if (kioskEyeSvg) {
+        kioskEyeSvg.innerHTML = isVisible ? EYE_CLOSED_SVG : EYE_OPEN_SVG;
+      }
       if (toggleKioskPass) {
-        const icon = toggleKioskPass.querySelector("i");
-        if (icon) {
-          icon.classList.toggle("fa-eye", !isVisible);
-          icon.classList.toggle("fa-eye-slash", isVisible);
-        }
         toggleKioskPass.setAttribute("title", isVisible ? "Hide Password" : "Show Password");
         toggleKioskPass.setAttribute("aria-label", isVisible ? "Hide Password" : "Show Password");
       }
