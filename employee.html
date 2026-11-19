@@ -86,7 +86,7 @@
 
 <div class="app-container">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (Tinanggal na ang Employee Record) -->
   <div class="sidebar">
     <div class="sidebar-header">
       <i class="fa-solid fa-graduation-cap"></i>
@@ -97,7 +97,6 @@
     <ul class="sidebar-menu">
       <li><a href="./dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
       <li class="active"><a href="./employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
-      <li><a href="./employee.html"><i class="fa-solid fa-users"></i> Employee Record</a></li>
       <li><a href="./attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
       <li><a href="./monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
       <li><a href="#" onclick="logout(); return false;"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
@@ -203,7 +202,8 @@
     const toggleBtn = document.getElementById("toggleRegPass");
     const passInput = document.getElementById("empPass");
 
-    if (toggleBtn && passInput) {
+    if (toggleBtn && passInput && toggleBtn.dataset.eyeBound !== "true") {
+      toggleBtn.dataset.eyeBound = "true";
       toggleBtn.addEventListener("click", () => {
         const isHidden = passInput.type === "password";
         passInput.type = isHidden ? "text" : "password";
