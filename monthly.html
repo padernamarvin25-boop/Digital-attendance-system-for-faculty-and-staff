@@ -9,6 +9,10 @@
   <link rel="stylesheet" href="./all.min.css">
 
   <style>
+    .group-section-card {
+      margin-top: 22px;
+    }
+
     .edit-attendance-btn {
       color: #0d6efd;
       border: 1px solid #0d6efd;
@@ -294,7 +298,7 @@
             Monthly Record
           </h1>
           <p class="page-subheading" style="margin-bottom:0;">
-            Balikan ang record ng bawat employee gamit ang calendar/date, mag-search, mag-edit/delete, at mag-generate ng receipt.
+            Hiwalay ang lagayan ng Faculty at Staff sa descending order, may search, calendar date, edit/delete, at receipt.
           </p>
         </div>
 
@@ -322,10 +326,9 @@
         </div>
       </div>
 
-      <!-- MONTHLY RECORDS TABLE (DESCENDING) -->
-      <div class="card">
-        <h3 class="monthly-table-title">Employee Monthly Attendance Records (Descending)</h3>
-
+      <!-- SEPARATE LAGAYAN: FACULTY (DESCENDING) -->
+      <div class="card group-section-card">
+        <h3 class="monthly-table-title">Faculty Monthly Records (Descending)</h3>
         <div class="table-wrapper">
           <table>
             <thead>
@@ -334,13 +337,35 @@
                 <th>Name</th>
                 <th>Department</th>
                 <th>Date</th>
-                <th>AM In / Out</th>
-                <th>PM In / Out</th>
+                <th>Morning (AM/PM)</th>
+                <th>Afternoon (AM/PM)</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="monthlyTable"></tbody>
+            <tbody id="facultyMonthlyTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SEPARATE LAGAYAN: STAFF (DESCENDING) -->
+      <div class="card group-section-card">
+        <h3 class="monthly-table-title" style="color:#198754;">Staff Monthly Records (Descending)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Morning (AM/PM)</th>
+                <th>Afternoon (AM/PM)</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffMonthlyTable"></tbody>
           </table>
         </div>
       </div>
@@ -349,12 +374,12 @@
   </div>
 </div>
 
-<!-- GENERATE RECEIPT MODAL (CS FORM NO. 48)[cite: 2] -->
+<!-- GENERATE RECEIPT MODAL (CS FORM NO. 48) -->
 <div id="dtrModalBackdrop" class="dtr-modal-backdrop" onclick="if(event.target === this) closeDTRModal()">
   <div class="dtr-modal-box">
     <div class="dtr-modal-toolbar">
       <h3 style="margin:0;font-size:1.1rem;color:var(--primary-blue);">
-        <i class="fa-solid fa-receipt"></i> Daily Time Record Receipt (CS Form No. 48)[cite: 2]
+        <i class="fa-solid fa-receipt"></i> Daily Time Record Receipt (CS Form No. 48)
       </h3>
       <div style="display:flex;gap:10px;">
         <button type="button" class="btn btn-primary" onclick="window.print()">
@@ -378,6 +403,13 @@
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[ch]));
 
+  function getGroupM(emp, rec) {
+    const pos = cleanM(rec?.position || emp?.position || "Staff").toLowerCase();
+    return (pos.includes("faculty") || pos.includes("instructor") || pos.includes("teacher"))
+      ? "Faculty"
+      : "Staff";
+  }
+
   function splitName(fullName) {
     const parts = cleanM(fullName).split(/\s+/).filter(Boolean);
     if (!parts.length) return { firstName: "—", familyName: "—" };
@@ -399,9 +431,38 @@
     renderMonthlyData();
   }
 
+  function buildRowHtml(r) {
+    const morningText = `${r.morningAmIn !== "--" ? r.morningAmIn : (r.amTimeIn || "--")} / ${r.morningPmIn !== "--" ? r.morningPmIn : "--"}`;
+    const afternoonText = `${r.afternoonAmIn !== "--" ? r.afternoonAmIn : "--"} / ${r.afternoonPmIn !== "--" ? r.afternoonPmIn : (r.pmTimeIn || "--")}`;
+
+    return `
+      <tr>
+        <td>${escM(r.id)}</td>
+        <td><strong>${escM(r.name)}</strong></td>
+        <td><span class="department-tag">${escM(r.department)}</span></td>
+        <td>${escM(r.date)}</td>
+        <td style="color:#198754;font-weight:600;">${escM(morningText)}</td>
+        <td style="color:#0d6efd;font-weight:600;">${escM(afternoonText)}</td>
+        <td><span class="days-tag">${escM(r.status)}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="receipt-btn" onclick="openDTRReceipt('${escM(r.id)}')">
+            <i class="fa-solid fa-receipt"></i> Generate Receipt
+          </button>
+          <button type="button" class="edit-attendance-btn" onclick="editMonthlyRecord(${r._recordIndex})">
+            <i class="fa-solid fa-pen"></i> Edit
+          </button>
+          <button type="button" class="delete-attendance-btn" onclick="deleteMonthlyRecord(${r._recordIndex})">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  }
+
   function renderMonthlyData() {
-    const tbody = document.getElementById("monthlyTable");
-    if (!tbody || !window.DB) return;
+    const facBody = document.getElementById("facultyMonthlyTable");
+    const staffBody = document.getElementById("staffMonthlyTable");
+    if (!facBody || !staffBody || !window.DB) return;
 
     const monthVal = document.getElementById("monthFilter")?.value || getCurrentMonthISO();
     const calDateVal = document.getElementById("calendarDateFilter")?.value || "";
@@ -410,7 +471,7 @@
     const records = DB.getAttendance() || [];
     const employees = DB.getEmployees() || [];
 
-    const rows = records
+    const filtered = records
       .map((rec, idx) => {
         const emp = employees.find(e => cleanM(e.id) === cleanM(rec.id || rec.employeeId));
         return {
@@ -419,11 +480,14 @@
           id: rec.id || rec.employeeId || "—",
           name: rec.name || rec.employeeName || emp?.name || "Unknown",
           department: cleanM(rec.department || emp?.department || "General").toUpperCase(),
+          group: getGroupM(emp, rec),
           date: cleanM(rec.date),
-          amIn: rec.amTimeIn || rec.timeIn || "--",
-          amOut: rec.amTimeOut || "--",
-          pmIn: rec.pmTimeIn || "--",
-          pmOut: rec.pmTimeOut || rec.timeOut || "--",
+          morningAmIn: rec.morningAmIn || "--",
+          morningPmIn: rec.morningPmIn || "--",
+          afternoonAmIn: rec.afternoonAmIn || "--",
+          afternoonPmIn: rec.afternoonPmIn || "--",
+          amTimeIn: rec.amTimeIn || rec.timeIn || "--",
+          pmTimeIn: rec.pmTimeIn || "--",
           status: rec.status || "Present"
         };
       })
@@ -438,33 +502,16 @@
         return matchesMonth && matchesDate && matchesSearch;
       });
 
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="8" class="empty-message">No monthly records found for the selected filter.</td></tr>`;
-      return;
-    }
+    const facRows = filtered.filter(r => r.group === "Faculty");
+    const staffRows = filtered.filter(r => r.group === "Staff");
 
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td>${escM(r.id)}</td>
-        <td><strong>${escM(r.name)}</strong></td>
-        <td><span class="department-tag">${escM(r.department)}</span></td>
-        <td>${escM(r.date)}</td>
-        <td style="color:#198754;font-weight:600;">${escM(r.amIn)} / ${escM(r.amOut)}</td>
-        <td style="color:#0d6efd;font-weight:600;">${escM(r.pmIn)} / ${escM(r.pmOut)}</td>
-        <td><span class="days-tag">${escM(r.status)}</span></td>
-        <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button type="button" class="receipt-btn" onclick="openDTRReceipt('${escM(r.id)}')">
-            <i class="fa-solid fa-receipt"></i> Generate Receipt
-          </button>
-          <button type="button" class="edit-attendance-btn" onclick="editMonthlyRecord(${r._recordIndex})">
-            <i class="fa-solid fa-pen"></i> Edit
-          </button>
-          <button type="button" class="delete-attendance-btn" onclick="deleteMonthlyRecord(${r._recordIndex})">
-            <i class="fa-solid fa-trash"></i> Delete
-          </button>
-        </td>
-      </tr>
-    `).join("");
+    facBody.innerHTML = facRows.length
+      ? facRows.map(buildRowHtml).join("")
+      : `<tr><td colspan="8" class="empty-message">No Faculty monthly records found.</td></tr>`;
+
+    staffBody.innerHTML = staffRows.length
+      ? staffRows.map(buildRowHtml).join("")
+      : `<tr><td colspan="8" class="empty-message">No Staff monthly records found.</td></tr>`;
   }
 
   function editMonthlyRecord(recordIndex) {
@@ -476,33 +523,14 @@
     const newStatus = prompt("Edit Status (Present / Late):", rec.status || "Present");
     if (newStatus === null) return;
 
-    const newAmIn = prompt("Edit AM Time In:", rec.amTimeIn || rec.timeIn || "--");
-    if (newAmIn === null) return;
-
-    const newAmOut = prompt("Edit AM Time Out:", rec.amTimeOut || "--");
-    if (newAmOut === null) return;
-
-    const newPmIn = prompt("Edit PM Time In:", rec.pmTimeIn || "--");
-    if (newPmIn === null) return;
-
-    const newPmOut = prompt("Edit PM Time Out:", rec.pmTimeOut || rec.timeOut || "--");
-    if (newPmOut === null) return;
-
     rec.status = cleanM(newStatus) || "Present";
-    rec.amTimeIn = cleanM(newAmIn) || "--";
-    rec.amTimeOut = cleanM(newAmOut) || "--";
-    rec.pmTimeIn = cleanM(newPmIn) || "--";
-    rec.pmTimeOut = cleanM(newPmOut) || "--";
-    rec.timeIn = rec.amTimeIn !== "--" ? rec.amTimeIn : rec.pmTimeIn;
-    rec.timeOut = rec.pmTimeOut !== "--" ? rec.pmTimeOut : rec.amTimeOut;
-
     records[recordIndex] = rec;
     DB.saveAttendance(records);
     renderMonthlyData();
   }
 
   function deleteMonthlyRecord(recordIndex) {
-    if (!window.DB || !confirm("Sigurado ka bang ide-delete ang record na ito?")) return;
+    if (!window.DB) return;
     const records = DB.getAttendance() || [];
     if (recordIndex < 0 || recordIndex >= records.length) return;
     records.splice(recordIndex, 1);
@@ -536,13 +564,20 @@
     records.forEach(r => {
       const dayNum = Number(cleanM(r.date).split("-")[2]);
       if (dayNum >= 1 && dayNum <= 31) {
-        dayMap.set(dayNum, {
-          amArr: r.amTimeIn && r.amTimeIn !== "--" ? r.amTimeIn : (r.timeIn && r.timeIn !== "--" ? r.timeIn : ""),
-          amDep: r.amTimeOut && r.amTimeOut !== "--" ? r.amTimeOut : "",
-          pmArr: r.pmTimeIn && r.pmTimeIn !== "--" ? r.pmTimeIn : "",
-          pmDep: r.pmTimeOut && r.pmTimeOut !== "--" ? r.pmTimeOut : (r.timeOut && r.timeOut !== "--" ? r.timeOut : ""),
-          hours: ""
-        });
+        const amArr = r.morningAmIn && r.morningAmIn !== "--"
+          ? r.morningAmIn
+          : (r.amTimeIn && r.amTimeIn !== "--" ? r.amTimeIn : (r.timeIn && r.timeIn !== "--" ? r.timeIn : ""));
+        const amDep = r.morningAmOut && r.morningAmOut !== "--"
+          ? r.morningAmOut
+          : (r.amTimeOut && r.amTimeOut !== "--" ? r.amTimeOut : "");
+        const pmArr = r.afternoonAmIn && r.afternoonAmIn !== "--"
+          ? r.afternoonAmIn
+          : (r.morningPmIn && r.morningPmIn !== "--" ? r.morningPmIn : "");
+        const pmDep = r.afternoonPmOut && r.afternoonPmOut !== "--"
+          ? r.afternoonPmOut
+          : (r.pmTimeOut && r.pmTimeOut !== "--" ? r.pmTimeOut : (r.timeOut && r.timeOut !== "--" ? r.timeOut : ""));
+
+        dayMap.set(dayNum, { amArr, amDep, pmArr, pmDep, hours: "" });
       }
     });
 
