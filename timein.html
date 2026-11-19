@@ -23,8 +23,14 @@
     #toggleKioskPass {
       position: absolute;
       right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
       cursor: pointer;
       color: #555;
+      font-size: 1rem;
+      background: transparent;
+      border: none;
+      padding: 4px;
     }
   </style>
 </head>
@@ -47,7 +53,7 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <i class="fa-solid fa-eye" id="toggleKioskPass" title="Show Password" aria-label="Show Password"></i>
+          <i class="fa-solid fa-eye" id="toggleKioskPass" title="Show Password" aria-label="Show Password" role="button" tabindex="0"></i>
         </div>
       </div>
 
@@ -70,7 +76,6 @@
         </button>
       </div>
 
-      <!-- Inline status text right below Time In / Out buttons (no OK alert popup) -->
       <div id="kioskStatusMsg" style="display:none;" aria-live="polite"></div>
     </form>
 
@@ -93,16 +98,25 @@
       kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
     }
 
+    function toggleKioskPasswordVisibility() {
+      if (!kioskPass || !toggleKioskPass) return;
+      const isHidden = kioskPass.type === "password";
+      kioskPass.type = isHidden ? "text" : "password";
+      toggleKioskPass.classList.toggle("fa-eye", !isHidden);
+      toggleKioskPass.classList.toggle("fa-eye-slash", isHidden);
+      toggleKioskPass.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
+      toggleKioskPass.setAttribute("aria-label", isHidden ? "Hide Password" : "Show Password");
+    }
+
     setDefaultSlot();
 
-    if (toggleKioskPass && kioskPass) {
-      toggleKioskPass.addEventListener("click", function () {
-        const isHidden = kioskPass.type === "password";
-        kioskPass.type = isHidden ? "text" : "password";
-        this.classList.toggle("fa-eye", !isHidden);
-        this.classList.toggle("fa-eye-slash", isHidden);
-        this.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
-        this.setAttribute("aria-label", isHidden ? "Hide Password" : "Show Password");
+    if (toggleKioskPass) {
+      toggleKioskPass.addEventListener("click", toggleKioskPasswordVisibility);
+      toggleKioskPass.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleKioskPasswordVisibility();
+        }
       });
     }
 
@@ -133,9 +147,7 @@
 
       if (result.ok) {
         document.getElementById("kioskForm").reset();
-        if (kioskPass) {
-          kioskPass.type = "password";
-        }
+        if (kioskPass) kioskPass.type = "password";
         if (toggleKioskPass) {
           toggleKioskPass.classList.remove("fa-eye-slash");
           toggleKioskPass.classList.add("fa-eye");
