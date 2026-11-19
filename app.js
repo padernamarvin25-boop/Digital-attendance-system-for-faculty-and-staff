@@ -58,7 +58,7 @@ function getAdminPassword() {
 }
 
 // ==========================================
-// AUTHENTICATION
+// AUTHENTICATION & LOG OUT
 // ==========================================
 
 function setAuthSession(active) {
@@ -80,9 +80,9 @@ function isLoggedIn() {
 
 function checkAuth() {
     const path = window.location.pathname.toLowerCase();
-    const isAuthPage = path.includes("index.html") || path.includes("login.html");
+    const isPublicPage = path.endsWith("/") || path.includes("index.html") || path.includes("login.html");
 
-    if (!isLoggedIn() && !isAuthPage) {
+    if (!isLoggedIn() && !isPublicPage) {
         window.location.href = "./login.html";
     }
 }
@@ -97,19 +97,11 @@ function loginAdmin(username, password) {
 
 function logout() {
     setAuthSession(false);
-    const loginPage = document.getElementById("loginPage");
-    const dashboard = document.getElementById("dashboard");
-
-    if (loginPage && dashboard) {
-        dashboard.classList.add("hidden");
-        loginPage.classList.remove("hidden");
-    } else {
-        window.location.href = "./login.html";
-    }
+    window.location.href = "./index.html";
 }
 
 // ==========================================
-// EMPLOYEE REGISTRATION & MANAGEMENT (DESC)
+// EMPLOYEE REGISTRATION & RECORD (DESC)
 // ==========================================
 
 function renderEmployeeTable() {
@@ -201,6 +193,8 @@ function editEmployee(index) {
 
 function deleteEmployee(index) {
     if (!window.DB) return;
+    if (!confirm("Sigurado ka bang ide-delete ang employee na ito?")) return;
+
     const employees = DB.getEmployees() || [];
     if (index < 0 || index >= employees.length) return;
 
@@ -277,10 +271,10 @@ function setupPasswordToggle() {
 }
 
 // ==========================================
-// AM / PM TIME IN & TIME OUT ENGINE
+// AM / PM TIME IN & TIME OUT
 // ==========================================
 
-function logAttendancePeriod(employeeId, actionType, explicitPeriod) {
+function logAttendancePeriod(employeeId, actionType) {
     if (!window.DB) return { ok: false, message: "Database not loaded." };
 
     const cleanId = cleanText(employeeId);
@@ -288,7 +282,7 @@ function logAttendancePeriod(employeeId, actionType, explicitPeriod) {
     const records = DB.getAttendance() || [];
     const today = getTodayISO();
     const nowTime = getCurrentTimeAMPM();
-    const period = (explicitPeriod || getCurrentPeriodAMPM()).toUpperCase();
+    const period = getCurrentPeriodAMPM();
 
     const emp = employees.find(e => cleanText(e.id).toLowerCase() === cleanId.toLowerCase());
     if (!emp) {
@@ -300,4 +294,115 @@ function logAttendancePeriod(employeeId, actionType, explicitPeriod) {
              cleanText(r.date) === today
     );
 
-    if (recIdx === -
+    if (recIdx === -1) {
+        records.push({
+            recordId: "ATT-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+            id: emp.id,
+            employeeId: emp.id,
+            name: emp.name,
+            employeeName: emp.name,
+            department: emp.department || "General",
+            position: emp.position || "Staff",
+            date: today,
+            amTimeIn: "--",
+            amTimeOut: "--",
+            pmTimeIn: "--",
+            pmTimeOut: "--",
+            timeIn: "--",
+            timeOut: "--",
+            status: "Present"
+        });
+        recIdx = records.length - 1;
+    }
+
+    const rec = records[recIdx];
+    rec.amTimeIn = rec.amTimeIn || "--";
+    rec.amTimeOut = rec.amTimeOut || "--";
+    rec.pmTimeIn = rec.pmTimeIn || "--";
+    rec.pmTimeOut = rec.pmTimeOut || "--";
+    rec.recordId = rec.recordId || ("ATT-" + Date.now() + "-" + Math.floor(Math.random() * 1000));
+
+    if (actionType === "TIME_IN") {
+        if (period === "AM") {
+            if (rec.amTimeIn !== "--") {
+                return { ok: false, message: "Naka-AM Time In ka na ngayong araw!" };
+            }
+            rec.amTimeIn = nowTime;
+            rec.timeIn = nowTime;
+            rec.status = computeStatusForPeriod("AM");
+        } else {
+            if (rec.pmTimeIn !== "--") {
+                return { ok: false, message: "Naka-PM Time In ka na ngayong araw!" };
+            }
+            rec.pmTimeIn = nowTime;
+            if (!rec.timeIn || rec.timeIn === "--") rec.timeIn = nowTime;
+            if (rec.status !== "Late") {
+                rec.status = computeStatusForPeriod("PM");
+            }
+        }
+    } else if (actionType === "TIME_OUT") {
+        if (period === "AM") {
+            if (rec.amTimeIn === "--") {
+                return { ok: false, message: "Kailangan muna ng AM Time In bago mag-AM Time Out!" };
+            }
+            if (rec.amTimeOut !== "--") {
+                return { ok: false, message: "Naka-AM Time Out ka na ngayong araw!" };
+            }
+            rec.amTimeOut = nowTime;
+            rec.timeOut = nowTime;
+        } else {
+            if (rec.pmTimeIn === "--") {
+                return { ok: false, message: "Kailangan muna ng PM Time In bago mag-PM Time Out!" };
+            }
+            if (rec.pmTimeOut !== "--") {
+                return { ok: false, message: "Naka-PM Time Out ka na ngayong araw!" };
+            }
+            rec.pmTimeOut = nowTime;
+            rec.timeOut = nowTime;
+        }
+    }
+
+    records[recIdx] = rec;
+    DB.saveAttendance(records);
+
+    if (typeof filterDailyData === "function") filterDailyData();
+    if (typeof renderMonthlyData === "function") renderMonthlyData();
+
+    return {
+        ok: true,
+        message: `SUCCESS! ${period} ${actionType.replace("_", " ")} recorded for ${emp.name} at ${nowTime}`
+    };
+}
+
+// ==========================================
+// GLOBAL INIT
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+    const currentDateEl = document.getElementById("currentDate");
+    if (currentDateEl && !currentDateEl.textContent.trim()) {
+        currentDateEl.textContent = new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    const regForm = document.getElementById("regForm");
+    if (regForm) {
+        regForm.addEventListener("submit", handleEmployeeFormSubmit);
+        setupPasswordToggle();
+        renderEmployeeTable();
+    }
+});
+
+window.checkAuth = checkAuth;
+window.isLoggedIn = isLoggedIn;
+window.loginAdmin = loginAdmin;
+window.logout = logout;
+window.editEmployee = editEmployee;
+window.deleteEmployee = deleteEmployee;
+window.resetForm = resetForm;
+window.logAttendancePeriod = logAttendancePeriod;
+window.getTodayISO = getTodayISO;
+window.getCurrentMonthISO = getCurrentMonthISO;
