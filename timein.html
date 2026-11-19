@@ -18,22 +18,20 @@
 
     .password-container input.form-control {
       width: 100%;
-      padding-right: 48px !important;
+      padding-right: 42px !important;
     }
 
-    .eye-toggle-btn {
+    .eye-icon-btn {
       position: absolute;
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: #1e293b;
-      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: #555;
       cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 700;
-      padding: 4px 8px;
+      font-size: 1rem;
+      padding: 4px;
       line-height: 1;
       z-index: 5;
       display: inline-flex;
@@ -41,8 +39,8 @@
       justify-content: center;
     }
 
-    .eye-toggle-btn:hover {
-      background: #e2e8f0;
+    .eye-icon-btn:hover {
+      color: #0d6efd;
     }
   </style>
 </head>
@@ -65,8 +63,8 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <button type="button" id="toggleKioskPass" class="eye-toggle-btn" title="Show Password" aria-label="Show Password" onclick="toggleKioskPassword()">
-            👁 Show
+          <button type="button" id="toggleKioskPass" class="eye-icon-btn" title="Show Password" aria-label="Show Password" onclick="toggleKioskPassword()">
+            <i class="fa-solid fa-eye"></i>
           </button>
         </div>
       </div>
@@ -117,7 +115,11 @@
         kioskPass.type = isVisible ? "text" : "password";
       }
       if (toggleKioskPass) {
-        toggleKioskPass.textContent = isVisible ? "🙈 Hide" : "👁 Show";
+        const icon = toggleKioskPass.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("fa-eye", !isVisible);
+          icon.classList.toggle("fa-eye-slash", isVisible);
+        }
         toggleKioskPass.setAttribute("title", isVisible ? "Hide Password" : "Show Password");
         toggleKioskPass.setAttribute("aria-label", isVisible ? "Hide Password" : "Show Password");
       }
