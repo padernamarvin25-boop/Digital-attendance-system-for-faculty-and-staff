@@ -200,8 +200,26 @@
 <script src="./database.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    if (typeof setupPasswordToggle === "function") setupPasswordToggle();
-    if (typeof renderEmployeeTable === "function") renderEmployeeTable();
+    const toggleBtn = document.getElementById("toggleRegPass");
+    const passInput = document.getElementById("empPass");
+
+    if (toggleBtn && passInput) {
+      toggleBtn.addEventListener("click", () => {
+        const isHidden = passInput.type === "password";
+        passInput.type = isHidden ? "text" : "password";
+        const icon = toggleBtn.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("fa-eye", !isHidden);
+          icon.classList.toggle("fa-eye-slash", isHidden);
+        }
+        toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+        toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
+      });
+    }
+
+    if (typeof renderEmployeeTable === "function") {
+      renderEmployeeTable();
+    }
   });
 </script>
 
