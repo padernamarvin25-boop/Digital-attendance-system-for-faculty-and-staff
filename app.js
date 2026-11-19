@@ -27,6 +27,14 @@ function cleanText(val) {
     return String(val ?? "").trim();
 }
 
+function normalizeId(val) {
+    return cleanText(val).toUpperCase();
+}
+
+function normalizeName(val) {
+    return cleanText(val).replace(/\s+/g, " ").toUpperCase();
+}
+
 function escapeStr(val) {
     return cleanText(val).replace(/[&<>"']/g, ch => ({
         "&": "&amp;",
@@ -142,7 +150,7 @@ function logout() {
 }
 
 // ==========================================
-// EMPLOYEE REGISTRATION & RECORD (DESC, NO ALERT)
+// EMPLOYEE REGISTRATION & RECORD (DESC, UNIQUE PK & NAME)
 // ==========================================
 
 function renderEmployeeTable() {
@@ -173,6 +181,7 @@ function renderEmployeeTable() {
         tableBody = document.getElementById("employeeTableBody");
     }
 
+    // Descending order (pinakabagong entry nasa pinakataas)
     const employees = (DB.getEmployees() || [])
         .map((emp, originalIndex) => ({ ...emp, _idx: originalIndex }))
         .sort((a, b) => b._idx - a._idx);
@@ -243,7 +252,7 @@ function deleteEmployee(index) {
 
     if (removed && typeof DB.getAttendance === "function" && typeof DB.saveAttendance === "function") {
         const attendance = DB.getAttendance() || [];
-        const updated = attendance.filter(r => cleanText(r.id || r.employeeId) !== cleanText(removed.id));
+        const updated = attendance.filter(r => normalizeId(r.id || r.employeeId) !== normalizeId(removed.id));
         DB.saveAttendance(updated);
     }
 
@@ -263,4 +272,251 @@ function resetForm() {
 
     setPasswordEyeState(passInput, toggleBtn, false);
 
-    if
+    if (formTitle) formTitle.textContent = "Register New Employee";
+    if (saveBtn) saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Employee`;
+}
+
+function handleEmployeeFormSubmit(event) {
+    event.preventDefault();
+    if (!window.DB) return;
+
+    const id = cleanText(document.getElementById("empId")?.value);
+    const name = cleanText(document.getElementById("empName")?.value).replace(/\s+/g, " ");
+    const password = cleanText(document.getElementById("empPass")?.value);
+    const position = cleanText(document.getElementById("empPos")?.value);
+    const department = cleanText(document.getElementById("empDept")?.value);
+
+    if (!id || !name || !password || !position || !department) {
+        showInlineNotice("regStatusMsg", "Please complete all fields.", false);
+        return;
+    }
+
+    const employees = DB.getEmployees() || [];
+    const editIndexRaw = sessionStorage.getItem(EDIT_INDEX_KEY);
+    const isEditing = editIndexRaw !== null && editIndexRaw !== "";
+    const editIndex = isEditing ? Number(editIndexRaw) : -1;
+
+    const normalizedNewId = normalizeId(id);
+    const normalizedNewName = normalizeName(name);
+
+    // 1. Check duplicate Employee ID (Primary Key)
+    const duplicateIdIndex = employees.findIndex(
+        (e, idx) => normalizeId(e.id) === normalizedNewId && idx !== editIndex
+    );
+
+    if (duplicateIdIndex !== -1) {
+        showInlineNotice(
+            "regStatusMsg",
+            `Employee ID "${id}" already exists! Primary Key must be unique.`,
+            false
+        );
+        return;
+    }
+
+    // 2. Check duplicate Full Name (hindi puwede ang parehong pangalan kahit ibang ID)
+    const duplicateNameIndex = employees.findIndex(
+        (e, idx) => normalizeName(e.name) === normalizedNewName && idx !== editIndex
+    );
+
+    if (duplicateNameIndex !== -1) {
+        const existingEmp = employees[duplicateNameIndex];
+        showInlineNotice(
+            "regStatusMsg",
+            `Employee "${name}" is already registered under ID "${existingEmp.id}"! Duplicate names are not allowed.`,
+            false
+        );
+        return;
+    }
+
+    const data = { id, name, password, position, department };
+
+    if (isEditing && editIndex >= 0 && editIndex < employees.length) {
+        const oldId = employees[editIndex]?.id;
+        employees[editIndex] = data;
+        sessionStorage.removeItem(EDIT_INDEX_KEY);
+
+        if (typeof DB.getAttendance === "function" && typeof DB.saveAttendance === "function") {
+            const attendance = DB.getAttendance() || [];
+            const updatedAttendance = attendance.map(rec => {
+                if (normalizeId(rec.id || rec.employeeId) === normalizeId(oldId)) {
+                    return {
+                        ...rec,
+                        id: data.id,
+                        employeeId: data.id,
+                        name: data.name,
+                        employeeName: data.name,
+                        department: data.department,
+                        position: data.position
+                    };
+                }
+                return rec;
+            });
+            DB.saveAttendance(updatedAttendance);
+        }
+
+        DB.saveEmployees(employees);
+        resetForm();
+        renderEmployeeTable();
+        showInlineNotice("regStatusMsg", "Successful update! Employee record updated.", true);
+        return;
+    }
+
+    // Bagong employee: ilagay sa dulo para lumabas sa pinakataas (Descending)
+    employees.push(data);
+    DB.saveEmployees(employees);
+    resetForm();
+    renderEmployeeTable();
+    showInlineNotice("regStatusMsg", "Successful registration! New employee saved.", true);
+}
+
+// ==========================================
+// MORNING (AM/PM) & AFTERNOON (AM/PM) ENGINE
+// ==========================================
+
+function recordMorningAfternoonAttendance(employeeId, actionType, slotKey) {
+    if (!window.DB) {
+        return { ok: false, message: "Database not loaded." };
+    }
+
+    const cleanId = cleanText(employeeId);
+    const employees = DB.getEmployees() || [];
+    const records = DB.getAttendance() || [];
+    const today = getTodayISO();
+    const nowTime = getCurrentTimeAMPM();
+
+    const slot = cleanText(slotKey).toUpperCase() || "MORNING_AM";
+
+    const emp = employees.find(e => normalizeId(e.id) === normalizeId(cleanId));
+    if (!emp) {
+        return { ok: false, message: "Invalid Employee ID or Password." };
+    }
+
+    let recIdx = records.findIndex(
+        r => normalizeId(r.id || r.employeeId) === normalizeId(cleanId) &&
+             cleanText(r.date) === today
+    );
+
+    if (recIdx === -1) {
+        records.push({
+            recordId: "ATT-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+            id: emp.id,
+            employeeId: emp.id,
+            name: emp.name,
+            employeeName: emp.name,
+            department: emp.department || "General",
+            position: emp.position || "Staff",
+            date: today,
+            morningAmIn: "--",
+            morningAmOut: "--",
+            morningPmIn: "--",
+            morningPmOut: "--",
+            afternoonAmIn: "--",
+            afternoonAmOut: "--",
+            afternoonPmIn: "--",
+            afternoonPmOut: "--",
+            amTimeIn: "--",
+            amTimeOut: "--",
+            pmTimeIn: "--",
+            pmTimeOut: "--",
+            status: "Present"
+        });
+        recIdx = records.length - 1;
+    }
+
+    const rec = records[recIdx];
+    const fieldMap = {
+        MORNING_AM: { inKey: "morningAmIn", outKey: "morningAmOut", label: "Morning (AM)" },
+        MORNING_PM: { inKey: "morningPmIn", outKey: "morningPmOut", label: "Morning (PM)" },
+        AFTERNOON_AM: { inKey: "afternoonAmIn", outKey: "afternoonAmOut", label: "Afternoon (AM)" },
+        AFTERNOON_PM: { inKey: "afternoonPmIn", outKey: "afternoonPmOut", label: "Afternoon (PM)" }
+    };
+
+    const cfg = fieldMap[slot] || fieldMap.MORNING_AM;
+    rec[cfg.inKey] = rec[cfg.inKey] || "--";
+    rec[cfg.outKey] = rec[cfg.outKey] || "--";
+
+    if (actionType === "TIME_IN") {
+        if (rec[cfg.inKey] !== "--") {
+            return { ok: false, message: `Already Timed In for ${cfg.label} today.` };
+        }
+        rec[cfg.inKey] = nowTime;
+        if (slot.startsWith("MORNING")) {
+            rec.amTimeIn = nowTime;
+        } else {
+            rec.pmTimeIn = nowTime;
+        }
+        records[recIdx] = rec;
+        DB.saveAttendance(records);
+        return {
+            ok: true,
+            message: `Successful Time In (${cfg.label}) for ${emp.name} at ${nowTime}`
+        };
+    }
+
+    if (actionType === "TIME_OUT") {
+        if (rec[cfg.inKey] === "--") {
+            return { ok: false, message: `Time In required first for ${cfg.label}.` };
+        }
+        if (rec[cfg.outKey] !== "--") {
+            return { ok: false, message: `Already Timed Out for ${cfg.label} today.` };
+        }
+        rec[cfg.outKey] = nowTime;
+        if (slot.startsWith("MORNING")) {
+            rec.amTimeOut = nowTime;
+        } else {
+            rec.pmTimeOut = nowTime;
+        }
+        records[recIdx] = rec;
+        DB.saveAttendance(records);
+        return {
+            ok: true,
+            message: `Successful Time Out (${cfg.label}) for ${emp.name} at ${nowTime}`
+        };
+    }
+
+    return { ok: false, message: "Invalid action." };
+}
+
+// ==========================================
+// GLOBAL INIT
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+    const currentDateEl = document.getElementById("currentDate");
+    if (currentDateEl && !currentDateEl.textContent.trim()) {
+        currentDateEl.textContent = new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    bindPasswordEye("toggleRegPass", "empPass");
+    bindPasswordEye("toggleKioskPass", "kioskPass");
+
+    const regForm = document.getElementById("regForm");
+    if (regForm) {
+        if (!document.getElementById("regStatusMsg")) {
+            const noticeDiv = document.createElement("div");
+            noticeDiv.id = "regStatusMsg";
+            noticeDiv.style.display = "none";
+            regForm.appendChild(noticeDiv);
+        }
+
+        regForm.addEventListener("submit", handleEmployeeFormSubmit);
+        renderEmployeeTable();
+    }
+});
+
+window.checkAuth = checkAuth;
+window.isLoggedIn = isLoggedIn;
+window.loginAdmin = loginAdmin;
+window.logout = logout;
+window.editEmployee = editEmployee;
+window.deleteEmployee = deleteEmployee;
+window.resetForm = resetForm;
+window.recordMorningAfternoonAttendance = recordMorningAfternoonAttendance;
+window.showInlineNotice = showInlineNotice;
+window.getTodayISO = getTodayISO;
+window.getCurrentMonthISO = getCurrentMonthISO;
+window.setPasswordEyeState = setPasswordEyeState;
