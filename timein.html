@@ -7,6 +7,26 @@
 
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./all.min.css">
+
+  <style>
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-container input {
+      width: 100%;
+      padding-right: 42px;
+    }
+
+    #toggleKioskPass {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      color: #555;
+    }
+  </style>
 </head>
 
 <body class="kiosk-body">
@@ -27,7 +47,7 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <i class="fa-solid fa-eye" id="toggleKioskPass"></i>
+          <i class="fa-solid fa-eye" id="toggleKioskPass" title="Show Password" aria-label="Show Password"></i>
         </div>
       </div>
 
@@ -67,16 +87,22 @@
     const kioskPass = document.getElementById("kioskPass");
     const kioskSlot = document.getElementById("kioskSlot");
 
-    if (kioskSlot) {
+    function setDefaultSlot() {
+      if (!kioskSlot) return;
       const hour = new Date().getHours();
       kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
     }
 
+    setDefaultSlot();
+
     if (toggleKioskPass && kioskPass) {
       toggleKioskPass.addEventListener("click", function () {
-        const isPass = kioskPass.type === "password";
-        kioskPass.type = isPass ? "text" : "password";
-        this.classList.toggle("fa-eye-slash", isPass);
+        const isHidden = kioskPass.type === "password";
+        kioskPass.type = isHidden ? "text" : "password";
+        this.classList.toggle("fa-eye", !isHidden);
+        this.classList.toggle("fa-eye-slash", isHidden);
+        this.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
+        this.setAttribute("aria-label", isHidden ? "Hide Password" : "Show Password");
       });
     }
 
@@ -87,6 +113,11 @@
 
       if (!id || !pass) {
         showInlineNotice("kioskStatusMsg", "Please enter Employee ID and Password.", false);
+        return;
+      }
+
+      if (!window.DB || typeof DB.getEmployees !== "function") {
+        showInlineNotice("kioskStatusMsg", "Database not loaded.", false);
         return;
       }
 
@@ -102,10 +133,16 @@
 
       if (result.ok) {
         document.getElementById("kioskForm").reset();
-        if (kioskSlot) {
-          const hour = new Date().getHours();
-          kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
+        if (kioskPass) {
+          kioskPass.type = "password";
         }
+        if (toggleKioskPass) {
+          toggleKioskPass.classList.remove("fa-eye-slash");
+          toggleKioskPass.classList.add("fa-eye");
+          toggleKioskPass.setAttribute("title", "Show Password");
+          toggleKioskPass.setAttribute("aria-label", "Show Password");
+        }
+        setDefaultSlot();
       }
     }
 
