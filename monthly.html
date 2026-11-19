@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
+<!-- saved from url=(0038)http://localhost/INUGTEST/monthly.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monthly Record - DAS</title>
 
-  <link rel="stylesheet" href="./style.css">
-  <link rel="stylesheet" href="./all.min.css">
+  <link rel="stylesheet" href="./o_files/style.css">
+  <link rel="stylesheet" href="./o_files/all.min.css">
 
   <style>
     .group-section-card {
@@ -352,7 +352,7 @@
 
 <body>
 
-<script src="./app.js"></script>
+<script src="./o_files/app.js.download"></script>
 <script>
   if (typeof checkAuth === "function") checkAuth();
 </script>
@@ -368,11 +368,11 @@
     </div>
 
     <ul class="sidebar-menu">
-      <li><a href="./dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
-      <li><a href="./employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
-      <li><a href="./attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
-      <li class="active"><a href="./monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
-      <li><a href="#" onclick="logout(); return false;"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+      <li><a href="http://localhost/INUGTEST/dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="http://localhost/INUGTEST/employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+      <li><a href="http://localhost/INUGTEST/attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+      <li class="active"><a href="http://localhost/INUGTEST/monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+      <li><a href="http://localhost/INUGTEST/monthly.html#" onclick="logout(); return false;"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
     </ul>
 
     <div class="sidebar-footer">
@@ -389,7 +389,7 @@
     <div class="topbar">
       <div><i class="fa-solid fa-bars"></i></div>
       <div class="topbar-info">
-        <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+        <span><i class="fa-regular fa-calendar"></i> <span id="currentDate">November 19, 2026</span></span>
       </div>
     </div>
 
@@ -400,9 +400,6 @@
             <i class="fa-solid fa-calendar-days" style="color:var(--primary-blue);"></i>
             Monthly Record
           </h1>
-          <p class="page-subheading" style="margin-bottom:0;">
-            Hiwalay ang lagayan ng Faculty at Staff (latest 5 preview, kumpleto ang data sa storage at department folders: BSHM, BSED, BEED, BSCRIM, BSIT, BSBA).
-          </p>
         </div>
 
         <div class="month-filter" style="margin:0;flex-wrap:wrap;gap:8px;">
@@ -436,12 +433,10 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
           <div>
             <h3 class="monthly-table-title" style="margin:0;">Faculty Monthly Records (Latest 5)</h3>
-            <small id="facultySummaryText" style="color:#64748b;"></small>
+            <small id="facultySummaryText" style="color:#64748b;">Folder: ALL • Showing 1 of 1 matching records (1 total Faculty in filter; all 1 stored records preserved)</small>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn btn-outline" id="toggleFacultyLimitBtn" onclick="toggleGroupLimit('Faculty')">
-              Show All Faculty
-            </button>
+            <button type="button" class="btn btn-outline" id="toggleFacultyLimitBtn" onclick="toggleGroupLimit('Faculty')">Show All Faculty (1)</button>
             <button type="button" class="receipt-btn" onclick="openBatchReceiptModal('Faculty')">
               <i class="fa-solid fa-receipt"></i> Faculty Receipts
             </button>
@@ -449,7 +444,33 @@
         </div>
 
         <!-- FACULTY DEPARTMENT FOLDERS -->
-        <div id="facultyDeptFolders" class="dept-folder-bar"></div>
+        <div id="facultyDeptFolders" class="dept-folder-bar"><button type="button" class="dept-folder-btn active" onclick="selectDepartmentFolder('Faculty', 'ALL')">
+        <i class="fa-solid fa-layer-group"></i> ALL DEPTS <span class="dept-count-badge">1</span>
+      </button>
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BSHM')">
+            <i class="fa-solid fa-folder"></i> BSHM <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BSED')">
+            <i class="fa-solid fa-folder"></i> BSED <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BEED')">
+            <i class="fa-solid fa-folder"></i> BEED <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BSCRIM')">
+            <i class="fa-solid fa-folder"></i> BSCRIM <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BSIT')">
+            <i class="fa-solid fa-folder"></i> BSIT <span class="dept-count-badge">1</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn " onclick="selectDepartmentFolder('Faculty', 'BSBA')">
+            <i class="fa-solid fa-folder"></i> BSBA <span class="dept-count-badge">0</span>
+          </button>
+        </div>
 
         <div class="table-wrapper" style="margin-top:8px;">
           <table>
@@ -465,7 +486,28 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="facultyMonthlyTable"></tbody>
+            <tbody id="facultyMonthlyTable">
+      <tr>
+        <td>EMP001</td>
+        <td><strong>Juan Dela Cruz</strong></td>
+        <td><span class="department-tag">BSIT</span></td>
+        <td>2026-11-19</td>
+        <td style="color:#198754;font-weight:600;">07:55 AM / --</td>
+        <td style="color:#0d6efd;font-weight:600;">-- / 01:00 PM</td>
+        <td><span class="days-tag">Present</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="receipt-btn" onclick="openDTRReceipt('EMP001')">
+            <i class="fa-solid fa-receipt"></i> Generate Receipt
+          </button>
+          <button type="button" class="edit-attendance-btn" onclick="editMonthlyRecord(0)">
+            <i class="fa-solid fa-pen"></i> Edit
+          </button>
+          <button type="button" class="delete-attendance-btn" onclick="deleteMonthlyRecord(0)">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
           </table>
         </div>
       </div>
@@ -475,12 +517,10 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
           <div>
             <h3 class="monthly-table-title" style="color:#198754;margin:0;">Staff Monthly Records (Latest 5)</h3>
-            <small id="staffSummaryText" style="color:#64748b;"></small>
+            <small id="staffSummaryText" style="color:#64748b;">Folder: ALL • Showing 0 of 0 matching records (0 total Staff in filter; all 1 stored records preserved)</small>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn btn-outline" id="toggleStaffLimitBtn" onclick="toggleGroupLimit('Staff')">
-              Show All Staff
-            </button>
+            <button type="button" class="btn btn-outline" id="toggleStaffLimitBtn" onclick="toggleGroupLimit('Staff')">Show All Staff (0)</button>
             <button type="button" class="receipt-btn" onclick="openBatchReceiptModal('Staff')">
               <i class="fa-solid fa-receipt"></i> Staff Receipts
             </button>
@@ -488,7 +528,33 @@
         </div>
 
         <!-- STAFF DEPARTMENT FOLDERS -->
-        <div id="staffDeptFolders" class="dept-folder-bar"></div>
+        <div id="staffDeptFolders" class="dept-folder-bar"><button type="button" class="dept-folder-btn staff-folder active" onclick="selectDepartmentFolder('Staff', 'ALL')">
+        <i class="fa-solid fa-layer-group"></i> ALL DEPTS <span class="dept-count-badge">0</span>
+      </button>
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BSHM')">
+            <i class="fa-solid fa-folder"></i> BSHM <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BSED')">
+            <i class="fa-solid fa-folder"></i> BSED <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BEED')">
+            <i class="fa-solid fa-folder"></i> BEED <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BSCRIM')">
+            <i class="fa-solid fa-folder"></i> BSCRIM <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BSIT')">
+            <i class="fa-solid fa-folder"></i> BSIT <span class="dept-count-badge">0</span>
+          </button>
+        
+          <button type="button" class="dept-folder-btn staff-folder " onclick="selectDepartmentFolder('Staff', 'BSBA')">
+            <i class="fa-solid fa-folder"></i> BSBA <span class="dept-count-badge">0</span>
+          </button>
+        </div>
 
         <div class="table-wrapper" style="margin-top:8px;">
           <table>
@@ -504,7 +570,7 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="staffMonthlyTable"></tbody>
+            <tbody id="staffMonthlyTable"><tr><td colspan="8" class="empty-message">No Staff monthly records found in ALL.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -550,7 +616,7 @@
   </div>
 </div>
 
-<script src="./database.js"></script>
+<script src="./o_files/database.js.download"></script>
 
 <script>
   const DEPARTMENTS = ["ALL", "BSHM", "BSED", "BEED", "BSCRIM", "BSIT", "BSBA"];
@@ -1254,5 +1320,7 @@
   });
 </script>
 
-</body>
-</html>
+</body></html>
+```[cite: 4]
+
+May iba pa bang bahagi sa code na gusto mong baguhin o ipatanggal?
