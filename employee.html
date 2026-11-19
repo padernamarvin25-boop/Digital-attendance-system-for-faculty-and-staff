@@ -26,21 +26,28 @@
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
       border: none;
       background: transparent;
-      color: #555;
+      color: #475569;
       cursor: pointer;
-      font-size: 1rem;
-      padding: 4px;
-      line-height: 1;
-      z-index: 5;
+      padding: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      z-index: 10;
     }
 
     #toggleRegPass:hover {
       color: #0d6efd;
+    }
+
+    #toggleRegPass svg {
+      width: 19px;
+      height: 19px;
+      display: block;
+      pointer-events: none;
     }
 
     .employee-table {
@@ -157,7 +164,10 @@
               <div class="password-container">
                 <input type="password" id="empPass" class="form-control" required placeholder="Enter Password">
                 <button type="button" id="toggleRegPass" aria-label="Show password" title="Show Password" onclick="toggleRegPassword()">
-                  <i class="fa-solid fa-eye"></i>
+                  <svg id="regEyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -207,17 +217,27 @@
 
 <script src="./database.js"></script>
 <script>
+  const REG_EYE_OPEN = `
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  `;
+
+  const REG_EYE_CLOSED = `
+    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-5.94"></path>
+    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-3.17 4.62"></path>
+    <line x1="1" y1="1" x2="23" y2="23"></line>
+  `;
+
   function toggleRegPassword() {
     const passInput = document.getElementById("empPass");
     const toggleBtn = document.getElementById("toggleRegPass");
+    const eyeSvg = document.getElementById("regEyeSvg");
     if (!passInput || !toggleBtn) return;
 
     const isHidden = passInput.type === "password";
     passInput.type = isHidden ? "text" : "password";
-    const icon = toggleBtn.querySelector("i");
-    if (icon) {
-      icon.classList.toggle("fa-eye", !isHidden);
-      icon.classList.toggle("fa-eye-slash", isHidden);
+    if (eyeSvg) {
+      eyeSvg.innerHTML = isHidden ? REG_EYE_CLOSED : REG_EYE_OPEN;
     }
     toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
     toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
