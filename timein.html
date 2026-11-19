@@ -17,20 +17,21 @@
 
     .password-container input {
       width: 100%;
-      padding-right: 42px;
+      padding-right: 44px !important;
     }
 
     #toggleKioskPass {
       position: absolute;
-      right: 12px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      cursor: pointer;
-      color: #555;
-      font-size: 1rem;
-      background: transparent;
       border: none;
-      padding: 4px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #555;
+      padding: 4px 6px;
+      z-index: 2;
     }
   </style>
 </head>
@@ -53,7 +54,9 @@
         <label for="kioskPass">Password</label>
         <div class="password-container">
           <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
-          <i class="fa-solid fa-eye" id="toggleKioskPass" title="Show Password" aria-label="Show Password" role="button" tabindex="0"></i>
+          <button type="button" id="toggleKioskPass" aria-label="Show password" title="Show Password">
+            <i class="fa-solid fa-eye"></i>
+          </button>
         </div>
       </div>
 
@@ -98,25 +101,32 @@
       kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
     }
 
-    function toggleKioskPasswordVisibility() {
-      if (!kioskPass || !toggleKioskPass) return;
-      const isHidden = kioskPass.type === "password";
-      kioskPass.type = isHidden ? "text" : "password";
-      toggleKioskPass.classList.toggle("fa-eye", !isHidden);
-      toggleKioskPass.classList.toggle("fa-eye-slash", isHidden);
-      toggleKioskPass.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
-      toggleKioskPass.setAttribute("aria-label", isHidden ? "Hide Password" : "Show Password");
+    function resetKioskPasswordEye() {
+      if (kioskPass) kioskPass.type = "password";
+      if (toggleKioskPass) {
+        const icon = toggleKioskPass.querySelector("i");
+        if (icon) {
+          icon.classList.remove("fa-eye-slash");
+          icon.classList.add("fa-eye");
+        }
+        toggleKioskPass.setAttribute("aria-label", "Show password");
+        toggleKioskPass.setAttribute("title", "Show Password");
+      }
     }
 
     setDefaultSlot();
 
-    if (toggleKioskPass) {
-      toggleKioskPass.addEventListener("click", toggleKioskPasswordVisibility);
-      toggleKioskPass.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          toggleKioskPasswordVisibility();
+    if (toggleKioskPass && kioskPass) {
+      toggleKioskPass.addEventListener("click", function () {
+        const isHidden = kioskPass.type === "password";
+        kioskPass.type = isHidden ? "text" : "password";
+        const icon = this.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("fa-eye", !isHidden);
+          icon.classList.toggle("fa-eye-slash", isHidden);
         }
+        this.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+        this.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
       });
     }
 
@@ -147,13 +157,7 @@
 
       if (result.ok) {
         document.getElementById("kioskForm").reset();
-        if (kioskPass) kioskPass.type = "password";
-        if (toggleKioskPass) {
-          toggleKioskPass.classList.remove("fa-eye-slash");
-          toggleKioskPass.classList.add("fa-eye");
-          toggleKioskPass.setAttribute("title", "Show Password");
-          toggleKioskPass.setAttribute("aria-label", "Show Password");
-        }
+        resetKioskPasswordEye();
         setDefaultSlot();
       }
     }
