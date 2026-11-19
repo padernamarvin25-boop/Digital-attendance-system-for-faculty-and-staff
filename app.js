@@ -7,6 +7,7 @@ const ADMIN_PASSWORD_KEY = "das_admin_password";
 const DEFAULT_ADMIN_USER = "admin";
 const DEFAULT_ADMIN_PASS = "admin123";
 const EDIT_INDEX_KEY = "das_editing_employee_index";
+const EMPLOYEE_DISPLAY_LIMIT = 5; // Limit ng latest records na ipinapakita sa bawat table (hindi binubura ang DB)
 
 const SVG_EYE_OPEN = `
   <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;display:block;">
@@ -150,7 +151,7 @@ function logout() {
 }
 
 // ==========================================
-// EMPLOYEE REGISTRATION & RECORD (SEPARATE FACULTY & STAFF, DESC, UNIQUE PK & NAME)
+// EMPLOYEE REGISTRATION & RECORD (SEPARATE FACULTY & STAFF, DESC, LIMITED LATEST VIEW)
 // ==========================================
 
 function getEmployeeGroup(emp) {
@@ -186,15 +187,23 @@ function renderEmployeeTable() {
 
     if (!facultyBody || !staffBody || !window.DB || typeof DB.getEmployees !== "function") return;
 
-    const sortedEmployees = (DB.getEmployees() || [])
+    // Lahat ng records ay nananatili sa database; ang naka-display lang ay nililimitahan sa pinakabago (descending)
+    const allEmployees = DB.getEmployees() || [];
+
+    const sortedEmployees = allEmployees
         .map((emp, originalIndex) => ({ ...emp, _idx: originalIndex }))
         .sort((a, b) => b._idx - a._idx);
 
-    const facultyRows = sortedEmployees.filter(emp => getEmployeeGroup(emp) === "Faculty");
-    const staffRows = sortedEmployees.filter(emp => getEmployeeGroup(emp) === "Staff");
+    const latestFaculty = sortedEmployees
+        .filter(emp => getEmployeeGroup(emp) === "Faculty")
+        .slice(0, EMPLOYEE_DISPLAY_LIMIT);
 
-    facultyBody.innerHTML = facultyRows.length
-        ? facultyRows.map(buildEmployeeRowHtml).join("")
+    const latestStaff = sortedEmployees
+        .filter(emp => getEmployeeGroup(emp) === "Staff")
+        .slice(0, EMPLOYEE_DISPLAY_LIMIT);
+
+    facultyBody.innerHTML = latestFaculty.length
+        ? latestFaculty.map(buildEmployeeRowHtml).join("")
         : `
             <tr>
                 <td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">
@@ -203,8 +212,8 @@ function renderEmployeeTable() {
             </tr>
         `;
 
-    staffBody.innerHTML = staffRows.length
-        ? staffRows.map(buildEmployeeRowHtml).join("")
+    staffBody.innerHTML = latestStaff.length
+        ? latestStaff.map(buildEmployeeRowHtml).join("")
         : `
             <tr>
                 <td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">
