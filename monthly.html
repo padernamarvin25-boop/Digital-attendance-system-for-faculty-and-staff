@@ -367,6 +367,10 @@
           <input type="date" id="calendarDateFilter" class="form-control" onchange="renderMonthlyData()">
           <button type="button" class="btn btn-outline" onclick="clearCalendarDate()">All Days</button>
 
+          <button type="button" class="btn btn-outline" onclick="restoreDefaultMonthlyRecords()">
+            <i class="fa-solid fa-rotate-left"></i> Restore Records
+          </button>
+
           <button type="button" class="bulk-receipt-btn" onclick="openBatchReceiptModal('ALL')">
             <i class="fa-solid fa-file-invoice"></i> Generate Receipt (All)
           </button>
@@ -489,403 +493,59 @@
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   }
 
-  function getEmpId(obj) {
-    return cleanM(
-      obj?.id ||
-      obj?.employeeId ||
-      obj?.employee_id ||
-      obj?.empId ||
-      obj?.emp_id ||
-      obj?.userId ||
-      ""
-    );
-  }
+  function buildSeedDataForMonth(ym) {
+    const baseMonth = /^\d{4}-\d{2}$/.test(ym) ? ym : "2026-11";
+    const employees = [
+      { id: "FAC-001", name: "Ryza Mendoza", department: "SOICT", position: "Faculty" },
+      { id: "FAC-002", name: "Irene Santos", department: "SOICT", position: "Faculty" },
+      { id: "STF-001", name: "Juan Dela Cruz", department: "ADMIN", position: "Staff" },
+      { id: "STF-002", name: "Maria Clara Reyes", department: "REGISTRAR", position: "Staff" }
+    ];
 
-  function getRawName(obj) {
-    if (!obj) return "";
-    if (typeof obj === "string") return cleanM(obj);
-    const direct = cleanM(
-      obj?.name ||
-      obj?.employeeName ||
-      obj?.employee_name ||
-      obj?.fullName ||
-      obj?.full_name ||
-      ""
-    );
-    if (direct) return direct;
-
-    const first = cleanM(obj?.firstName || obj?.first_name || "");
-    const last = cleanM(obj?.lastName || obj?.last_name || obj?.familyName || obj?.family_name || "");
-    return [first, last].filter(Boolean).join(" ").trim();
-  }
-
-  function findMatchingEmployee(employees, recOrId) {
-    const targetId = getEmpId(recOrId).toLowerCase() || cleanM(recOrId).toLowerCase();
-    const targetName = getRawName(recOrId).toLowerCase();
-    if ((!targetId && !targetName) || !Array.isArray(employees)) return null;
-
-    return employees.find(e => {
-      const eId = getEmpId(e).toLowerCase();
-      const eName = getRawName(e).toLowerCase();
-      return (targetId && eId && eId === targetId) ||
-             (targetName && eName && eName === targetName) ||
-             (targetId && eName && eName === targetId);
-    }) || null;
-  }
-
-  function resolveEmployeeName(rec, emp, fallbackId = "") {
-    const fromRec = getRawName(rec);
-    if (fromRec) return fromRec;
-
-    const fromEmp = getRawName(emp);
-    if (fromEmp) return fromEmp;
-
-    const idVal = getEmpId(rec) || getEmpId(emp) || cleanM(fallbackId);
-    return idVal || "—";
-  }
-
-  function resolveEmployeeDept(rec, emp) {
-    return cleanM(rec?.department || rec?.dept || emp?.department || emp?.dept || "GENERAL").toUpperCase();
-  }
-
-  function getGroupM(emp, rec) {
-    const pos = cleanM(
-      rec?.position ||
-      rec?.role ||
-      rec?.group ||
-      rec?.type ||
-      emp?.position ||
-      emp?.role ||
-      emp?.group ||
-      emp?.type ||
-      "Staff"
-    ).toLowerCase();
-    return (pos.includes("faculty") || pos.includes("instructor") || pos.includes("teacher") || pos.includes("prof"))
-      ? "Faculty"
-      : "Staff";
-  }
-
-  function splitName(fullName) {
-    const parts = cleanM(fullName).split(/\s+/).filter(Boolean);
-    if (!parts.length) return { firstName: "—", familyName: "—" };
-    if (parts.length === 1) return { firstName: parts[0], familyName: "—" };
-    const familyName = parts.pop();
-    return { firstName: parts.join(" "), familyName };
-  }
-
-  function formatMonthLabel(ym) {
-    if (!ym) return "All Months";
-    const [y, m] = String(ym || "").split("-");
-    if (!y || !m) return ym || "";
-    const d = new Date(Number(y), Number(m) - 1, 1);
-    return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  }
-
-  function showAllMonths() {
-    const mf = document.getElementById("monthFilter");
-    if (mf) mf.value = "";
-    renderMonthlyData();
-  }
-
-  function clearCalendarDate() {
-    const cal = document.getElementById("calendarDateFilter");
-    if (cal) cal.value = "";
-    renderMonthlyData();
-  }
-
-  function buildRowHtml(r) {
-    const morningText = `${r.morningAmIn !== "--" ? r.morningAmIn : (r.amTimeIn || "--")} / ${r.morningPmIn !== "--" ? r.morningPmIn : "--"}`;
-    const afternoonText = `${r.afternoonAmIn !== "--" ? r.afternoonAmIn : "--"} / ${r.afternoonPmIn !== "--" ? r.afternoonPmIn : (r.pmTimeIn || "--")}`;
-
-    return `
-      <tr>
-        <td>${escM(r.id)}</td>
-        <td><strong>${escM(r.name)}</strong></td>
-        <td><span class="department-tag">${escM(r.department)}</span></td>
-        <td>${escM(r.date)}</td>
-        <td style="color:#198754;font-weight:600;">${escM(morningText)}</td>
-        <td style="color:#0d6efd;font-weight:600;">${escM(afternoonText)}</td>
-        <td><span class="days-tag">${escM(r.status)}</span></td>
-        <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button type="button" class="receipt-btn" onclick="openDTRReceipt('${escM(r.id)}')">
-            <i class="fa-solid fa-receipt"></i> Generate Receipt
-          </button>
-          <button type="button" class="edit-attendance-btn" onclick="editMonthlyRecord(${r._recordIndex})">
-            <i class="fa-solid fa-pen"></i> Edit
-          </button>
-          <button type="button" class="delete-attendance-btn" onclick="deleteMonthlyRecord(${r._recordIndex})">
-            <i class="fa-solid fa-trash"></i> Delete
-          </button>
-        </td>
-      </tr>
-    `;
-  }
-
-  function renderMonthlyData() {
-    const facBody = document.getElementById("facultyMonthlyTable");
-    const staffBody = document.getElementById("staffMonthlyTable");
-    if (!facBody || !staffBody || !window.DB) return;
-
-    const monthVal = document.getElementById("monthFilter")?.value ?? safeCurrentMonth();
-    const calDateVal = document.getElementById("calendarDateFilter")?.value || "";
-    const keyword = cleanM(document.getElementById("monthlySearch")?.value).toLowerCase();
-
-    const records = DB.getAttendance() || [];
-    const employees = DB.getEmployees() || [];
-
-    const filtered = records
-      .map((rec, idx) => {
-        const recId = getEmpId(rec);
-        const emp = findMatchingEmployee(employees, rec);
-        const finalId = recId || getEmpId(emp) || resolveEmployeeName(rec, emp, "") || "—";
-        return {
-          ...rec,
-          _recordIndex: idx,
-          id: finalId,
-          name: resolveEmployeeName(rec, emp, finalId),
-          department: resolveEmployeeDept(rec, emp),
-          group: getGroupM(emp, rec),
-          date: cleanM(rec.date),
-          morningAmIn: rec.morningAmIn || "--",
-          morningPmIn: rec.morningPmIn || "--",
-          afternoonAmIn: rec.afternoonAmIn || "--",
-          afternoonPmIn: rec.afternoonPmIn || "--",
-          amTimeIn: rec.amTimeIn || rec.timeIn || "--",
-          pmTimeIn: rec.pmTimeIn || "--",
-          status: rec.status || "Present"
-        };
-      })
-      .sort((a, b) => b._recordIndex - a._recordIndex)
-      .filter(r => {
-        const matchesMonth = !monthVal || r.date.startsWith(monthVal);
-        const matchesDate = !calDateVal || r.date === calDateVal;
-        const matchesSearch = !keyword ||
-          cleanM(r.id).toLowerCase().includes(keyword) ||
-          cleanM(r.name).toLowerCase().includes(keyword) ||
-          cleanM(r.department).toLowerCase().includes(keyword);
-        return matchesMonth && matchesDate && matchesSearch;
-      });
-
-    const facRows = filtered.filter(r => r.group === "Faculty");
-    const staffRows = filtered.filter(r => r.group === "Staff");
-
-    facBody.innerHTML = facRows.length
-      ? facRows.map(buildRowHtml).join("")
-      : `<tr><td colspan="8" class="empty-message">No Faculty monthly records found.</td></tr>`;
-
-    staffBody.innerHTML = staffRows.length
-      ? staffRows.map(buildRowHtml).join("")
-      : `<tr><td colspan="8" class="empty-message">No Staff monthly records found.</td></tr>`;
-  }
-
-  function editMonthlyRecord(recordIndex) {
-    if (!window.DB) return;
-    const records = DB.getAttendance() || [];
-    const rec = records[recordIndex];
-    if (!rec) return;
-
-    const newStatus = prompt("Edit Status (Present / Late):", rec.status || "Present");
-    if (newStatus === null) return;
-
-    rec.status = cleanM(newStatus) || "Present";
-    records[recordIndex] = rec;
-    DB.saveAttendance(records);
-    renderMonthlyData();
-  }
-
-  function deleteMonthlyRecord(recordIndex) {
-    if (!window.DB) return;
-    const records = DB.getAttendance() || [];
-    if (recordIndex < 0 || recordIndex >= records.length) return;
-    records.splice(recordIndex, 1);
-    DB.saveAttendance(records);
-    renderMonthlyData();
-  }
-
-  function buildSingleEmployeeReceiptHtml(emp, monthRecords, monthVal) {
-    const { firstName, familyName } = splitName(emp.name);
-    const monthLabel = formatMonthLabel(monthVal);
-
-    const dayMap = new Map();
-    monthRecords.forEach(r => {
-      const dayNum = Number(cleanM(r.date).split("-")[2]);
-      if (dayNum >= 1 && dayNum <= 31) {
-        const amArr = r.morningAmIn && r.morningAmIn !== "--"
-          ? r.morningAmIn
-          : (r.amTimeIn && r.amTimeIn !== "--" ? r.amTimeIn : (r.timeIn && r.timeIn !== "--" ? r.timeIn : ""));
-        const amDep = r.morningAmOut && r.morningAmOut !== "--"
-          ? r.morningAmOut
-          : (r.amTimeOut && r.amTimeOut !== "--" ? r.amTimeOut : "");
-        const pmArr = r.afternoonAmIn && r.afternoonAmIn !== "--"
-          ? r.afternoonAmIn
-          : (r.morningPmIn && r.morningPmIn !== "--" ? r.morningPmIn : "");
-        const pmDep = r.afternoonPmOut && r.afternoonPmOut !== "--"
-          ? r.afternoonPmOut
-          : (r.pmTimeOut && r.pmTimeOut !== "--" ? r.pmTimeOut : (r.timeOut && r.timeOut !== "--" ? r.timeOut : ""));
-
-        dayMap.set(dayNum, { amArr, amDep, pmArr, pmDep, hours: "" });
-      }
-    });
-
-    let rowsHtml = "";
-    for (let day = 1; day <= 31; day++) {
-      const info = dayMap.get(day) || { amArr: "", amDep: "", pmArr: "", pmDep: "", hours: "" };
-      rowsHtml += `
-        <tr>
-          <td><strong>${day}</strong></td>
-          <td>${escM(info.amArr)}</td>
-          <td>${escM(info.amDep)}</td>
-          <td>${escM(info.pmArr)}</td>
-          <td>${escM(info.pmDep)}</td>
-          <td>${escM(info.hours)}</td>
-        </tr>
-      `;
-    }
-
-    const copyHtml = `
-      <div class="dtr-copy">
-        <div class="dtr-header-title">
-          DIGITAL ATTENDANCE SYSTEM<br>
-          DAILY TIME RECORD
-        </div>
-
-        <div class="dtr-name-row">
-          <div>
-            <div class="dtr-name-val">${escM(firstName)}</div>
-            <div class="dtr-name-lbl">First Name</div>
-          </div>
-          <div>
-            <div class="dtr-name-val">${escM(familyName)}</div>
-            <div class="dtr-name-lbl">Family Name</div>
-          </div>
-        </div>
-
-        <div class="dtr-meta-line">
-          <span>For the month of:</span>
-          <span class="dtr-meta-val">${escM(monthLabel)}</span>
-        </div>
-        <div class="dtr-meta-line">
-          <span>Official hours for arrival and departure:</span>
-          <span class="dtr-meta-val">8:00 AM - 5:00 PM</span>
-        </div>
-        <div class="dtr-meta-line">
-          <span>Regular Days:</span>
-          <span class="dtr-meta-val">${escM(emp.department)} (${escM(emp.position)})</span>
-        </div>
-        <div class="dtr-meta-line">
-          <span>Saturdays and Sundays:</span>
-          <span class="dtr-meta-val">As Required</span>
-        </div>
-
-        <table class="dtr-table">
-          <thead>
-            <tr>
-              <th rowspan="2">Day</th>
-              <th colspan="2">AM</th>
-              <th colspan="2">PM</th>
-              <th rowspan="2">Hours</th>
-            </tr>
-            <tr>
-              <th>Arrival</th>
-              <th>Departure</th>
-              <th>Arrival</th>
-              <th>Departure</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-
-        <div class="dtr-cert">
-          I certify on my honor that the above is true and correct report of the hours of work performed record of which was made daily at the arrival and departure from office.
-        </div>
-
-        <div class="dtr-verified">
-          Verified as to prescribed office hours
-        </div>
-
-        <div class="dtr-sig-block">
-          <div class="dtr-sig-name">JANICE JENNIFER P. PALMARES, DPA</div>
-          <div class="dtr-sig-role">College Administrator / College President</div>
-        </div>
-      </div>
-    `;
-
-    return `<div class="dtr-employee-page"><div class="dtr-twin-sheet">${copyHtml}${copyHtml}</div></div>`;
-  }
-
-  function getEmployeeKey(rec, emp) {
-    const idVal = getEmpId(rec) || getEmpId(emp);
-    if (idVal) return idVal.toUpperCase();
-    const nameVal = resolveEmployeeName(rec, emp, "");
-    return nameVal.toUpperCase();
-  }
-
-  function collectMonthEmployeeEntries(scope, monthVal) {
-    const employees = DB.getEmployees() || [];
-    const monthRecords = (DB.getAttendance() || []).filter(r => !monthVal || cleanM(r.date).startsWith(monthVal));
-    const byKeyMap = new Map();
-
-    monthRecords.forEach(r => {
-      const matchedEmp = findMatchingEmployee(employees, r);
-      const grp = getGroupM(matchedEmp, r);
-      if (scope !== "ALL" && grp !== scope) return;
-
-      const key = getEmployeeKey(r, matchedEmp);
-      if (!key) return;
-
-      if (!byKeyMap.has(key)) {
-        byKeyMap.set(key, {
-          emp: {
-            id: getEmpId(r) || getEmpId(matchedEmp) || key,
-            name: resolveEmployeeName(r, matchedEmp, key),
-            department: resolveEmployeeDept(r, matchedEmp),
-            position: r.position || matchedEmp?.position || grp,
-            group: grp
-          },
-          records: []
-        });
-      }
-      byKeyMap.get(key).records.push(r);
-    });
-
-    return Array.from(byKeyMap.values());
-  }
-
-  function populateReceiptEmployeeDropdown(scope, monthVal, preferredKey = "ALL_IN_SCOPE") {
-    const empSelect = document.getElementById("receiptEmployeeSelect");
-    if (!empSelect) return;
-
-    const entries = collectMonthEmployeeEntries(scope, monthVal);
-    const optionsHtml = [
-      `<option value="ALL_IN_SCOPE">All Employees (${entries.length})</option>`,
-      ...entries.map(entry => {
-        const key = getEmployeeKey({ id: entry.emp.id, name: entry.emp.name }, entry.emp);
-        return `<option value="${escM(key)}">${escM(entry.emp.name)} (${escM(entry.emp.id)})</option>`;
-      })
-    ].join("");
-
-    empSelect.innerHTML = optionsHtml;
-    const upperPref = cleanM(preferredKey).toUpperCase();
-    const exists = Array.from(empSelect.options).some(o => o.value === upperPref);
-    empSelect.value = exists ? upperPref : "ALL_IN_SCOPE";
-  }
-
-  function openDTRReceipt(employeeId) {
-    const backdrop = document.getElementById("dtrModalBackdrop");
-    const batchControls = document.getElementById("dtrBatchControls");
-    const scopeSelect = document.getElementById("receiptScopeSelect");
-    const titleEl = document.getElementById("dtrModalTitle");
-    if (!backdrop || !window.DB) return;
-
-    const monthVal = document.getElementById("monthFilter")?.value ?? safeCurrentMonth();
-    const employees = DB.getEmployees() || [];
-    const matchedEmp = findMatchingEmployee(employees, employeeId);
-    const sampleRec = (DB.getAttendance() || []).find(r => {
-      const k = getEmployeeKey(r, matchedEmp);
-      return k === cleanM(employeeId).toUpperCase() ||
-             getRawName(r).toLowerCase() === cleanM(employeeId).toLowerCase();
-    });
-    const grp = getGroupM(matchedEmp, sampleRec);
-    const targetKey = sampleRec ? getEmployeeKey(sampleRec, matchedEmp)
+    const attendance = [
+      {
+        id: "FAC-001",
+        name: "Ryza Mendoza",
+        department: "SOICT",
+        position: "Faculty",
+        date: `${baseMonth}-02`,
+        morningAmIn: "07:55 AM",
+        morningPmIn: "12:00 PM",
+        afternoonAmIn: "01:00 PM",
+        afternoonPmIn: "05:02 PM",
+        morningAmOut: "12:00 PM",
+        afternoonPmOut: "05:02 PM",
+        status: "Present"
+      },
+      {
+        id: "FAC-002",
+        name: "Irene Santos",
+        department: "SOICT",
+        position: "Faculty",
+        date: `${baseMonth}-02`,
+        morningAmIn: "07:58 AM",
+        morningPmIn: "12:01 PM",
+        afternoonAmIn: "01:02 PM",
+        afternoonPmIn: "05:00 PM",
+        morningAmOut: "12:01 PM",
+        afternoonPmOut: "05:00 PM",
+        status: "Present"
+      },
+      {
+        id: "STF-001",
+        name: "Juan Dela Cruz",
+        department: "ADMIN",
+        position: "Staff",
+        date: `${baseMonth}-02`,
+        morningAmIn: "08:00 AM",
+        morningPmIn: "12:00 PM",
+        afternoonAmIn: "01:00 PM",
+        afternoonPmIn: "05:00 PM",
+        morningAmOut: "12:00 PM",
+        afternoonPmOut: "05:00 PM",
+        status: "Present"
+      },
+      {
+        id: "STF-002",
+        name: "Maria Clara Reyes",
+        department
