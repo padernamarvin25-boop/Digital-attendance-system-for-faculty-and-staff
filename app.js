@@ -224,7 +224,13 @@ function resetForm() {
 
     if (passInput) passInput.type = "password";
     if (toggleBtn) {
-        toggleBtn.textContent = "👁️";
+        const icon = toggleBtn.querySelector("i");
+        if (icon) {
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        } else {
+            toggleBtn.textContent = "👁️";
+        }
         toggleBtn.setAttribute("aria-label", "Show password");
         toggleBtn.setAttribute("title", "Show Password");
     }
@@ -277,12 +283,19 @@ function handleEmployeeFormSubmit(event) {
 function setupPasswordToggle() {
     const toggleBtn = document.getElementById("toggleRegPass");
     const passInput = document.getElementById("empPass");
-    if (!toggleBtn || !passInput) return;
+    if (!toggleBtn || !passInput || toggleBtn.dataset.bound === "true") return;
 
+    toggleBtn.dataset.bound = "true";
     toggleBtn.addEventListener("click", () => {
         const isHidden = passInput.type === "password";
         passInput.type = isHidden ? "text" : "password";
-        toggleBtn.textContent = isHidden ? "🙈" : "👁️";
+        const icon = toggleBtn.querySelector("i");
+        if (icon) {
+            icon.classList.toggle("fa-eye", !isHidden);
+            icon.classList.toggle("fa-eye-slash", isHidden);
+        } else {
+            toggleBtn.textContent = isHidden ? "🙈" : "👁️";
+        }
         toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
         toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
     });
