@@ -1,639 +1,1977 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Monthly Record - DAS</title>
+
+
+
+<link rel="stylesheet" href="./style.css">
+
+<link rel="stylesheet" href="./all.min.css">
+
+
 
 <style>
-/* =====================================
-   MODERN MONTHLY RECORD DESIGN
-   Existing functions remain unchanged
-===================================== */
-
-:root {
-  --primary-blue: #2563eb;
-  --dark-blue: #1e40af;
-  --light-bg: #f1f5f9;
-  --card-bg: #ffffff;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --green: #198754;
-  --red: #dc3545;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background: var(--light-bg);
-  color: var(--text-dark);
-}
-
-/* MAIN CONTENT */
-
-.main-content {
-  background: #f1f5f9;
-}
-
-.content-area {
-  padding: 28px;
-  max-width: 1600px;
-  margin: auto;
-}
-
-/* SIDEBAR */
-
-.sidebar {
-  background: linear-gradient(180deg, #172554, #1e3a8a);
-  box-shadow: 4px 0 15px rgba(15, 23, 42, 0.12);
-}
-
-.sidebar-header {
-  padding: 25px 18px;
-}
-
-.sidebar-header i {
-  font-size: 34px;
-  margin-bottom: 12px;
-  color: #93c5fd;
-}
-
-.sidebar-header h2 {
-  font-size: 19px;
-  font-weight: 700;
-}
-
-.sidebar-menu {
-  padding: 10px;
-}
-
-.sidebar-menu li {
-  margin: 6px 0;
-}
-
-.sidebar-menu li a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 15px;
-  border-radius: 9px;
-  transition: 0.25s;
-}
-
-.sidebar-menu li a:hover {
-  background: rgba(255,255,255,0.13);
-  transform: translateX(3px);
-}
-
-.sidebar-menu li.active a {
-  background: #2563eb;
-  color: white;
-  box-shadow: 0 4px 12px rgba(37,99,235,0.25);
-}
-
-.sidebar-footer {
-  border-top: 1px solid rgba(255,255,255,0.15);
-  padding: 18px;
-}
-
-/* TOPBAR */
-
-.topbar {
-  background: white;
-  padding: 16px 28px;
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
-}
-
-.topbar-info {
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-/* PAGE HEADER */
-
-.page-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  margin-bottom: 22px;
-}
-
-.page-heading {
-  color: #1e293b;
-  font-size: 28px;
-  font-weight: 800;
-  margin: 0;
-  letter-spacing: -0.5px;
-}
-
-.page-heading i {
-  margin-right: 8px;
-}
-
-/* FILTERS */
-
-.month-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  background: white;
-  padding: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
-}
-
-.month-filter label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #475569;
-}
-
-.form-control {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 10px 12px;
-  background: #fff;
-  color: #1e293b;
-  transition: 0.2s;
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-}
-
-/* CARDS */
-
-.card {
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 13px;
-  padding: 22px;
-  box-shadow: 0 3px 12px rgba(15,23,42,0.045);
-  margin-bottom: 20px;
-}
 
 .group-section-card {
-  margin-top: 24px;
-  padding: 24px;
-  overflow: hidden;
+
+margin-top: 22px;
+
 }
 
-.monthly-table-title {
-  font-size: 19px;
-  font-weight: 800;
-  color: #1e40af;
-  margin-bottom: 5px;
-}
 
-/* SEARCH */
-
-.filter-area {
-  display: flex;
-  gap: 12px;
-}
-
-#monthlySearch {
-  min-height: 46px;
-  padding: 12px 16px;
-  border-radius: 9px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-}
-
-#monthlySearch:focus {
-  background: white;
-  border-color: var(--primary-blue);
-}
-
-/* BUTTONS */
-
-.btn,
-.bulk-receipt-btn,
-.receipt-btn,
-.edit-attendance-btn,
-.delete-attendance-btn {
-  border-radius: 8px;
-  padding: 9px 13px;
-  font-weight: 700;
-  font-size: 13px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.btn:hover,
-.bulk-receipt-btn:hover,
-.receipt-btn:hover,
-.edit-attendance-btn:hover,
-.delete-attendance-btn:hover {
-  transform: translateY(-2px);
-}
-
-.btn-outline {
-  background: white;
-  border: 1px solid #cbd5e1;
-  color: #334155;
-}
-
-.btn-outline:hover {
-  background: #eff6ff;
-  border-color: var(--primary-blue);
-  color: var(--primary-blue);
-}
-
-.btn-primary {
-  background: var(--primary-blue);
-  color: white;
-  border: none;
-}
-
-/* DEPARTMENT FOLDERS */
 
 .dept-folder-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-  margin-bottom: 18px;
+
+display: flex;
+
+flex-wrap: wrap;
+
+gap: 8px;
+
+margin-top: 12px;
+
+margin-bottom: 12px;
+
 }
+
+
 
 .dept-folder-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 15px;
-  border: 1px solid #dbe3ed;
-  border-radius: 9px;
-  background: #f8fafc;
-  color: #475569;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.2s;
+
+padding: 6px 12px;
+
+border-radius: 6px;
+
+border: 1px solid #cbd5e1;
+
+background: #f8fafc;
+
+color: #1e293b;
+
+font-weight: 600;
+
+font-size: 0.85rem;
+
+cursor: pointer;
+
+display: inline-flex;
+
+align-items: center;
+
+gap: 6px;
+
 }
 
-.dept-folder-btn:hover {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
-}
+
 
 .dept-folder-btn.active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: white;
-  box-shadow: 0 3px 8px rgba(37,99,235,0.2);
+
+background: var(--primary-blue, #0d6efd);
+
+color: #fff;
+
+border-color: var(--primary-blue, #0d6efd);
+
 }
+
+
 
 .dept-folder-btn.staff-folder.active {
-  background: #198754;
-  border-color: #198754;
-  color: white;
+
+background: #198754;
+
+color: #fff;
+
+border-color: #198754;
+
 }
+
+
 
 .dept-count-badge {
-  background: rgba(15,23,42,0.1);
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 11px;
+
+background: rgba(15, 23, 42, 0.12);
+
+padding: 1px 7px;
+
+border-radius: 999px;
+
+font-size: 0.75rem;
+
 }
 
-.dept-folder-btn.active .dept-count-badge {
-  background: rgba(255,255,255,0.22);
-  color: white;
-}
 
-/* TABLE */
-
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-
-table thead th {
-  background: #eff6ff;
-  color: #1e40af;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  padding: 15px 12px;
-  border-bottom: 2px solid #dbeafe;
-  white-space: nowrap;
-  text-align: center;
-}
-
-table tbody td {
-  padding: 14px 12px;
-  font-size: 13px;
-  color: #334155;
-  border-bottom: 1px solid #e2e8f0;
-  text-align: center;
-  white-space: nowrap;
-}
-
-table tbody tr {
-  transition: background 0.2s;
-}
-
-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-table tbody td strong {
-  color: #1e293b;
-}
-
-/* TAGS */
-
-.department-tag {
-  display: inline-block;
-  background: #dbeafe;
-  color: #1d4ed8;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.days-tag {
-  display: inline-block;
-  background: #dcfce7;
-  color: #15803d;
-  padding: 5px 11px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-/* ACTION BUTTONS */
 
 .edit-attendance-btn {
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
+
+color: #0d6efd;
+
+border: 1px solid #0d6efd;
+
+background: #eef5ff;
+
+border-radius: 5px;
+
+padding: 6px 10px;
+
+cursor: pointer;
+
+white-space: nowrap;
+
+font-weight: 600;
+
 }
+
+
 
 .edit-attendance-btn:hover {
-  background: #2563eb;
-  color: white;
+
+color: #fff;
+
+background: #0d6efd;
+
 }
+
+
 
 .delete-attendance-btn {
-  color: #dc3545;
-  border: 1px solid #fecaca;
-  background: #fff1f2;
+
+color: #dc3545;
+
+border: 1px solid #dc3545;
+
+background: white;
+
+border-radius: 5px;
+
+padding: 6px 10px;
+
+cursor: pointer;
+
+white-space: nowrap;
+
+font-weight: 600;
+
 }
+
+
 
 .delete-attendance-btn:hover {
-  background: #dc3545;
-  color: white;
+
+color: white;
+
+background: #dc3545;
+
 }
+
+
 
 .receipt-btn {
-  color: #15803d;
-  border: 1px solid #bbf7d0;
-  background: #f0fdf4;
+
+color: #198754;
+
+border: 1px solid #198754;
+
+background: #e8f5e9;
+
+border-radius: 5px;
+
+padding: 6px 10px;
+
+cursor: pointer;
+
+white-space: nowrap;
+
+font-weight: 600;
+
 }
+
+
 
 .receipt-btn:hover {
-  background: #198754;
-  color: white;
+
+color: #fff;
+
+background: #198754;
+
 }
+
+
 
 .bulk-receipt-btn {
-  background: #198754;
-  color: white;
-  border: none;
-  padding: 11px 16px;
+
+background: #198754;
+
+color: #fff;
+
+border: none;
+
+border-radius: 6px;
+
+padding: 8px 14px;
+
+font-weight: 600;
+
+cursor: pointer;
+
+display: inline-flex;
+
+align-items: center;
+
+gap: 6px;
+
+white-space: nowrap;
+
 }
+
+
 
 .bulk-receipt-btn:hover {
-  background: #157347;
+
+background: #157347;
+
 }
 
-/* EMPTY MESSAGE */
 
-.empty-message {
-  text-align: center !important;
-  padding: 35px !important;
-  color: #94a3b8 !important;
-  font-weight: 600;
-}
-
-/* RECEIPT MODAL */
 
 .dtr-modal-backdrop {
-  background: rgba(15,23,42,0.65);
-  backdrop-filter: blur(4px);
-  padding: 20px;
+
+position: fixed;
+
+inset: 0;
+
+background: rgba(0, 0, 0, 0.55);
+
+display: none;
+
+align-items: center;
+
+justify-content: center;
+
+padding: 20px;
+
+z-index: 10000;
+
+overflow-y: auto;
+
 }
+
+
+
+.dtr-modal-backdrop.open {
+
+display: flex;
+
+}
+
+
 
 .dtr-modal-box {
-  background: white;
-  width: 100%;
-  max-width: 1100px;
-  max-height: 92vh;
-  overflow-y: auto;
-  border-radius: 15px;
-  padding: 26px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+
+background: #fff;
+
+width: 100%;
+
+max-width: 980px;
+
+max-height: 92vh;
+
+overflow-y: auto;
+
+border-radius: 10px;
+
+padding: 24px;
+
+box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+
 }
+
+
 
 .dtr-modal-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+gap: 10px;
+
+flex-wrap: wrap;
+
+margin-bottom: 18px;
+
+padding-bottom: 12px;
+
+border-bottom: 1px solid #e2e8f0;
+
 }
 
-.dtr-modal-toolbar h3 {
-  font-weight: 800;
-}
+
 
 .dtr-batch-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
+
+display: flex;
+
+align-items: center;
+
+gap: 10px;
+
+flex-wrap: wrap;
+
+background: #f8fafc;
+
+border: 1px solid #e2e8f0;
+
+border-radius: 8px;
+
+padding: 10px 14px;
+
+margin-bottom: 16px;
+
 }
+
+
 
 .dtr-batch-controls select {
-  padding: 9px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 7px;
-  background: white;
+
+padding: 6px 10px;
+
+border: 1px solid #cbd5e1;
+
+border-radius: 6px;
+
+font-weight: 600;
+
+background: #fff;
+
 }
+
+
 
 .dtr-employee-page {
-  margin-bottom: 25px;
+
+margin-bottom: 24px;
+
 }
+
+
+
+.dtr-employee-page:last-child {
+
+margin-bottom: 0;
+
+}
+
+
 
 .dtr-twin-sheet {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  background: white;
-  color: #111;
-  padding: 10px;
+
+display: grid;
+
+grid-template-columns: 1fr 1fr;
+
+gap: 24px;
+
+background: #fff;
+
+color: #111;
+
+padding: 10px;
+
 }
+
+
 
 .dtr-copy {
-  border: 1px solid #222;
-  padding: 14px 16px;
-  font-size: 11.5px;
-  line-height: 1.35;
+
+border: 1px solid #222;
+
+padding: 14px 16px;
+
+font-size: 11.5px;
+
+line-height: 1.35;
+
 }
 
-/* RESPONSIVE DESIGN */
 
-@media (max-width: 1100px) {
-  .page-header-row {
-    align-items: flex-start;
-  }
 
-  .month-filter {
-    width: 100%;
-  }
+.dtr-header-title {
 
-  .group-section-card {
-    padding: 17px;
-  }
+text-align: center;
+
+font-weight: 700;
+
+font-size: 12.5px;
+
+margin-bottom: 12px;
+
+text-transform: uppercase;
+
 }
 
-@media (max-width: 768px) {
-  .content-area {
-    padding: 15px;
-  }
 
-  .page-heading {
-    font-size: 23px;
-  }
 
-  .month-filter {
-    padding: 12px;
-  }
+.dtr-name-row {
 
-  .month-filter label {
-    width: 100%;
-  }
+display: grid;
 
-  .month-filter input,
-  .month-filter button {
-    flex: 1;
-    min-width: 120px;
-  }
+grid-template-columns: 1fr 1fr;
 
-  .group-section-card {
-    padding: 15px;
-  }
+gap: 12px;
 
-  .dept-folder-bar {
-    gap: 7px;
-  }
+border-bottom: 1px solid #222;
 
-  .dept-folder-btn {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
+padding-bottom: 4px;
 
-  .dtr-modal-box {
-    padding: 15px;
-  }
+margin-bottom: 8px;
 
-  .dtr-twin-sheet {
-    grid-template-columns: 1fr;
-  }
+text-align: center;
 
-  .dtr-batch-controls {
-    align-items: stretch;
-  }
-
-  .dtr-batch-controls select {
-    width: 100%;
-  }
-
-  .dtr-modal-toolbar {
-    align-items: flex-start;
-  }
 }
 
-/* PRINT - PRESERVE ORIGINAL DTR FORMAT */
+
+
+.dtr-name-val {
+
+font-weight: 700;
+
+font-size: 12px;
+
+min-height: 16px;
+
+}
+
+
+
+.dtr-name-lbl {
+
+font-size: 10px;
+
+color: #444;
+
+}
+
+
+
+.dtr-meta-line {
+
+display: flex;
+
+justify-content: space-between;
+
+gap: 8px;
+
+margin-bottom: 4px;
+
+font-size: 11px;
+
+}
+
+
+
+.dtr-meta-val {
+
+flex: 1;
+
+border-bottom: 1px solid #333;
+
+padding-left: 6px;
+
+font-weight: 600;
+
+}
+
+
+
+.dtr-table {
+
+width: 100%;
+
+border-collapse: collapse;
+
+margin-top: 8px;
+
+margin-bottom: 10px;
+
+font-size: 10.5px;
+
+}
+
+
+
+.dtr-table th,
+
+.dtr-table td {
+
+border: 1px solid #222;
+
+padding: 2px 4px;
+
+text-align: center;
+
+white-space: nowrap;
+
+}
+
+
+
+.dtr-table th {
+
+background: #f4f6f9;
+
+font-weight: 700;
+
+}
+
+
+
+.dtr-cert {
+
+font-size: 10.5px;
+
+text-align: justify;
+
+margin-bottom: 14px;
+
+}
+
+
+
+.dtr-verified {
+
+text-align: center;
+
+font-size: 11px;
+
+margin-bottom: 22px;
+
+}
+
+
+
+.dtr-verified-line {
+
+width: 72%;
+
+margin: 0 auto 6px auto;
+
+border-top: 1px solid #222;
+
+}
+
+
+
+.dtr-sig-block {
+
+text-align: center;
+
+margin-top: 14px;
+
+font-size: 11px;
+
+}
+
+
+
+.dtr-sig-name {
+
+font-weight: 700;
+
+text-transform: uppercase;
+
+margin-bottom: 2px;
+
+}
+
+
+
+.dtr-sig-role {
+
+font-size: 10.5px;
+
+color: #222;
+
+}
+
+
 
 @media print {
-  body * {
-    visibility: hidden !important;
-  }
 
-  #dtrModalBackdrop,
-  #dtrModalBackdrop * {
-    visibility: visible !important;
-  }
+body * {
 
-  #dtrModalBackdrop {
-    position: static !important;
-    background: none !important;
-    padding: 0 !important;
-    display: block !important;
-  }
+visibility: hidden !important;
 
-  .dtr-modal-toolbar,
-  .dtr-batch-controls {
-    display: none !important;
-  }
-
-  .dtr-modal-box {
-    max-height: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .dtr-employee-page {
-    page-break-after: always;
-    break-after: page;
-    margin-bottom: 0 !important;
-  }
-
-  .dtr-employee-page:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-
-  .dtr-twin-sheet {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 14px !important;
-    padding: 0 !important;
-  }
-
-  .dtr-copy {
-    border: 1px solid #222 !important;
-    color: #000 !important;
-  }
 }
+
+
+
+#dtrModalBackdrop,
+
+#dtrModalBackdrop * {
+
+visibility: visible !important;
+
+}
+
+
+
+#dtrModalBackdrop {
+
+position: static !important;
+
+background: none !important;
+
+padding: 0 !important;
+
+display: block !important;
+
+}
+
+
+
+.dtr-modal-toolbar,
+
+.dtr-batch-controls {
+
+display: none !important;
+
+}
+
+
+
+.dtr-modal-box {
+
+max-height: none !important;
+
+box-shadow: none !important;
+
+padding: 0 !important;
+
+max-width: 100% !important;
+
+}
+
+
+
+.dtr-employee-page {
+
+page-break-after: always;
+
+break-after: page;
+
+margin-bottom: 0 !important;
+
+}
+
+
+
+.dtr-employee-page:last-child {
+
+page-break-after: auto;
+
+break-after: auto;
+
+}
+
+
+
+.dtr-twin-sheet {
+
+gap: 14px !important;
+
+padding: 0 !important;
+
+}
+
+}
+
 </style>
+
+</head>
+
+
+
+<body>
+
+
+
+<script src="./app.js"></script>
+
+<script>
+
+if (typeof checkAuth === "function") checkAuth();
+
+</script>
+
+
+
+<div class="app-container">
+
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<div class="sidebar-header">
+
+<i class="fa-solid fa-graduation-cap"></i>
+
+<h2>Digital Attendance System</h2>
+
+<p>Admin Panel</p>
+
+</div>
+
+
+
+<ul class="sidebar-menu">
+
+<li><a href="./dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+
+<li><a href="./employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+
+<li><a href="./attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+
+<li class="active"><a href="./monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+
+<li><a href="#" onclick="logout(); return false;"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
+
+</ul>
+
+
+
+<div class="sidebar-footer">
+
+<i class="fa-solid fa-user-circle"></i>
+
+<div>
+
+<strong>Welcome,</strong>
+
+<span>Admin</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- MAIN CONTENT -->
+
+<div class="main-content">
+
+<div class="topbar">
+
+<div><i class="fa-solid fa-bars"></i></div>
+
+<div class="topbar-info">
+
+<span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
+
+</div>
+
+</div>
+
+
+
+<div class="content-area">
+
+<div class="page-header-row">
+
+<div>
+
+<h1 class="page-heading">
+
+<i class="fa-solid fa-calendar-days" style="color:var(--primary-blue);"></i>
+
+Monthly Record
+
+</h1>
+
+<p class="page-subheading" style="margin-bottom:0;">
+
+Hiwalay ang lagayan ng Faculty at Staff (latest 5 preview, kumpleto ang data sa storage at department folders: BSHM, BSED, BEED, BSCRIM, BSIT, BSBA).
+
+</p>
+
+</div>
+
+
+
+<div class="month-filter" style="margin:0;flex-wrap:wrap;gap:8px;">
+
+<label for="monthFilter">Month:</label>
+
+<input type="month" id="monthFilter" class="form-control" onchange="renderMonthlyData()">
+
+<button type="button" class="btn btn-outline" onclick="showAllMonths()">All Months</button>
+
+
+
+<label for="calendarDateFilter">Calendar Date:</label>
+
+<input type="date" id="calendarDateFilter" class="form-control" onchange="renderMonthlyData()">
+
+<button type="button" class="btn btn-outline" onclick="clearCalendarDate()">All Days</button>
+
+
+
+<button type="button" class="btn btn-outline" onclick="restoreDefaultMonthlyRecords()">
+
+<i class="fa-solid fa-rotate-left"></i> Restore Records
+
+</button>
+
+
+
+<button type="button" class="bulk-receipt-btn" onclick="openBatchReceiptModal('ALL')">
+
+<i class="fa-solid fa-file-invoice"></i> Generate Receipt (All)
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- SEARCH BAR -->
+
+<div class="card" style="margin-bottom:20px;">
+
+<div class="filter-area" style="margin:0;">
+
+<input type="text" id="monthlySearch" class="form-control" style="flex:1;min-width:240px;" placeholder="Search employee name, ID, or department..." oninput="renderMonthlyData()">
+
+</div>
+
+</div>
+
+
+
+<!-- FACULTY RECORD SECTION -->
+
+<div class="card group-section-card">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+
+<div>
+
+<h3 class="monthly-table-title" style="margin:0;">Faculty Monthly Records (Latest 5)</h3>
+
+<small id="facultySummaryText" style="color:#64748b;"></small>
+
+</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+<button type="button" class="btn btn-outline" id="toggleFacultyLimitBtn" onclick="toggleGroupLimit('Faculty')">
+
+Show All Faculty
+
+</button>
+
+<button type="button" class="receipt-btn" onclick="openBatchReceiptModal('Faculty')">
+
+<i class="fa-solid fa-receipt"></i> Faculty Receipts
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- FACULTY DEPARTMENT FOLDERS -->
+
+<div id="facultyDeptFolders" class="dept-folder-bar"></div>
+
+
+
+<div class="table-wrapper" style="margin-top:8px;">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Employee ID</th>
+
+<th>Name</th>
+
+<th>Department</th>
+
+<th>Date</th>
+
+<th>Morning (AM/PM)</th>
+
+<th>Afternoon (AM/PM)</th>
+
+<th>Status</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="facultyMonthlyTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- STAFF RECORD SECTION -->
+
+<div class="card group-section-card">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+
+<div>
+
+<h3 class="monthly-table-title" style="color:#198754;margin:0;">Staff Monthly Records (Latest 5)</h3>
+
+<small id="staffSummaryText" style="color:#64748b;"></small>
+
+</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+<button type="button" class="btn btn-outline" id="toggleStaffLimitBtn" onclick="toggleGroupLimit('Staff')">
+
+Show All Staff
+
+</button>
+
+<button type="button" class="receipt-btn" onclick="openBatchReceiptModal('Staff')">
+
+<i class="fa-solid fa-receipt"></i> Staff Receipts
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- STAFF DEPARTMENT FOLDERS -->
+
+<div id="staffDeptFolders" class="dept-folder-bar"></div>
+
+
+
+<div class="table-wrapper" style="margin-top:8px;">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Employee ID</th>
+
+<th>Name</th>
+
+<th>Department</th>
+
+<th>Date</th>
+
+<th>Morning (AM/PM)</th>
+
+<th>Afternoon (AM/PM)</th>
+
+<th>Status</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="staffMonthlyTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- GENERATE RECEIPT MODAL -->
+
+<div id="dtrModalBackdrop" class="dtr-modal-backdrop" onclick="if(event.target === this) closeDTRModal()">
+
+<div class="dtr-modal-box">
+
+<div class="dtr-modal-toolbar">
+
+<h3 id="dtrModalTitle" style="margin:0;font-size:1.1rem;color:var(--primary-blue);">
+
+<i class="fa-solid fa-receipt"></i> Digital Attendance System Daily Time Record
+
+</h3>
+
+<div style="display:flex;gap:10px;">
+
+<button type="button" class="btn btn-primary" onclick="window.print()">
+
+<i class="fa-solid fa-print"></i> Print Receipt
+
+</button>
+
+<button type="button" class="btn btn-outline" onclick="closeDTRModal()">
+
+Close
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<div id="dtrBatchControls" class="dtr-batch-controls">
+
+<label for="receiptScopeSelect"><strong>Group:</strong></label>
+
+<select id="receiptScopeSelect" onchange="handleReceiptScopeChange()">
+
+<option value="ALL">All (Faculty &amp; Staff)</option>
+
+<option value="Faculty">Faculty Only</option>
+
+<option value="Staff">Staff Only</option>
+
+</select>
+
+
+
+<label for="receiptEmployeeSelect"><strong>Employee (Whole Month):</strong></label>
+
+<select id="receiptEmployeeSelect" onchange="renderBatchReceiptsFromSelect()">
+
+<option value="ALL_IN_SCOPE">All Employees in Selection</option>
+
+</select>
+
+
+
+<span id="receiptMonthSummary" style="font-size:0.9rem;color:#334155;"></span>
+
+</div>
+
+
+
+<div id="dtrTwinContainer"></div>
+
+</div>
+
+</div>
+
+
+
+<script src="./database.js"></script>
+
+
+
+<script>
+
+const DEPT_FOLDERS = ["BSHM", "BSED", "BEED", "BSCRIM", "BSIT", "BSBA"];
+
+
+
+const selectedDeptState = {
+
+Faculty: "ALL",
+
+Staff: "ALL"
+
+};
+
+
+
+const showAllState = {
+
+Faculty: false,
+
+Staff: false
+
+};
+
+
+
+const cleanM = v => String(v ?? "").trim();
+
+const escM = v => cleanM(v).replace(/[&<>"']/g, ch => ({
+
+"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+
+}[ch]));
+
+
+
+function safeCurrentMonth() {
+
+if (typeof getCurrentMonthISO === "function") return getCurrentMonthISO();
+
+const now = new Date();
+
+return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+}
+
+
+
+function buildSeedDataForMonth(ym) {
+
+const baseMonth = /^\d{4}-\d{2}$/.test(ym) ? ym : "2026-11";
+
+
+
+const employees = [
+
+// Faculty
+
+{ id: "EMP9991", name: "ADRIAN PABIONA", department: "BEED", position: "Faculty" },
+
+{ id: "EMP9921", name: "CHARLES BARKLEY", department: "BEED", position: "Faculty" },
+
+{ id: "EMP2524", name: "RICHARD JASPE", department: "BEED", position: "Faculty" },
+
+{ id: "EMP456", name: "WINDELYN JONTOCAN", department: "BEED", position: "Faculty" },
+
+{ id: "EMP0099", name: "IRENE ZULUETA", department: "BSHM", position: "Faculty" },
+
+{ id: "EMP2137", name: "CATHLEEN JANE", department: "BSED", position: "Faculty" },
+
+{ id: "EMP2516", name: "KRISTINE LOVELA", department: "BSED", position: "Faculty" },
+
+{ id: "EMP123", name: "RYZA JUANIZA", department: "BSED", position: "Faculty" },
+
+{ id: "EMP7712", name: "JONEL PASCUAL", department: "BSCRIM", position: "Faculty" },
+
+{ id: "EMP0125", name: "JESMAR MIGUEL", department: "BSCRIM", position: "Faculty" },
+
+{ id: "EMP225", name: "JOHN GEROD MAGARSO", department: "BSCRIM", position: "Faculty" },
+
+{ id: "EMP00738", name: "MAE CLAIRE NATIVIDAD", department: "BSIT", position: "Faculty" },
+
+{ id: "EMP0096", name: "MARC DAVID OBINA", department: "BSIT", position: "Faculty" },
+
+{ id: "EMP003218", name: "JOHN MARK LASAP", department: "BSBA", position: "Faculty" },
+
+{ id: "EMP11007", name: "HARVY PACARDO", department: "BSBA", position: "Faculty" },
+
+
+
+// Staff
+
+{ id: "EMP33178", name: "LOYD CHRISTIAN LAYSON", department: "BSBA", position: "Staff" },
+
+{ id: "EMP21769", name: "CHRISTIAN REX", department: "BSBA", position: "Staff" },
+
+{ id: "EMP001234", name: "RAFAEL PAGMANOJA", department: "BSBA", position: "Staff" },
+
+{ id: "EMP8912", name: "CRYSTAL ROSE", department: "BSIT", position: "Staff" },
+
+{ id: "EMP0078", name: "JASON WILLIAM LEONOR", department: "BSIT", position: "Staff" },
+
+{ id: "EMP789", name: "Juan Dela Cruz", department: "BSIT", position: "Staff" },
+
+{ id: "EMP2718", name: "REYNALDO PACLIBAR", department: "BSHM", position: "Staff" },
+
+{ id: "EMP1002", name: "JOSHUA PACIAL", department: "BSHM", position: "Staff" },
+
+{ id: "EMP7728", name: "JESHELL MAE CRUZ", department: "BSHM", position: "Staff" },
+
+{ id: "EMP012", name: "marvin palabrica", department: "BSHM", position: "Staff" },
+
+{ id: "EMP6632", name: "YANAMI LANGERO", department: "BSED", position: "Staff" },
+
+{ id: "EMP35716", name: "SAMUEL SMITH", department: "BSED", position: "Staff" },
+
+{ id: "EMP00217", name: "ABBIE GAIL", department: "BEED", position: "Staff" },
+
+{ id: "EMP8812", name: "BING BONG LEONOR", department: "BSCRIM", position: "Staff" },
+
+{ id: "EMP226", name: "ANGELO LIBALIB", department: "BSCRIM", position: "Staff" }
+
+];
+
+
+
+const days = ["02", "03"];
+
+const attendance = [];
+
+
+
+days.forEach((day, dIdx) => {
+
+employees.forEach((emp, eIdx) => {
+
+const isLate = (dIdx + eIdx) % 7 === 4;
+
+attendance.push({
+
+id: emp.id,
+
+name: emp.name,
+
+department: emp.department,
+
+position: emp.position,
+
+date: `${baseMonth}-${day}`,
+
+morningAmIn: isLate ? "08:06 AM" : "07:56 AM",
+
+morningPmIn: "12:00 PM",
+
+afternoonAmIn: "01:00 PM",
+
+afternoonPmIn: "05:00 PM",
+
+morningAmOut: "12:00 PM",
+
+afternoonPmOut: "05:00 PM",
+
+status: isLate ? "Late" : "Present"
+
+});
+
+});
+
+});
+
+
+
+return { employees, attendance };
+
+}
+
+
+
+function getRecordsStore() {
+
+if (window.DB && typeof DB.getAttendance === "function") {
+
+const list = DB.getAttendance();
+
+if (Array.isArray(list)) return list;
+
+}
+
+try {
+
+const parsed = JSON.parse(localStorage.getItem("das_monthly_attendance") || "null");
+
+if (Array.isArray(parsed)) return parsed;
+
+} catch (_) {}
+
+return [];
+
+}
+
+
+
+function saveRecordsStore(list) {
+
+if (window.DB && typeof DB.saveAttendance === "function") {
+
+DB.saveAttendance(list);
+
+}
+
+try {
+
+localStorage.setItem("das_monthly_attendance", JSON.stringify(list));
+
+} catch (_) {}
+
+}
+
+
+
+function getEmployeesStore() {
+
+if (window.DB && typeof DB.getEmployees === "function") {
+
+const list = DB.getEmployees();
+
+if (Array.isArray(list)) return list;
+
+}
+
+try {
+
+const parsed = JSON.parse(localStorage.getItem("das_monthly_employees") || "null");
+
+if (Array.isArray(parsed)) return parsed;
+
+} catch (_) {}
+
+return [];
+
+}
+
+
+
+function saveEmployeesStore(list) {
+
+if (window.DB && typeof DB.saveEmployees === "function") {
+
+DB.saveEmployees(list);
+
+}
+
+try {
+
+localStorage.setItem("das_monthly_employees", JSON.stringify(list));
+
+} catch (_) {}
+
+}
+
+
+
+function ensureRecordsAvailable(forceRestore = false) {
+
+const existingRecs = getRecordsStore();
+
+const existingEmps = getEmployeesStore();
+
+const currentMonth = document.getElementById("monthFilter")?.value || safeCurrentMonth();
+
+
+
+if (forceRestore || existingRecs.length === 0) {
+
+const seed = buildSeedDataForMonth(currentMonth);
+
+if (forceRestore || existingEmps.length === 0) {
+
+saveEmployeesStore(seed.employees);
+
+}
+
+saveRecordsStore(seed.attendance);
+
+}
+
+}
+
+
+
+function restoreDefaultMonthlyRecords() {
+
+ensureRecordsAvailable(true);
+
+renderMonthlyData();
+
+}
+
+
+
+function selectDepartmentFolder(group, dept) {
+
+selectedDeptState[group] = dept;
+
+renderMonthlyData();
+
+}
+
+
+
+function toggleGroupLimit(group) {
+
+showAllState[group] = !showAllState[group];
+
+renderMonthlyData();
+
+}
+
+
+
+function renderDeptFolders(group, groupRecords) {
+
+const containerId = group === "Faculty" ? "facultyDeptFolders" : "staffDeptFolders";
+
+const container = document.getElementById(containerId);
+
+if (!container) return;
+
+
+
+const activeDept = selectedDeptState[group] || "ALL";
+
+const folderClass = group === "Staff" ? "dept-folder-btn staff-folder" : "dept-folder-btn";
+
+
+
+const allCount = groupRecords.length;
+
+const buttons = [
+
+`<button type="button" class="${folderClass} ${activeDept === "ALL" ? "active" : ""}" onclick="selectDepartmentFolder('${group}', 'ALL')">
+
+<i class="fa-solid fa-layer-group"></i> ALL DEPTS <span class="dept-count-badge">${allCount}</span>
+
+</button>`,
+
+...DEPT_FOLDERS.map(dept => {
+
+const count = groupRecords.filter(r => r.department === dept).length;
+
+const isActive = activeDept === dept ? "active" : "";
+
+return `
+
+<button type="button" class="${folderClass} ${isActive}" onclick="selectDepartmentFolder('${group}', '${dept}')">
+
+<i class="fa-solid fa-folder"></i> ${dept} <span class="dept-count-badge">${count}</span>
+
+</button>
+
+`;
+
+})
+
+];
+
+
+
+container.innerHTML = buttons.join("");
+
+}
+
+
+
+function getEmpId(obj) {
+
+return cleanM(
+
+obj?.id ||
+
+obj?.employeeId ||
+
+obj?.employee_id ||
+
+obj?.empId ||
+
+obj?.emp_id ||
+
+obj?.userId ||
+
+""
+
+);
+
+}
+
+
+
+function getRawName(obj) {
+
+if (!obj) return "";
+
+if (typeof obj === "string") return cleanM(obj);
+
+const direct = cleanM(
+
+obj?.name ||
+
+obj?.employeeName ||
+
+obj?.employee_name ||
+
+obj?.fullName ||
+
+obj?.full_name ||
+
+""
+
+);
+
+if (direct) return direct;
+
+
+
+const first = cleanM(obj?.firstName || obj?.first_name || "");
+
+const last = cleanM(obj?.lastName || obj?.last_name || obj?.familyName || obj?.family_name || "");
+
+return [first, last].filter(Boolean).join(" ").trim();
+
+}
+
+
+
+function findMatchingEmployee(employees, recOrId) {
+
+const targetId = getEmpId(recOrId).toLowerCase() || cleanM(recOrId).toLowerCase();
+
+const targetName = getRawName(recOrId).toLowerCase();
+
+if ((!targetId && !targetName) || !Array.isArray(employees)) return null;
+
+
+
+return employees.find(e => {
+
+const eId = getEmpId(e).toLowerCase();
+
+const eName = getRawName(e).toLowerCase();
+
+return (targetId && eId && eId === targetId) ||
+
+(targetName && eName && eName === targetName) ||
+
+(targetId && eName && eName === targetId);
+
+}) || null;
+
+}
+
+
+
+function resolveEmployeeName(rec, emp, fallbackId = "") {
+
+const fromRec = getRawName(rec);
+
+if (fromRec) return fromRec;
+
+
+
+const fromEmp = getRawName(emp);
+
+if (fromEmp) return fromEmp;
+
+
+
+const idVal = getEmpId(rec) || getEmpId(emp) || cleanM(fallbackId);
+
+return idVal || "—";
+
+}
+
+
+
+function resolveEmployeeDept(rec, emp) {
+
+return cleanM(rec?.department || rec?.dept || emp?.department || emp?.dept || "GENERAL").toUpperCase();
+
+}
+
+
+
+function getGroupM(emp, rec) {
+
+const pos = cleanM(
+
+rec?.position ||
+
+rec?.role ||
+
+rec?.group ||
+
+rec?.type ||
+
+emp?.position ||
+
+emp?.role ||
+
+emp?.group ||
+
+emp?.type ||
+
+"Staff"
+
+).toLowerCase();
+
+return (pos.includes("faculty") || pos.includes("instructor") || pos.includes("teacher") || pos.includes("prof"))
+
+? "Faculty"
+
+: "Staff";
+
+}
+
+
+
+function splitName(fullName) {
+
+const parts = cleanM(fullName).split(/\s+/).filter(Boolean);
+
+if (!parts.length) return { firstName: "—", familyName: "—" };
+
+if (parts.length === 1) return { firstName: parts[0], familyName: "—" };
+
+const familyName = parts.pop();
+
+return { firstName: parts.join(" "), familyName };
+
+}
+
+
+
+function formatMonthLabel(ym) {
+
+if (!ym) return "All Months";
+
+const [y, m] = String(ym || "").split("-");
+
+if (!y || !m) return ym || "";
+
+const d = new Date(Number(y), Number(m) - 1, 1);
+
+return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+}
+
+
+
+function showAllMonths() {
+
+const mf = document.getElementById("monthFilter");
+
+if (mf) mf.value = "";
+
+renderMonthlyData();
+
+}
+
+
+
+function clearCalendarDate() {
+
+const cal = document.getElementById("calendarDateFilter");
+
+if (cal) cal.value = "";
+
+renderMonthlyData();
+
+}
+
+
+
+function buildRowHtml(r) {
+
+const morningText = `${r.morningAmIn !== "--" ? r.morningAmIn : (r.amTimeIn || "--")} / ${r.morningPmIn !== "--" ? r.morningPmIn : "--"}`;
+
+const afternoonText = `${r.afternoonAmIn !== "--" ? r.afternoonAmIn : "--"} / ${r.afternoonPmIn !== "--" ? r.afternoonPmIn : (r.pmTimeIn || "--")}`;
+
+
+
+return `
+
+<tr>
+
+<td>${escM(r.id)}</td>
+
+<td><strong>${escM(r.name)}</strong></td>
+
+<td><span class="department-tag">${escM(r.department)}</span></td>
+
+<td>${escM(r.date)}</td>
+
+<td style="color:#198754;font-weight:600;">${escM(morningText)}</td>
+
+<td style="color:#0d6efd;font-weight:600;">${escM(afternoonText)}</td>
+
+<td><span class="days-tag">${escM(r.status)}</span></td>
+
+<td style="display:flex;gap:6px;flex-wrap:wrap;">
+
+<button type="button" class="receipt-btn" onclick="openDTRReceipt('${escM(r.id)}')">
+
+<i class="fa-solid fa-receipt"></i> Generate Receipt
+
+</button>
+
+<button type="button" class="edit-attendance-btn" onclick="editMonthlyRecord(${r._recordIndex})">
+
+<i class="fa-solid fa-pen"></i> Edit
+
+</button>
+
+<button type="button" class="delete-attendance-btn" onclick="deleteMonthlyRecord(${r._recordIndex})">
+
+<i class="fa-solid fa-trash"></i> Delete
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+
+
+function renderMonthlyData() {
+
+const facBody = document.getElementById("facultyMonthlyTable");
+
+const staffBody = document.getElementById("staffMonthlyTable");
+
+if (!facBody || !staffBody) return;
+
+
+
+const monthVal = document.getElementById("monthFilter")?.value ?? safeCurrentMonth();
+
+const calDateVal = document.getElementById("calendarDateFilter")?.value || "";
+
+const keyword = cleanM(document.getElementById("monthlySearch")?.value).toLowerCase();
+
+
+
+const records = getRecordsStore();
+
+const employees = getEmployeesStore();
+
+
+
+const baseFiltered = records
+
+.map((rec, idx) => {
+
+const recId = getEmpId(rec);
+
+const emp = findMatchingEmployee(employees, rec);
+
+const finalId = recId || getEmpId(emp) || resolveEmployeeName(rec, emp, "") || "—";
+
+return {
+
+...rec,
+
+_recordIndex: idx,
+
+id: finalId,
+
+name: resolveEmployeeName(rec, emp, finalId),
+
+department: resolveEmployeeDept(rec, emp),
+
+group: getGroupM(emp, rec),
+
+date: cleanM(rec.date),
+
+morningAmIn: rec.morningAmIn || "--",
+
+morningPmIn: rec.morningPmIn || "--",
+
+afternoonAmIn: rec.afternoonAmIn || "--",
+
+afternoonPmIn: rec.afternoonPmIn || "--",
+
+amTimeIn: rec.amTimeIn || rec.timeIn || "--",
+
+pmTimeIn: rec.pmTimeIn || "--",
+
+status: rec.status || "Present"
+
+};
+
+})
+
+.sort((a, b) => b._recordIndex - a._recordIndex)
+
+.filter(r => {
+
+const matchesMonth = !monthVal || r.date.startsWith(monthVal);
+
+const matchesDate = !calDateVal || r.date === calDateVal;
+
+const matchesSearch = !keyword ||
+
+cleanM(r.id).toLowerCase().includes(keyword) ||
+
+cleanM(r.name).toLowerCase().includes(keyword) ||
+
+cleanM(r.department).toLowerCase().includes(keyword);
+
+return matchesMonth && matchesDate && matchesSearch;
+
+});
+
+
+
+const facAll = baseFiltered.filter(r => r.group === "Faculty");
+
+const staffAll = baseFiltered.filter(r => r.group === "Staff");
+
+
+
+renderDeptFolders("Faculty", facAll);
+
+renderDeptFolders("Staff", staffAll);
+
+
+
+const facDept = selectedDeptState.Faculty || "ALL";
+
+const staffDept = selectedDeptState.Staff || "ALL";
+
+
+
+const facByDept = facDept === "ALL" ? facAll : facAll.filter(r => r.department === facDept);
+
+const staffByDept = staffDept === "ALL" ? staffAll : staffAll.filter(r => r.department === staffDept);
+
+
+
+const facDisplay = showAllState.Faculty ? facByDept : facByDept.slice(0, 5);
+
+const staffDisplay = showAllState.Staff ? staffByDept : staffByDept.slice(0, 5);
+
+
+
+const facSummary = document.getElementById("facultySummaryText");
+
+if (facSummary) {
+
+facSummary.textContent = `Folder: ${facDept} • Showing ${facDisplay.length} of ${facByDept.length} matching records (${facAll.length} total Faculty in filter; all ${records.length} stored records preserved)`;
+
+}
+
+
+
+const staffSummary = document.getElementById("staffSummaryText");
+
+if (staffSummary) {
+
+staffSummary.textContent = `Folder: ${staffDept} • Showing ${staffDisplay.length} of ${staffByDept.length} matching records (${staffAll.length} total Staff in filter; all ${records.length} stored records preserved)`;
+
+}
+
+
+
+const facToggleBtn = document.getElementById("toggleFacultyLimitBtn");
+
+if (facToggleBtn) {
+
+facToggleBtn.textContent = showAllState.Faculty ? "Limit to 5" : `Show All Faculty (${facByDept.length})`;
+
+}
+
+
+
+const staffToggleBtn = document.getElementById("toggleStaffLimitBtn");
+
+if (staffToggleBtn) {
+
+staffToggleBtn.textContent = showAllState.Staff ? "Limit to 5" : `Show All Staff (${staffByDept.length})`;
+
+}
+
+
+
+facBody.innerHTML = facDisplay.length
+
+? facDisplay.map(buildRowHtml).join("")
+
+: `<tr><td colspan="8" class="empty-message">No Faculty monthly records found in ${escM(facDept)}.</td></tr>`;
+
+
+
+staffBody.innerHTML = staffDisplay.length
+
+? staffDisplay.map(buildRowHtml).join("")
+
+: `<tr><td colspan="8" class="empty-message">No Staff monthly records found in ${escM(staffDept)}.</td></tr>`;
+
+}
+
+
+
+function editMonthlyRecord(recordIndex) {
+
+const records = getRecordsStore();
+
+const rec = records[recordIndex];
+
+if (!rec) return;
+
+
+
+const newStatus = prompt("Edit Status (Present / Late):", rec.status || "Present");
+
+if (newStatus === null) return;
+
+
+
+rec.status = cleanM(newStatus) || "Present";
+
+records[recordIndex] = rec;
+
+saveRecordsStore(records);
+
+renderMonthlyData();
+
+}
+
+
+
+function deleteMonthlyRecord(recordIndex) {
+
+const records = getRecordsStore();
+
+if (recordIndex < 0 || recordIndex >= records.length) return;
+
+records.splice(recordIndex, 1);
+
+saveRecordsStore(records);
+
+renderMonthlyData();
+
+}
+
+
+
+function buildSingleEmployeeReceiptHtml(emp, monthRecords, monthVal) {
+
+const { firstName, familyName } = splitName(emp.name);
+
+const monthLabel = formatMonthLabel(monthVal);
+
+
+
+const dayMap = new Map();
