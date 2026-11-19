@@ -8,6 +8,21 @@ const DEFAULT_ADMIN_USER = "admin";
 const DEFAULT_ADMIN_PASS = "admin123";
 const EDIT_INDEX_KEY = "das_editing_employee_index";
 
+const SVG_EYE_OPEN = `
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;display:block;">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  </svg>
+`;
+
+const SVG_EYE_CLOSED = `
+  <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;display:block;">
+    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-5.94"></path>
+    <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-3.17 4.62"></path>
+    <line x1="1" y1="1" x2="23" y2="23"></line>
+  </svg>
+`;
+
 function cleanText(val) {
     return String(val ?? "").trim();
 }
@@ -57,6 +72,30 @@ function showInlineNotice(elementId, text, isSuccess = true) {
     box.style.marginTop = "12px";
     box.style.fontWeight = "600";
     box.style.fontSize = "0.9rem";
+}
+
+function setPasswordEyeState(inputEl, btnEl, showPlainText) {
+    if (!inputEl || !btnEl) return;
+    inputEl.type = showPlainText ? "text" : "password";
+    btnEl.innerHTML = showPlainText ? SVG_EYE_CLOSED : SVG_EYE_OPEN;
+    btnEl.setAttribute("aria-label", showPlainText ? "Hide password" : "Show password");
+    btnEl.setAttribute("title", showPlainText ? "Hide Password" : "Show Password");
+}
+
+function bindPasswordEye(btnId, inputId) {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    if (!btn || !input) return;
+
+    btn.removeAttribute("onclick");
+    setPasswordEyeState(input, btn, false);
+
+    btn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const isCurrentlyHidden = input.type === "password";
+        setPasswordEyeState(input, btn, isCurrentlyHidden);
+    };
 }
 
 // ==========================================
@@ -222,229 +261,6 @@ function resetForm() {
     if (form) form.reset();
     sessionStorage.removeItem(EDIT_INDEX_KEY);
 
-    if (passInput) passInput.type = "password";
-    if (toggleBtn) {
-        const icon = toggleBtn.querySelector("i");
-        if (icon) {
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        } else {
-            toggleBtn.textContent = "👁️";
-        }
-        toggleBtn.setAttribute("aria-label", "Show password");
-        toggleBtn.setAttribute("title", "Show Password");
-    }
+    setPasswordEyeState(passInput, toggleBtn, false);
 
-    if (formTitle) formTitle.textContent = "Register New Employee";
-    if (saveBtn) saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Employee`;
-}
-
-function handleEmployeeFormSubmit(event) {
-    event.preventDefault();
-    if (!window.DB) return;
-
-    const id = cleanText(document.getElementById("empId")?.value);
-    const name = cleanText(document.getElementById("empName")?.value);
-    const password = cleanText(document.getElementById("empPass")?.value);
-    const position = cleanText(document.getElementById("empPos")?.value);
-    const department = cleanText(document.getElementById("empDept")?.value);
-
-    if (!id || !name || !password || !position || !department) {
-        showInlineNotice("regStatusMsg", "Please complete all fields.", false);
-        return;
-    }
-
-    const employees = DB.getEmployees() || [];
-    const editIndexRaw = sessionStorage.getItem(EDIT_INDEX_KEY);
-    const editIndex = editIndexRaw !== null ? Number(editIndexRaw) : -1;
-    const data = { id, name, password, position, department };
-
-    let statusText = "Successful registration! Employee saved.";
-    if (editIndex >= 0 && editIndex < employees.length) {
-        employees[editIndex] = data;
-        sessionStorage.removeItem(EDIT_INDEX_KEY);
-        statusText = "Successful update! Employee record updated.";
-    } else {
-        const dupIdx = employees.findIndex(e => cleanText(e.id).toLowerCase() === id.toLowerCase());
-        if (dupIdx >= 0) {
-            employees[dupIdx] = data;
-            statusText = "Successful update! Existing Employee ID updated.";
-        } else {
-            employees.push(data);
-        }
-    }
-
-    DB.saveEmployees(employees);
-    resetForm();
-    renderEmployeeTable();
-    showInlineNotice("regStatusMsg", statusText, true);
-}
-
-function setupPasswordToggle() {
-    const toggleBtn = document.getElementById("toggleRegPass");
-    const passInput = document.getElementById("empPass");
-    if (!toggleBtn || !passInput || toggleBtn.dataset.bound === "true") return;
-
-    toggleBtn.dataset.bound = "true";
-    toggleBtn.addEventListener("click", () => {
-        const isHidden = passInput.type === "password";
-        passInput.type = isHidden ? "text" : "password";
-        const icon = toggleBtn.querySelector("i");
-        if (icon) {
-            icon.classList.toggle("fa-eye", !isHidden);
-            icon.classList.toggle("fa-eye-slash", isHidden);
-        } else {
-            toggleBtn.textContent = isHidden ? "🙈" : "👁️";
-        }
-        toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
-        toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
-    });
-}
-
-// ==========================================
-// MORNING (AM/PM) & AFTERNOON (AM/PM) ENGINE
-// ==========================================
-
-function recordMorningAfternoonAttendance(employeeId, actionType, slotKey) {
-    if (!window.DB) {
-        return { ok: false, message: "Database not loaded." };
-    }
-
-    const cleanId = cleanText(employeeId);
-    const employees = DB.getEmployees() || [];
-    const records = DB.getAttendance() || [];
-    const today = getTodayISO();
-    const nowTime = getCurrentTimeAMPM();
-
-    // slotKey values: "MORNING_AM", "MORNING_PM", "AFTERNOON_AM", "AFTERNOON_PM"
-    const slot = cleanText(slotKey).toUpperCase() || "MORNING_AM";
-
-    const emp = employees.find(e => cleanText(e.id).toLowerCase() === cleanId.toLowerCase());
-    if (!emp) {
-        return { ok: false, message: "Invalid Employee ID or Password." };
-    }
-
-    let recIdx = records.findIndex(
-        r => cleanText(r.id || r.employeeId).toLowerCase() === cleanId.toLowerCase() &&
-             cleanText(r.date) === today
-    );
-
-    if (recIdx === -1) {
-        records.push({
-            recordId: "ATT-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-            id: emp.id,
-            employeeId: emp.id,
-            name: emp.name,
-            employeeName: emp.name,
-            department: emp.department || "General",
-            position: emp.position || "Staff",
-            date: today,
-            morningAmIn: "--",
-            morningAmOut: "--",
-            morningPmIn: "--",
-            morningPmOut: "--",
-            afternoonAmIn: "--",
-            afternoonAmOut: "--",
-            afternoonPmIn: "--",
-            afternoonPmOut: "--",
-            amTimeIn: "--",
-            amTimeOut: "--",
-            pmTimeIn: "--",
-            pmTimeOut: "--",
-            status: "Present"
-        });
-        recIdx = records.length - 1;
-    }
-
-    const rec = records[recIdx];
-    const fieldMap = {
-        MORNING_AM: { inKey: "morningAmIn", outKey: "morningAmOut", label: "Morning (AM)" },
-        MORNING_PM: { inKey: "morningPmIn", outKey: "morningPmOut", label: "Morning (PM)" },
-        AFTERNOON_AM: { inKey: "afternoonAmIn", outKey: "afternoonAmOut", label: "Afternoon (AM)" },
-        AFTERNOON_PM: { inKey: "afternoonPmIn", outKey: "afternoonPmOut", label: "Afternoon (PM)" }
-    };
-
-    const cfg = fieldMap[slot] || fieldMap.MORNING_AM;
-    rec[cfg.inKey] = rec[cfg.inKey] || "--";
-    rec[cfg.outKey] = rec[cfg.outKey] || "--";
-
-    if (actionType === "TIME_IN") {
-        if (rec[cfg.inKey] !== "--") {
-            return { ok: false, message: `Already Timed In for ${cfg.label} today.` };
-        }
-        rec[cfg.inKey] = nowTime;
-        if (slot.startsWith("MORNING")) {
-            rec.amTimeIn = nowTime;
-        } else {
-            rec.pmTimeIn = nowTime;
-        }
-        records[recIdx] = rec;
-        DB.saveAttendance(records);
-        return {
-            ok: true,
-            message: `Successful Time In (${cfg.label}) for ${emp.name} at ${nowTime}`
-        };
-    }
-
-    if (actionType === "TIME_OUT") {
-        if (rec[cfg.inKey] === "--") {
-            return { ok: false, message: `Time In required first for ${cfg.label}.` };
-        }
-        if (rec[cfg.outKey] !== "--") {
-            return { ok: false, message: `Already Timed Out for ${cfg.label} today.` };
-        }
-        rec[cfg.outKey] = nowTime;
-        if (slot.startsWith("MORNING")) {
-            rec.amTimeOut = nowTime;
-        } else {
-            rec.pmTimeOut = nowTime;
-        }
-        records[recIdx] = rec;
-        DB.saveAttendance(records);
-        return {
-            ok: true,
-            message: `Successful Time Out (${cfg.label}) for ${emp.name} at ${nowTime}`
-        };
-    }
-
-    return { ok: false, message: "Invalid action." };
-}
-
-// ==========================================
-// GLOBAL INIT
-// ==========================================
-
-document.addEventListener("DOMContentLoaded", () => {
-    const currentDateEl = document.getElementById("currentDate");
-    if (currentDateEl && !currentDateEl.textContent.trim()) {
-        currentDateEl.textContent = new Date().toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        });
-    }
-
-    const regForm = document.getElementById("regForm");
-    if (regForm) {
-        const noticeDiv = document.createElement("div");
-        noticeDiv.id = "regStatusMsg";
-        noticeDiv.style.display = "none";
-        regForm.appendChild(noticeDiv);
-
-        regForm.addEventListener("submit", handleEmployeeFormSubmit);
-        setupPasswordToggle();
-        renderEmployeeTable();
-    }
-});
-
-window.checkAuth = checkAuth;
-window.isLoggedIn = isLoggedIn;
-window.loginAdmin = loginAdmin;
-window.logout = logout;
-window.editEmployee = editEmployee;
-window.deleteEmployee = deleteEmployee;
-window.resetForm = resetForm;
-window.recordMorningAfternoonAttendance = recordMorningAfternoonAttendance;
-window.showInlineNotice = showInlineNotice;
-window.getTodayISO = getTodayISO;
-window.getCurrentMonthISO = getCurrentMonthISO;
+    if
