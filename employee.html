@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,35 +11,27 @@
   <style>
     .password-container {
       position: relative;
-      width: 100%;
+      display: flex;
+      align-items: center;
     }
 
     .password-container input {
       width: 100%;
-      padding-right: 48px !important;
+      padding-right: 44px !important;
     }
 
     #toggleRegPass {
       position: absolute;
-      right: 12px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
       border: none;
       background: transparent;
       cursor: pointer;
-      font-size: 18px;
-      padding: 5px;
+      font-size: 1rem;
+      color: #555;
+      padding: 4px 6px;
       z-index: 2;
-    }
-
-    .department-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-      gap: 12px;
-    }
-
-    .department-buttons button {
-      cursor: pointer;
     }
 
     .employee-table {
@@ -64,7 +55,21 @@
       white-space: nowrap;
     }
 
-    @media(max-width:600px) {
+    .delete-attendance-btn {
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      background: white;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .delete-attendance-btn:hover {
+      color: white;
+      background: #dc3545;
+    }
+
+    @media (max-width: 600px) {
       #regForm > div:first-child {
         grid-template-columns: 1fr !important;
       }
@@ -83,7 +88,6 @@
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-
     <div class="sidebar-header">
       <i class="fa-solid fa-graduation-cap"></i>
       <h2>Digital Attendance System</h2>
@@ -91,121 +95,76 @@
     </div>
 
     <ul class="sidebar-menu">
-
-      <li>
-        <a href="./dashboard.html">
-          <i class="fa-solid fa-house"></i> Home
-        </a>
-      </li>
-
-      <li class="active">
-        <a href="./employee.html">
-          <i class="fa-solid fa-user-plus"></i> Employee Registration
-        </a>
-      </li>
-
-      <li>
-        <a href="./attendance.html">
-          <i class="fa-solid fa-clipboard-check"></i> Attendance Record
-        </a>
-      </li>
-
-      <li>
-        <a href="./monthly.html">
-          <i class="fa-solid fa-calendar-days"></i> Monthly Record
-        </a>
-      </li>
-
-      <li>
-        <a href="#" onclick="logout(); return false;">
-          <i class="fa-solid fa-right-from-bracket"></i> Log Out
-        </a>
-      </li>
-
+      <li><a href="./dashboard.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li class="active"><a href="./employee.html"><i class="fa-solid fa-user-plus"></i> Employee Registration</a></li>
+      <li><a href="./employee.html"><i class="fa-solid fa-users"></i> Employee Record</a></li>
+      <li><a href="./attendance.html"><i class="fa-solid fa-clipboard-check"></i> Attendance Record</a></li>
+      <li><a href="./monthly.html"><i class="fa-solid fa-calendar-days"></i> Monthly Record</a></li>
+      <li><a href="#" onclick="logout(); return false;"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a></li>
     </ul>
+
+    <div class="sidebar-footer">
+      <i class="fa-solid fa-user-circle"></i>
+      <div>
+        <strong>Welcome,</strong>
+        <span>Admin</span>
+      </div>
+    </div>
   </div>
 
   <!-- MAIN CONTENT -->
   <div class="main-content">
-
     <div class="topbar">
-      <div>
-        <i class="fa-solid fa-bars"></i>
-      </div>
-
+      <div><i class="fa-solid fa-bars"></i></div>
       <div class="topbar-info">
-        <span>
-          <i class="fa-regular fa-calendar"></i>
-          <span id="currentDate"></span>
-        </span>
+        <span><i class="fa-regular fa-calendar"></i> <span id="currentDate"></span></span>
       </div>
     </div>
 
     <div class="content-area">
-
-      <h1 style="font-size:1.5rem;margin-bottom:20px;">
+      <h1 class="page-heading">
         <i class="fa-solid fa-user-plus" style="color:var(--primary-blue);"></i>
         Employee Registration
       </h1>
+      <p class="page-subheading">Register Faculty or Staff under their department (Descending list).</p>
 
       <!-- REGISTRATION FORM -->
       <div class="card">
-
-        <h3 id="formTitle">Register New Employee</h3>
+        <h3 id="formTitle" class="card-title">Register New Employee</h3>
 
         <form id="regForm">
-
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-
             <div class="form-group">
-              <label>Employee ID *</label>
-              <input type="text" id="empId" class="form-control"
-                required placeholder="Enter Employee ID">
+              <label for="empId">Employee ID (Primary Key) *</label>
+              <input type="text" id="empId" class="form-control" required placeholder="e.g. EMP003">
             </div>
 
             <div class="form-group">
-              <label>Full Name *</label>
-              <input type="text" id="empName" class="form-control"
-                required placeholder="Enter Full Name">
+              <label for="empName">Full Name *</label>
+              <input type="text" id="empName" class="form-control" required placeholder="e.g. Pedro Reyes">
             </div>
 
-            <!-- PASSWORD WITH EYE BUTTON -->
             <div class="form-group">
-              <label>Password *</label>
-
+              <label for="empPass">Password *</label>
               <div class="password-container">
-
-                <input
-                  type="password"
-                  id="empPass"
-                  class="form-control"
-                  required
-                  placeholder="Enter Password"
-                >
-
-                <button
-                  type="button"
-                  id="toggleRegPass"
-                  aria-label="Show password"
-                  title="Show Password"
-                >👁️</button>
-
+                <input type="password" id="empPass" class="form-control" required placeholder="Enter Password">
+                <button type="button" id="toggleRegPass" aria-label="Show password" title="Show Password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
               </div>
             </div>
 
             <div class="form-group">
-              <label>Position *</label>
-
+              <label for="empPos">Position / Group *</label>
               <select id="empPos" class="form-control" required>
                 <option value="">Select Position</option>
-                <option value="Staff">Staff</option>
                 <option value="Faculty">Faculty</option>
+                <option value="Staff">Staff</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label>Department *</label>
-
+              <label for="empDept">Department *</label>
               <select id="empDept" class="form-control" required>
                 <option value="">Select Department</option>
                 <option value="BSHM">BSHM</option>
@@ -216,486 +175,34 @@
                 <option value="BSBA">BSBA</option>
               </select>
             </div>
-
           </div>
 
           <div style="margin-top:20px;display:flex;gap:10px;">
-
             <button type="submit" class="btn btn-primary" id="saveBtn">
               <i class="fa-solid fa-floppy-disk"></i> Save Employee
             </button>
-
-            <button type="button" class="btn btn-outline"
-              onclick="resetForm()">
-              Cancel
-            </button>
-
+            <button type="button" class="btn btn-outline" onclick="resetForm()">Cancel</button>
           </div>
         </form>
       </div>
 
       <!-- EMPLOYEE RECORDS -->
       <div class="card" style="margin-top:25px;">
-
-        <h2 style="margin-bottom:15px;">
+        <h2 class="card-title">
           <i class="fa-solid fa-folder-open"></i>
-          Employee Records
+          Employee Records (Descending)
         </h2>
-
-        <p style="margin-bottom:15px;color:gray;">
-          Select a department folder to view its registered employees.
-        </p>
-
-        <!-- DEPARTMENT FOLDERS -->
-        <div id="departmentFolders" class="department-buttons">
-
-          <button type="button" class="btn btn-primary"
-            onclick="showDepartment('ALL')">
-            <i class="fa-solid fa-folder-open"></i> All Depts
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BSHM')">
-            <i class="fa-solid fa-folder"></i> BSHM
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BSED')">
-            <i class="fa-solid fa-folder"></i> BSED
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BEED')">
-            <i class="fa-solid fa-folder"></i> BEED
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BSCRIM')">
-            <i class="fa-solid fa-folder"></i> BSCRIM
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BSIT')">
-            <i class="fa-solid fa-folder"></i> BSIT
-          </button>
-
-          <button type="button" class="btn btn-outline"
-            onclick="showDepartment('BSBA')">
-            <i class="fa-solid fa-folder"></i> BSBA
-          </button>
-
-        </div>
-
-        <h3 id="departmentTitle" style="margin:25px 0 15px;">
-          All Registered Employees
-        </h3>
-
-        <!-- EMPLOYEE TABLE -->
-        <div style="overflow-x:auto;">
-
-          <table class="employee-table">
-
-            <thead>
-              <tr>
-                <th>Employee ID</th>
-                <th>Full Name</th>
-                <th>Position</th>
-                <th>Department</th>
-                <th>Registration Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="employeeTableBody"></tbody>
-
-          </table>
-        </div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- DATABASE -->
 <script src="./database.js"></script>
-
 <script>
-
-let selectedDepartment = "ALL";
-let editingEmployeeId = null;
-
-// CURRENT DATE
-document.getElementById("currentDate").textContent =
-  new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof setupPasswordToggle === "function") setupPasswordToggle();
+    if (typeof renderEmployeeTable === "function") renderEmployeeTable();
   });
-
-// SHOW / HIDE PASSWORD
-document.getElementById("toggleRegPass")
-  .addEventListener("click", function() {
-
-    const password = document.getElementById("empPass");
-
-    if (password.type === "password") {
-
-      password.type = "text";
-      this.textContent = "🙈";
-      this.setAttribute("aria-label", "Hide password");
-      this.title = "Hide Password";
-
-    } else {
-
-      password.type = "password";
-      this.textContent = "👁️";
-      this.setAttribute("aria-label", "Show password");
-      this.title = "Show Password";
-
-    }
-
-  });
-
-// GET EMPLOYEES
-function getEmployees() {
-
-  if (!window.DB || typeof DB.getEmployees !== "function") {
-    return [];
-  }
-
-  return DB.getEmployees() || [];
-}
-
-// ESCAPE HTML
-function escapeHTML(value) {
-
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-
-}
-
-// ESCAPE JAVASCRIPT STRING
-function escapeJS(value) {
-
-  return String(value ?? "")
-    .replace(/\\/g, "\\\\")
-    .replace(/'/g, "\\'")
-    .replace(/\n/g, "\\n");
-
-}
-
-// REGISTRATION DATE
-function formatRegistrationDate(dateValue) {
-
-  if (!dateValue) return "Not recorded";
-
-  const date = new Date(dateValue);
-
-  if (isNaN(date.getTime())) return "Not recorded";
-
-  return date.toLocaleString("en-PH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-}
-
-// REGISTER OR UPDATE EMPLOYEE
-document.getElementById("regForm")
-  .addEventListener("submit", function(e) {
-
-    e.preventDefault();
-
-    if (!window.DB ||
-        typeof DB.saveEmployees !== "function") {
-      return;
-    }
-
-    const employees = getEmployees();
-
-    const id = document.getElementById("empId").value.trim();
-    const name = document.getElementById("empName").value.trim();
-    const password = document.getElementById("empPass").value;
-    const position = document.getElementById("empPos").value;
-    const department = document.getElementById("empDept").value;
-
-    if (!id || !name || !password || !position || !department) {
-      return;
-    }
-
-    // NEW EMPLOYEE
-    if (editingEmployeeId === null) {
-
-      const duplicate = employees.some(emp =>
-        String(emp.id).toLowerCase() === id.toLowerCase()
-      );
-
-      if (duplicate) {
-        document.getElementById("empId").setCustomValidity(
-          "Employee ID already exists."
-        );
-        document.getElementById("empId").reportValidity();
-        document.getElementById("empId").setCustomValidity("");
-        return;
-      }
-
-      employees.push({
-        id: id,
-        name: name,
-        password: password,
-        position: position,
-        department: department,
-        registeredAt: new Date().toISOString()
-      });
-
-    }
-
-    // UPDATE EMPLOYEE
-    else {
-
-      const index = employees.findIndex(emp =>
-        String(emp.id) === String(editingEmployeeId)
-      );
-
-      if (index === -1) return;
-
-      const duplicate = employees.some((emp, i) =>
-        i !== index &&
-        String(emp.id).toLowerCase() === id.toLowerCase()
-      );
-
-      if (duplicate) {
-        document.getElementById("empId").setCustomValidity(
-          "Employee ID already exists."
-        );
-        document.getElementById("empId").reportValidity();
-        document.getElementById("empId").setCustomValidity("");
-        return;
-      }
-
-      employees[index] = {
-        ...employees[index],
-        id: id,
-        name: name,
-        password: password,
-        position: position,
-        department: department
-      };
-
-    }
-
-    DB.saveEmployees(employees);
-
-    resetForm();
-    renderEmployees();
-
-  });
-
-// SHOW DEPARTMENT
-function showDepartment(department) {
-
-  selectedDepartment = department;
-
-  document.getElementById("departmentTitle").textContent =
-    department === "ALL"
-      ? "All Registered Employees"
-      : department + " Registered Employees";
-
-  document.querySelectorAll("#departmentFolders button")
-    .forEach(button => {
-
-      button.classList.remove("btn-primary");
-      button.classList.add("btn-outline");
-
-    });
-
-  const buttons = document.querySelectorAll(
-    "#departmentFolders button"
-  );
-
-  buttons.forEach(button => {
-
-    const isSelected = department === "ALL"
-      ? button.textContent.includes("All Depts")
-      : button.textContent.trim().includes(department);
-
-    if (isSelected) {
-
-      button.classList.remove("btn-outline");
-      button.classList.add("btn-primary");
-
-    }
-
-  });
-
-  renderEmployees();
-
-}
-
-// DISPLAY EMPLOYEES
-function renderEmployees() {
-
-  const employees = getEmployees();
-
-  const tbody = document.getElementById("employeeTableBody");
-
-  const filtered = selectedDepartment === "ALL"
-    ? employees
-    : employees.filter(emp =>
-        String(emp.department).toUpperCase() === selectedDepartment
-      );
-
-  if (filtered.length === 0) {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center;padding:20px;">
-          No registered employees in this department.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(emp => `
-
-    <tr style="border-bottom:1px solid #ddd;">
-
-      <td>${escapeHTML(emp.id)}</td>
-
-      <td>${escapeHTML(emp.name)}</td>
-
-      <td>${escapeHTML(emp.position)}</td>
-
-      <td>${escapeHTML(emp.department)}</td>
-
-      <td>${formatRegistrationDate(emp.registeredAt)}</td>
-
-      <td style="white-space:nowrap;">
-
-        <button type="button"
-          class="btn btn-primary"
-          onclick="editEmployee('${escapeJS(emp.id)}')">
-
-          <i class="fa-solid fa-pen"></i> Edit
-
-        </button>
-
-        <button type="button"
-          class="btn btn-outline"
-          onclick="deleteEmployee('${escapeJS(emp.id)}')">
-
-          <i class="fa-solid fa-trash"></i> Delete
-
-        </button>
-
-      </td>
-
-    </tr>
-
-  `).join("");
-
-}
-
-// EDIT EMPLOYEE
-function editEmployee(id) {
-
-  const employees = getEmployees();
-
-  const employee = employees.find(emp =>
-    String(emp.id) === String(id)
-  );
-
-  if (!employee) return;
-
-  editingEmployeeId = employee.id;
-
-  document.getElementById("empId").value = employee.id;
-  document.getElementById("empName").value = employee.name;
-  document.getElementById("empPass").value = employee.password || "";
-  document.getElementById("empPos").value = employee.position;
-  document.getElementById("empDept").value = employee.department;
-
-  document.getElementById("empPass").type = "password";
-  document.getElementById("toggleRegPass").textContent = "👁️";
-
-  document.getElementById("formTitle").textContent =
-    "Update Employee";
-
-  document.getElementById("saveBtn").innerHTML =
-    '<i class="fa-solid fa-rotate"></i> Update Employee';
-
-  document.getElementById("empId").disabled = true;
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-}
-
-// DELETE EMPLOYEE - NO CONFIRMATION POPUP
-function deleteEmployee(id) {
-
-  if (!window.DB ||
-      typeof DB.saveEmployees !== "function") {
-    return;
-  }
-
-  const employees = getEmployees();
-
-  const updatedEmployees = employees.filter(emp =>
-    String(emp.id) !== String(id)
-  );
-
-  DB.saveEmployees(updatedEmployees);
-
-  if (String(editingEmployeeId) === String(id)) {
-    resetForm();
-  }
-
-  renderEmployees();
-
-}
-
-// RESET FORM
-function resetForm() {
-
-  document.getElementById("regForm").reset();
-
-  editingEmployeeId = null;
-
-  document.getElementById("formTitle").textContent =
-    "Register New Employee";
-
-  document.getElementById("saveBtn").innerHTML =
-    '<i class="fa-solid fa-floppy-disk"></i> Save Employee';
-
-  document.getElementById("empId").disabled = false;
-
-  document.getElementById("empPass").type = "password";
-
-  document.getElementById("toggleRegPass").textContent = "👁️";
-  document.getElementById("toggleRegPass").setAttribute(
-    "aria-label",
-    "Show password"
-  );
-  document.getElementById("toggleRegPass").title = "Show Password";
-
-}
-
-// INITIAL DISPLAY
-renderEmployees();
-
 </script>
 
 </body>
