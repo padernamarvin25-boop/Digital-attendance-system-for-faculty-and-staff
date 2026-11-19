@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Employee Attendance - Time In/Out</title>
 
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./all.min.css">
 </head>
 
 <body class="kiosk-body">
@@ -14,7 +14,7 @@
     <div class="kiosk-heading">
       <i class="fa-regular fa-clock"></i>
       <h1>Employee Attendance</h1>
-      <p>Morning (AM) &amp; Afternoon (PM) Time In / Time Out</p>
+      <p>Morning (AM/PM) &amp; Afternoon (AM/PM) Time In / Time Out</p>
     </div>
 
     <form id="kioskForm">
@@ -32,10 +32,12 @@
       </div>
 
       <div class="form-group">
-        <label for="kioskPeriod">Session (AM / PM)</label>
-        <select id="kioskPeriod" class="form-control">
-          <option value="AM">Morning (AM)</option>
-          <option value="PM">Afternoon (PM)</option>
+        <label for="kioskSlot">Attendance Session</label>
+        <select id="kioskSlot" class="form-control">
+          <option value="MORNING_AM">Morning — AM</option>
+          <option value="MORNING_PM">Morning — PM</option>
+          <option value="AFTERNOON_AM">Afternoon — AM</option>
+          <option value="AFTERNOON_PM">Afternoon — PM</option>
         </select>
       </div>
 
@@ -47,53 +49,63 @@
           <i class="fa-solid fa-right-from-bracket"></i> TIME OUT
         </button>
       </div>
+
+      <!-- Inline status text right below Time In / Out buttons (no OK alert popup) -->
+      <div id="kioskStatusMsg" style="display:none;" aria-live="polite"></div>
     </form>
 
     <div class="kiosk-footer">
       <p>&mdash; Be On Time. Be Productive. &mdash;</p>
-      <a href="login.html" class="admin-link">Admin Access</a>
+      <a href="./login.html" class="admin-link">Admin Access</a>
     </div>
   </div>
 
-  <script src="database.js"></script>
-  <script src="app.js"></script>
+  <script src="./database.js"></script>
+  <script src="./app.js"></script>
   <script>
     const toggleKioskPass = document.getElementById("toggleKioskPass");
     const kioskPass = document.getElementById("kioskPass");
-    const kioskPeriod = document.getElementById("kioskPeriod");
+    const kioskSlot = document.getElementById("kioskSlot");
 
-    if (kioskPeriod) {
-      kioskPeriod.value = new Date().getHours() < 12 ? "AM" : "PM";
+    if (kioskSlot) {
+      const hour = new Date().getHours();
+      kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
     }
 
-    toggleKioskPass.addEventListener("click", function () {
-      const isPass = kioskPass.type === "password";
-      kioskPass.type = isPass ? "text" : "password";
-      this.classList.toggle("fa-eye-slash", isPass);
-    });
+    if (toggleKioskPass && kioskPass) {
+      toggleKioskPass.addEventListener("click", function () {
+        const isPass = kioskPass.type === "password";
+        kioskPass.type = isPass ? "text" : "password";
+        this.classList.toggle("fa-eye-slash", isPass);
+      });
+    }
 
     function runKioskAction(actionType) {
       const id = document.getElementById("kioskId").value.trim();
       const pass = document.getElementById("kioskPass").value;
-      const period = document.getElementById("kioskPeriod").value;
+      const slot = document.getElementById("kioskSlot").value;
 
       if (!id || !pass) {
-        alert("Mangyaring ilagay ang Employee ID at Password.");
+        showInlineNotice("kioskStatusMsg", "Please enter Employee ID and Password.", false);
         return;
       }
 
       const employees = DB.getEmployees() || [];
       const emp = employees.find(e => String(e.id) === id && String(e.password) === pass);
       if (!emp) {
-        alert("Maling Employee ID o Password!");
+        showInlineNotice("kioskStatusMsg", "Invalid Employee ID or Password.", false);
         return;
       }
 
-      const result = logAttendancePeriod(id, actionType, period);
-      alert(result.message);
+      const result = recordMorningAfternoonAttendance(id, actionType, slot);
+      showInlineNotice("kioskStatusMsg", result.message, result.ok);
+
       if (result.ok) {
         document.getElementById("kioskForm").reset();
-        if (kioskPeriod) kioskPeriod.value = new Date().getHours() < 12 ? "AM" : "PM";
+        if (kioskSlot) {
+          const hour = new Date().getHours();
+          kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
+        }
       }
     }
 
