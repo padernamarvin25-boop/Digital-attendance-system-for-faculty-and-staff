@@ -68,6 +68,54 @@
       margin-top: 24px;
     }
 
+    .section-search-box {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .section-search-input {
+      width: 100%;
+      padding: 10px 38px 10px 38px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+    }
+
+    .section-search-input:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+    }
+
+    .section-search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .section-search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      padding: 4px 6px;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .section-search-clear:hover {
+      color: #dc3545;
+    }
+
     .dept-folders-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
@@ -263,12 +311,27 @@
         </form>
       </div>
 
-      <!-- FACULTY RECORDS (NEW RECORD + DEPARTMENTS) -->
+      <!-- FACULTY RECORDS (NEW RECORD + DEPARTMENTS + SEARCH) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:var(--primary-blue);">
           <i class="fa-solid fa-chalkboard-user"></i>
           Faculty Records
         </h2>
+
+        <div class="section-search-box">
+          <i class="fa-solid fa-magnifying-glass section-search-icon"></i>
+          <input
+            type="text"
+            id="facultySearchInput"
+            class="section-search-input"
+            placeholder="Search Faculty by ID, Name, or Department..."
+            aria-label="Search Faculty Records"
+          >
+          <button type="button" id="clearFacultySearch" class="section-search-clear" title="Clear search" aria-label="Clear search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
         <div id="facultyDeptFolders" class="dept-folders-grid"></div>
         <div class="folder-panel-header">
           <span id="facultyActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> NEW RECORD</span>
@@ -289,12 +352,27 @@
         </div>
       </div>
 
-      <!-- STAFF RECORDS (NEW RECORD + DEPARTMENTS) -->
+      <!-- STAFF RECORDS (NEW RECORD + DEPARTMENTS + SEARCH) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:#198754;">
           <i class="fa-solid fa-user-tie"></i>
           Staff Records
         </h2>
+
+        <div class="section-search-box">
+          <i class="fa-solid fa-magnifying-glass section-search-icon"></i>
+          <input
+            type="text"
+            id="staffSearchInput"
+            class="section-search-input"
+            placeholder="Search Staff by ID, Name, or Department..."
+            aria-label="Search Staff Records"
+          >
+          <button type="button" id="clearStaffSearch" class="section-search-clear" title="Clear search" aria-label="Clear search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
         <div id="staffDeptFolders" class="dept-folders-grid"></div>
         <div class="folder-panel-header">
           <span id="staffActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> NEW RECORD</span>
@@ -328,6 +406,8 @@
 
     let selectedFacultyTab = NEW_RECORD_KEY;
     let selectedStaffTab = NEW_RECORD_KEY;
+    let facultyQuery = "";
+    let staffQuery = "";
 
     const clean = v => String(v ?? "").trim();
     const isFaculty = emp => clean(emp?.position).toLowerCase().includes("faculty");
@@ -339,6 +419,16 @@
       '"': "&quot;",
       "'": "&#39;"
     }[ch]));
+
+    const matchesQuery = (emp, query) => {
+      const q = clean(query).toLowerCase();
+      if (!q) return true;
+      const idMatch = clean(emp?.id).toLowerCase().includes(q);
+      const nameMatch = clean(emp?.name).toLowerCase().includes(q);
+      const deptMatch = clean(emp?.department).toLowerCase().includes(q);
+      const posMatch = clean(emp?.position).toLowerCase().includes(q);
+      return idMatch || nameMatch || deptMatch || posMatch;
+    };
 
     const makeRow = emp => `
       <tr>
@@ -353,12 +443,18 @@
       </tr>
     `;
 
-    function renderGroupSection(groupType, sortedEmployees, activeTab, onSelectTab) {
+    function renderGroupSection(groupType, sortedEmployees, activeTab, onSelectTab, query) {
       const isFac = groupType === "Faculty";
       const foldersContainer = document.getElementById(isFac ? "facultyDeptFolders" : "staffDeptFolders");
       const labelEl = document.getElementById(isFac ? "facultyActiveFolderLabel" : "staffActiveFolderLabel");
       const bodyEl = document.getElementById(isFac ? "facultyEmployeeTableBody" : "staffEmployeeTableBody");
+      const clearBtn = document.getElementById(isFac ? "clearFacultySearch" : "clearStaffSearch");
       if (!foldersContainer || !labelEl || !bodyEl) return;
+
+      const trimmedQuery = clean(query);
+      if (clearBtn) {
+        clearBtn.style.display = trimmedQuery ? "inline-flex" : "none";
+      }
 
       const groupEmployees = sortedEmployees.filter(emp =>
         isFac ? isFaculty(emp) : !isFaculty(emp)
@@ -389,17 +485,28 @@
       });
 
       const isNewSelected = activeTab === NEW_RECORD_KEY;
-      labelEl.innerHTML = isNewSelected
-        ? `<i class="fa-regular fa-folder-open"></i> NEW RECORD (Latest ${MAX_NEW_RECORDS} — ${groupType})`
-        : `<i class="fa-regular fa-folder-open"></i> ${esc(activeTab)} (${groupType})`;
 
-      const rowsToShow = isNewSelected
-        ? groupEmployees.slice(0, MAX_NEW_RECORDS)
-        : groupEmployees.filter(emp => clean(emp.department).toUpperCase() === clean(activeTab).toUpperCase());
+      let rowsToShow = [];
+      if (trimmedQuery) {
+        // Kapag naghahanap, hinahanap sa loob ng group (o napiling department kung hindi NEW RECORD)
+        const pool = isNewSelected
+          ? groupEmployees
+          : groupEmployees.filter(emp => clean(emp.department).toUpperCase() === clean(activeTab).toUpperCase());
+        rowsToShow = pool.filter(emp => matchesQuery(emp, trimmedQuery));
+        labelEl.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Search "${esc(trimmedQuery)}" (${rowsToShow.length} result${rowsToShow.length === 1 ? "" : "s"} — ${groupType})`;
+      } else {
+        labelEl.innerHTML = isNewSelected
+          ? `<i class="fa-regular fa-folder-open"></i> NEW RECORD (Latest ${MAX_NEW_RECORDS} — ${groupType})`
+          : `<i class="fa-regular fa-folder-open"></i> ${esc(activeTab)} (${groupType})`;
+
+        rowsToShow = isNewSelected
+          ? groupEmployees.slice(0, MAX_NEW_RECORDS)
+          : groupEmployees.filter(emp => clean(emp.department).toUpperCase() === clean(activeTab).toUpperCase());
+      }
 
       bodyEl.innerHTML = rowsToShow.length
         ? rowsToShow.map(makeRow).join("")
-        : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No ${groupType.toLowerCase()} records found in ${esc(activeTab)}.</td></tr>`;
+        : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No matching ${groupType.toLowerCase()} records found.</td></tr>`;
     }
 
     function renderAllSections() {
@@ -409,8 +516,45 @@
         .map((emp, idx) => ({ ...emp, _idx: idx }))
         .sort((a, b) => b._idx - a._idx);
 
-      renderGroupSection("Faculty", sorted, selectedFacultyTab, t => { selectedFacultyTab = t; });
-      renderGroupSection("Staff", sorted, selectedStaffTab, t => { selectedStaffTab = t; });
+      renderGroupSection("Faculty", sorted, selectedFacultyTab, t => { selectedFacultyTab = t; }, facultyQuery);
+      renderGroupSection("Staff", sorted, selectedStaffTab, t => { selectedStaffTab = t; }, staffQuery);
+    }
+
+    const facInput = document.getElementById("facultySearchInput");
+    const staffInput = document.getElementById("staffSearchInput");
+    const clearFacBtn = document.getElementById("clearFacultySearch");
+    const clearStaffBtn = document.getElementById("clearStaffSearch");
+
+    if (facInput) {
+      facInput.addEventListener("input", e => {
+        facultyQuery = e.target.value;
+        renderAllSections();
+      });
+    }
+
+    if (staffInput) {
+      staffInput.addEventListener("input", e => {
+        staffQuery = e.target.value;
+        renderAllSections();
+      });
+    }
+
+    if (clearFacBtn && facInput) {
+      clearFacBtn.addEventListener("click", () => {
+        facInput.value = "";
+        facultyQuery = "";
+        renderAllSections();
+        facInput.focus();
+      });
+    }
+
+    if (clearStaffBtn && staffInput) {
+      clearStaffBtn.addEventListener("click", () => {
+        staffInput.value = "";
+        staffQuery = "";
+        renderAllSections();
+        staffInput.focus();
+      });
     }
 
     renderAllSections();
