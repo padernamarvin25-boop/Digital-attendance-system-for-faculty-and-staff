@@ -68,6 +68,67 @@
       margin-top: 24px;
     }
 
+    .dept-folders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .dept-folder-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #1e293b;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .dept-folder-btn:hover {
+      border-color: var(--primary-blue);
+      background: #eff6ff;
+    }
+
+    .dept-folder-btn.active-faculty {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: #ffffff;
+    }
+
+    .dept-folder-btn.active-staff {
+      background: #198754;
+      border-color: #198754;
+      color: #ffffff;
+    }
+
+    .dept-count-badge {
+      background: rgba(15, 23, 42, 0.1);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+
+    .dept-folder-btn.active-faculty .dept-count-badge,
+    .dept-folder-btn.active-staff .dept-count-badge {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+
+    .folder-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #334155;
+    }
+
     .delete-attendance-btn {
       color: #dc3545;
       border: 1px solid #dc3545;
@@ -201,7 +262,7 @@
         </form>
       </div>
 
-      <!-- FACULTY RECORDS -->
+      <!-- FACULTY RECORDS (LATEST VIEW) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:var(--primary-blue);">
           <i class="fa-solid fa-chalkboard-user"></i>
@@ -223,7 +284,33 @@
         </div>
       </div>
 
-      <!-- STAFF RECORDS -->
+      <!-- FACULTY DEPARTMENT FOLDERS -->
+      <div class="card group-section-card">
+        <h2 class="card-title" style="color:var(--primary-blue);">
+          <i class="fa-solid fa-folder-tree"></i>
+          Faculty Department Folders
+        </h2>
+        <div id="facultyDeptFolders" class="dept-folders-grid"></div>
+        <div class="folder-panel-header">
+          <span id="facultyActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> Folder: BSHM</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="employee-table">
+            <thead>
+              <tr>
+                <th>Employee ID (PK)</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="facultyFolderTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STAFF RECORDS (LATEST VIEW) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:#198754;">
           <i class="fa-solid fa-user-tie"></i>
@@ -245,6 +332,32 @@
         </div>
       </div>
 
+      <!-- STAFF DEPARTMENT FOLDERS -->
+      <div class="card group-section-card">
+        <h2 class="card-title" style="color:#198754;">
+          <i class="fa-solid fa-folder-tree"></i>
+          Staff Department Folders
+        </h2>
+        <div id="staffDeptFolders" class="dept-folders-grid"></div>
+        <div class="folder-panel-header">
+          <span id="staffActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> Folder: BSHM</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="employee-table">
+            <thead>
+              <tr>
+                <th>Employee ID (PK)</th>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Position</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffFolderTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -253,8 +366,76 @@
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const MAX_LATEST_ROWS = 5;
+    const DEPARTMENTS = ["BSHM", "BSED", "BEED", "BSCRIM", "BSIT", "BSBA"];
+    let selectedFacultyDept = "BSHM";
+    let selectedStaffDept = "BSHM";
 
-    function applyLatestLimitOnly() {
+    const clean = v => String(v ?? "").trim();
+    const isFaculty = emp => clean(emp?.position).toLowerCase().includes("faculty");
+
+    const esc = v => clean(v).replace(/[&<>"']/g, ch => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[ch]));
+
+    const makeRow = emp => `
+      <tr>
+        <td>${esc(emp.id)}</td>
+        <td><strong>${esc(emp.name)}</strong></td>
+        <td>${esc(emp.department)}</td>
+        <td>${esc(emp.position)}</td>
+        <td style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-outline" style="padding:5px 10px;" onclick="editEmployee(${emp._idx})">Edit</button>
+          <button type="button" class="delete-attendance-btn" onclick="deleteEmployee(${emp._idx})">Delete</button>
+        </td>
+      </tr>
+    `;
+
+    function renderDepartmentFolderSection(groupType, sortedEmployees, activeDept, onSelectDept) {
+      const isFac = groupType === "Faculty";
+      const foldersContainer = document.getElementById(isFac ? "facultyDeptFolders" : "staffDeptFolders");
+      const labelEl = document.getElementById(isFac ? "facultyActiveFolderLabel" : "staffActiveFolderLabel");
+      const bodyEl = document.getElementById(isFac ? "facultyFolderTableBody" : "staffFolderTableBody");
+      if (!foldersContainer || !labelEl || !bodyEl) return;
+
+      const groupEmployees = sortedEmployees.filter(emp =>
+        isFac ? isFaculty(emp) : !isFaculty(emp)
+      );
+
+      foldersContainer.innerHTML = DEPARTMENTS.map(dept => {
+        const count = groupEmployees.filter(emp => clean(emp.department).toUpperCase() === dept).length;
+        const isActive = dept === activeDept;
+        const activeClass = isActive ? (isFac ? "active-faculty" : "active-staff") : "";
+        return `
+          <button type="button" class="dept-folder-btn ${activeClass}" data-dept="${dept}">
+            <span><i class="fa-${isActive ? "solid fa-folder-open" : "regular fa-folder"}"></i> ${dept}</span>
+            <span class="dept-count-badge">${count}</span>
+          </button>
+        `;
+      }).join("");
+
+      foldersContainer.querySelectorAll(".dept-folder-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          onSelectDept(btn.getAttribute("data-dept"));
+          renderEmployeeViews();
+        });
+      });
+
+      labelEl.innerHTML = `<i class="fa-regular fa-folder-open"></i> Folder: ${esc(activeDept)} (${groupType})`;
+
+      const deptRecords = groupEmployees.filter(
+        emp => clean(emp.department).toUpperCase() === clean(activeDept).toUpperCase()
+      );
+
+      bodyEl.innerHTML = deptRecords.length
+        ? deptRecords.map(makeRow).join("")
+        : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No ${groupType.toLowerCase()} records in ${esc(activeDept)} folder.</td></tr>`;
+    }
+
+    function renderEmployeeViews() {
       const facultyBody = document.getElementById("facultyEmployeeTableBody");
       const staffBody = document.getElementById("staffEmployeeTableBody");
 
@@ -264,22 +445,8 @@
           .map((emp, idx) => ({ ...emp, _idx: idx }))
           .sort((a, b) => b._idx - a._idx);
 
-        const isFaculty = emp => String(emp.position || "").trim().toLowerCase().includes("faculty");
         const latestFaculty = sorted.filter(isFaculty).slice(0, MAX_LATEST_ROWS);
         const latestStaff = sorted.filter(emp => !isFaculty(emp)).slice(0, MAX_LATEST_ROWS);
-
-        const makeRow = emp => `
-          <tr>
-            <td>${String(emp.id || "")}</td>
-            <td><strong>${String(emp.name || "")}</strong></td>
-            <td>${String(emp.department || "")}</td>
-            <td>${String(emp.position || "")}</td>
-            <td style="display:flex;gap:8px;">
-              <button type="button" class="btn btn-outline" style="padding:5px 10px;" onclick="editEmployee(${emp._idx})">Edit</button>
-              <button type="button" class="delete-attendance-btn" onclick="deleteEmployee(${emp._idx})">Delete</button>
-            </td>
-          </tr>
-        `;
 
         facultyBody.innerHTML = latestFaculty.length
           ? latestFaculty.map(makeRow).join("")
@@ -288,25 +455,31 @@
         staffBody.innerHTML = latestStaff.length
           ? latestStaff.map(makeRow).join("")
           : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No registered staff found.</td></tr>`;
-      } else {
-        // Fallback kung static rows lang ang nandoon: itago ang lampas sa MAX_LATEST_ROWS
-        [facultyBody, staffBody].forEach(tbody => {
-          if (!tbody) return;
-          Array.from(tbody.querySelectorAll("tr")).forEach((tr, i) => {
-            tr.style.display = i < MAX_LATEST_ROWS ? "" : "none";
-          });
-        });
+
+        renderDepartmentFolderSection("Faculty", sorted, selectedFacultyDept, d => { selectedFacultyDept = d; });
+        renderDepartmentFolderSection("Staff", sorted, selectedStaffDept, d => { selectedStaffDept = d; });
       }
     }
 
     if (typeof renderEmployeeTable === "function") {
       renderEmployeeTable();
     }
-    applyLatestLimitOnly();
+    renderEmployeeViews();
 
     const regForm = document.getElementById("regForm");
     if (regForm) {
-      regForm.addEventListener("submit", () => setTimeout(applyLatestLimitOnly, 50));
+      regForm.addEventListener("submit", () => {
+        const chosenDept = clean(document.getElementById("empDept")?.value).toUpperCase();
+        const chosenPos = clean(document.getElementById("empPos")?.value);
+        if (DEPARTMENTS.includes(chosenDept)) {
+          if (chosenPos.toLowerCase().includes("faculty")) {
+            selectedFacultyDept = chosenDept;
+          } else if (chosenPos) {
+            selectedStaffDept = chosenDept;
+          }
+        }
+        setTimeout(renderEmployeeViews, 50);
+      });
     }
   });
 </script>
