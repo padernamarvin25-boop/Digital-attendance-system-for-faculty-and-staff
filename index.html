@@ -3,33 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Digital Attendance System</title>
+  <title>Employee Attendance - Time In/Out</title>
 
   <link rel="stylesheet" href="./style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./all.min.css">
+
+  <style>
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .password-container input.form-control {
+      width: 100%;
+      padding-right: 42px !important;
+    }
+
+    #toggleKioskPass {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: #475569;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #toggleKioskPass:hover {
+      color: #0d6efd;
+    }
+  </style>
 </head>
 
 <body class="kiosk-body">
   <div class="kiosk-card">
     <div class="kiosk-heading">
-      <i class="fa-solid fa-graduation-cap"></i>
-      <h1>Digital Attendance System</h1>
-      <p>Select portal to continue</p>
+      <i class="fa-regular fa-clock"></i>
+      <h1>Employee Attendance</h1>
+      <p>Morning (AM/PM) &amp; Afternoon (AM/PM) Time In / Time Out</p>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <a href="./timein.html" class="btn btn-success btn-block" style="padding:14px;font-size:1rem;">
-        <i class="fa-solid fa-clock"></i> Employee Time In / Time Out (AM / PM)
-      </a>
+    <form id="kioskForm">
+      <div class="form-group">
+        <label for="kioskId">Employee ID</label>
+        <input type="text" id="kioskId" class="form-control" required placeholder="Enter Employee ID" autocomplete="username">
+      </div>
 
-      <a href="./login.html" class="btn btn-primary btn-block" style="padding:14px;font-size:1rem;">
-        <i class="fa-solid fa-shield-halved"></i> Admin Login &amp; Records
-      </a>
-    </div>
+      <div class="form-group">
+        <label for="kioskPass">Password</label>
+        <div class="password-container">
+          <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
+          <button type="button" id="toggleKioskPass" title="Show Password" aria-label="Show Password">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;display:block;">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="kioskSlot">Attendance Session</label>
+        <select id="kioskSlot" class="form-control">
+          <option value="MORNING_AM">Morning — AM</option>
+          <option value="MORNING_PM">Morning — PM</option>
+          <option value="AFTERNOON_AM">Afternoon — AM</option>
+          <option value="AFTERNOON_PM">Afternoon — PM</option>
+        </select>
+      </div>
+
+      <div class="kiosk-buttons">
+        <button type="button" id="timeInBtn" class="time-in-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> TIME IN
+        </button>
+        <button type="button" id="timeOutBtn" class="time-out-btn">
+          <i class="fa-solid fa-right-from-bracket"></i> TIME OUT
+        </button>
+      </div>
+
+      <div id="kioskStatusMsg" style="display:none;" aria-live="polite"></div>
+    </form>
 
     <div class="kiosk-footer">
-      <p>&mdash; Digital Attendance System &mdash;</p>
+      <p>&mdash; Be On Time. Be Productive. &mdash;</p>
+      <a href="./login.html" class="admin-link">Admin Access</a>
     </div>
   </div>
+
+  <script src="./database.js"></script>
+  <script src="./app.js"></script>
+  <script>
+    const kioskSlot = document.getElementById("kioskSlot");
+
+    function setDefaultSlot() {
+      if (!kioskSlot) return;
+      const hour = new Date().getHours();
+      kioskSlot.value = hour < 12 ? "MORNING_AM" : "AFTERNOON_PM";
+    }
+
+    setDefaultSlot();
+
+    function runKioskAction(actionType) {
+      const id = document.getElementById("kioskId").value.trim();
+      const pass = document.getElementById("kioskPass").value;
+      const slot = document.getElementById("kioskSlot").value;
+
+      if (!id || !pass) {
+        showInlineNotice("kioskStatusMsg", "Please enter Employee ID and Password.", false);
+        return;
+      }
+
+      if (!window.DB || typeof DB.getEmployees !== "function") {
+        showInlineNotice("kioskStatusMsg", "Database not loaded.", false);
+        return;
+      }
+
+      const employees = DB.getEmployees() || [];
+      const emp = employees.find(e => String(e.id) === id && String(e.password) === pass);
+      if (!emp) {
+        showInlineNotice("kioskStatusMsg", "Invalid Employee ID or Password.", false);
+        return;
+      }
+
+      const result = recordMorningAfternoonAttendance(id, actionType, slot);
+      showInlineNotice("kioskStatusMsg", result.message, result.ok);
+
+      if (result.ok) {
+        document.getElementById("kioskForm").reset();
+        if (typeof setPasswordEyeState === "function") {
+          setPasswordEyeState(
+            document.getElementById("kioskPass"),
+            document.getElementById("toggleKioskPass"),
+            false
+          );
+        }
+        setDefaultSlot();
+      }
+    }
+
+    document.getElementById("timeInBtn").addEventListener("click", () => runKioskAction("TIME_IN"));
+    document.getElementById("timeOutBtn").addEventListener("click", () => runKioskAction("TIME_OUT"));
+  </script>
 </body>
 </html>
