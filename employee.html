@@ -18,22 +18,20 @@
 
     .password-container input.form-control {
       width: 100%;
-      padding-right: 78px !important;
+      padding-right: 42px !important;
     }
 
     #toggleRegPass {
       position: absolute;
-      right: 8px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      color: #1e293b;
-      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: #555;
       cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 4px 8px;
+      font-size: 1rem;
+      padding: 4px;
       line-height: 1;
       z-index: 5;
       display: inline-flex;
@@ -42,7 +40,7 @@
     }
 
     #toggleRegPass:hover {
-      background: #e2e8f0;
+      color: #0d6efd;
     }
 
     .employee-table {
@@ -159,7 +157,7 @@
               <div class="password-container">
                 <input type="password" id="empPass" class="form-control" required placeholder="Enter Password">
                 <button type="button" id="toggleRegPass" aria-label="Show password" title="Show Password" onclick="toggleRegPassword()">
-                  👁 Show
+                  <i class="fa-solid fa-eye"></i>
                 </button>
               </div>
             </div>
@@ -216,7 +214,11 @@
 
     const isHidden = passInput.type === "password";
     passInput.type = isHidden ? "text" : "password";
-    toggleBtn.textContent = isHidden ? "🙈 Hide" : "👁 Show";
+    const icon = toggleBtn.querySelector("i");
+    if (icon) {
+      icon.classList.toggle("fa-eye", !isHidden);
+      icon.classList.toggle("fa-eye-slash", isHidden);
+    }
     toggleBtn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
     toggleBtn.setAttribute("title", isHidden ? "Hide Password" : "Show Password");
   }
