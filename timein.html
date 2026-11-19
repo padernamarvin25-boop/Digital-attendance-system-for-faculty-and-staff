@@ -1,529 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Attendance - Time In/Out</title>
 
-    <title>Employee Attendance - Time In/Out</title>
-
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <style>
-        /* Attendance Page Design */
-        .kiosk-body {
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 25px 15px;
-            background: #f4f6f9;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
-
-        .kiosk-card {
-            width: 100%;
-            max-width: 460px;
-            background: #ffffff;
-            padding: 35px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
-            text-align: center;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 1;
-        }
-
-        .kiosk-card h1 {
-            color: #212529;
-            font-size: 1.8rem;
-            margin-top: 12px;
-            margin-bottom: 8px;
-        }
-
-        .kiosk-subtitle {
-            color: #6c757d;
-            margin-bottom: 25px;
-        }
-
-        .kiosk-card .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .kiosk-card label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333333;
-        }
-
-        .kiosk-card .form-control {
-            width: 100%;
-            height: 48px;
-            padding: 12px;
-            border: 1px solid #ced4da;
-            border-radius: 7px;
-            font-size: 15px;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        .kiosk-card .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
-        }
-
-        .password-container {
-            position: relative;
-            width: 100%;
-        }
-
-        .password-container input {
-            padding-right: 45px;
-        }
-
-        .password-container i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6c757d;
-            z-index: 2;
-        }
-
-        .kiosk-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 25px;
-            width: 100%;
-        }
-
-        .kiosk-buttons button {
-            width: 100%;
-            min-height: 55px;
-            border: none;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            pointer-events: auto;
-            position: relative;
-            z-index: 5;
-            transition: 0.2s ease;
-        }
-
-        .time-in-btn {
-            background: #198754;
-        }
-
-        .time-in-btn:hover {
-            background: #146c43;
-        }
-
-        .time-out-btn {
-            background: #0d6efd;
-        }
-
-        .time-out-btn:hover {
-            background: #0b5ed7;
-        }
-
-        .kiosk-buttons button:active {
-            transform: scale(0.97);
-        }
-
-        .kiosk-footer {
-            margin-top: 30px;
-            border-top: 1px solid #eeeeee;
-            padding-top: 18px;
-        }
-
-        .kiosk-footer p {
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .admin-link {
-            display: inline-block;
-            margin-top: 12px;
-            color: #6c757d;
-            font-size: 13px;
-            text-decoration: none;
-        }
-
-        .admin-link:hover {
-            color: #0d6efd;
-            text-decoration: underline;
-        }
-
-        @media (max-width: 480px) {
-            .kiosk-card {
-                padding: 25px 20px;
-            }
-
-            .kiosk-card h1 {
-                font-size: 1.5rem;
-            }
-
-            .kiosk-buttons {
-                gap: 8px;
-            }
-
-            .kiosk-buttons button {
-                font-size: 14px;
-                padding: 12px 5px;
-            }
-        }
-    </style>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body class="kiosk-body">
-
-    <div class="kiosk-card">
-
-        <div style="margin-bottom: 25px;">
-
-            <i class="fa-regular fa-clock"
-               style="font-size: 3.5rem; color: #0d6efd;">
-            </i>
-
-            <h1>Employee Attendance</h1>
-
-            <p class="kiosk-subtitle">
-                Time In and Time Out
-            </p>
-
-        </div>
-
-        <form id="kioskForm">
-
-            <div class="form-group">
-
-                <label for="kioskId">Employee ID</label>
-
-                <input
-                    type="text"
-                    id="kioskId"
-                    class="form-control"
-                    required
-                    placeholder="Enter Employee ID"
-                    autocomplete="username"
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="kioskPass">Password</label>
-
-                <div class="password-container">
-
-                    <input
-                        type="password"
-                        id="kioskPass"
-                        class="form-control"
-                        required
-                        placeholder="Enter Password"
-                        autocomplete="current-password"
-                    >
-
-                    <i class="fa-solid fa-eye"
-                       id="toggleKioskPass">
-                    </i>
-
-                </div>
-
-            </div>
-
-            <div class="kiosk-buttons">
-
-                <button
-                    type="button"
-                    id="timeInBtn"
-                    class="time-in-btn"
-                >
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    TIME IN
-                </button>
-
-                <button
-                    type="button"
-                    id="timeOutBtn"
-                    class="time-out-btn"
-                >
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    TIME OUT
-                </button>
-
-            </div>
-
-        </form>
-
-        <div class="kiosk-footer">
-
-            <p>— Be On Time. Be Productive. —</p>
-
-            <a href="login.html" class="admin-link">
-                Admin Access
-            </a>
-
-        </div>
-
+  <div class="kiosk-card">
+    <div class="kiosk-heading">
+      <i class="fa-regular fa-clock"></i>
+      <h1>Employee Attendance</h1>
+      <p>Morning (AM) &amp; Afternoon (PM) Time In / Time Out</p>
     </div>
 
-    <!-- Database -->
-    <script src="database.js"></script>
-
-    <script>
-        // Password visibility
-        const toggleKioskPass =
-            document.getElementById('toggleKioskPass');
-
-        const kioskPass =
-            document.getElementById('kioskPass');
-
-        toggleKioskPass.addEventListener('click', function () {
-
-            const type = kioskPass.type === 'password'
-                ? 'text'
-                : 'password';
-
-            kioskPass.type = type;
-
-            this.classList.toggle('fa-eye-slash');
-
-        });
-
-
-        // Get local date
-        function getLocalDate() {
-
-            const today = new Date();
-
-            const year = today.getFullYear();
-
-            const month = String(
-                today.getMonth() + 1
-            ).padStart(2, '0');
-
-            const day = String(
-                today.getDate()
-            ).padStart(2, '0');
-
-            return `${year}-${month}-${day}`;
-
-        }
-
-
-        // Attendance function
-        function handleAttendance(type) {
-
-            const id = document
-                .getElementById('kioskId')
-                .value.trim();
-
-            const pass = document
-                .getElementById('kioskPass')
-                .value;
-
-            // Check empty fields
-            if (!id || !pass) {
-
-                alert(
-                    'Mangyaring ilagay ang Employee ID at Password.'
-                );
-
-                return;
-
-            }
-
-            // Check database
-            if (
-                typeof DB === 'undefined' ||
-                typeof DB.getEmployees !== 'function' ||
-                typeof DB.getAttendance !== 'function' ||
-                typeof DB.saveAttendance !== 'function'
-            ) {
-
-                alert(
-                    'Database not loaded. Pakisuri ang database.js.'
-                );
-
-                return;
-
-            }
-
-            try {
-
-                // Verify employee
-                const employees = DB.getEmployees();
-
-                const emp = employees.find(employee =>
-                    employee.id === id &&
-                    String(employee.password) === pass
-                );
-
-                if (!emp) {
-
-                    alert('Maling Employee ID o Password!');
-
-                    return;
-
-                }
-
-                // Get attendance records
-                const records = DB.getAttendance();
-
-                const todayStr = getLocalDate();
-
-                const nowTime = new Date().toLocaleTimeString(
-                    'en-US',
-                    {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }
-                );
-
-                // Find today's record
-                let record = records.find(item =>
-                    item.id === id &&
-                    item.date === todayStr
-                );
-
-
-                // TIME IN
-                if (type === 'TIME_IN') {
-
-                    if (record) {
-
-                        alert(
-                            'Naka-Time In ka na ngayong araw!'
-                        );
-
-                        return;
-
-                    }
-
-                    records.push({
-
-                        id: emp.id,
-
-                        name: emp.name,
-
-                        date: todayStr,
-
-                        timeIn: nowTime,
-
-                        timeOut: '--',
-
-                        status: 'Present'
-
-                    });
-
-                    DB.saveAttendance(records);
-
-                    alert(
-                        `SUCCESS! Time In recorded for ${emp.name} at ${nowTime}`
-                    );
-
-                }
-
-
-                // TIME OUT
-                else if (type === 'TIME_OUT') {
-
-                    if (!record) {
-
-                        alert(
-                            'Kailangan mo munang mag-Time In bago mag-Time Out!'
-                        );
-
-                        return;
-
-                    }
-
-                    if (
-                        record.timeOut &&
-                        record.timeOut !== '--'
-                    ) {
-
-                        alert(
-                            'Naka-Time Out ka na ngayong araw!'
-                        );
-
-                        return;
-
-                    }
-
-                    record.timeOut = nowTime;
-
-                    DB.saveAttendance(records);
-
-                    alert(
-                        `SUCCESS! Time Out recorded for ${emp.name} at ${nowTime}`
-                    );
-
-                }
-
-                else {
-
-                    alert('Invalid attendance action.');
-
-                    return;
-
-                }
-
-                // Reset form after successful attendance
-                document.getElementById('kioskForm').reset();
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    'Attendance Error:',
-                    error
-                );
-
-                alert(
-                    'May error sa pag-save ng attendance. Pakisuri ang database.js.'
-                );
-
-            }
-
-        }
-
-
-        // Button click events
-        document
-            .getElementById('timeInBtn')
-            .addEventListener('click', function () {
-
-                handleAttendance('TIME_IN');
-
-            });
-
-
-        document
-            .getElementById('timeOutBtn')
-            .addEventListener('click', function () {
-
-                handleAttendance('TIME_OUT');
-
-            });
-
-    </script>
-
+    <form id="kioskForm">
+      <div class="form-group">
+        <label for="kioskId">Employee ID</label>
+        <input type="text" id="kioskId" class="form-control" required placeholder="Enter Employee ID" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="kioskPass">Password</label>
+        <div class="password-container">
+          <input type="password" id="kioskPass" class="form-control" required placeholder="Enter Password" autocomplete="current-password">
+          <i class="fa-solid fa-eye" id="toggleKioskPass"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="kioskPeriod">Session (AM / PM)</label>
+        <select id="kioskPeriod" class="form-control">
+          <option value="AM">Morning (AM)</option>
+          <option value="PM">Afternoon (PM)</option>
+        </select>
+      </div>
+
+      <div class="kiosk-buttons">
+        <button type="button" id="timeInBtn" class="time-in-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> TIME IN
+        </button>
+        <button type="button" id="timeOutBtn" class="time-out-btn">
+          <i class="fa-solid fa-right-from-bracket"></i> TIME OUT
+        </button>
+      </div>
+    </form>
+
+    <div class="kiosk-footer">
+      <p>&mdash; Be On Time. Be Productive. &mdash;</p>
+      <a href="login.html" class="admin-link">Admin Access</a>
+    </div>
+  </div>
+
+  <script src="database.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const toggleKioskPass = document.getElementById("toggleKioskPass");
+    const kioskPass = document.getElementById("kioskPass");
+    const kioskPeriod = document.getElementById("kioskPeriod");
+
+    if (kioskPeriod) {
+      kioskPeriod.value = new Date().getHours() < 12 ? "AM" : "PM";
+    }
+
+    toggleKioskPass.addEventListener("click", function () {
+      const isPass = kioskPass.type === "password";
+      kioskPass.type = isPass ? "text" : "password";
+      this.classList.toggle("fa-eye-slash", isPass);
+    });
+
+    function runKioskAction(actionType) {
+      const id = document.getElementById("kioskId").value.trim();
+      const pass = document.getElementById("kioskPass").value;
+      const period = document.getElementById("kioskPeriod").value;
+
+      if (!id || !pass) {
+        alert("Mangyaring ilagay ang Employee ID at Password.");
+        return;
+      }
+
+      const employees = DB.getEmployees() || [];
+      const emp = employees.find(e => String(e.id) === id && String(e.password) === pass);
+      if (!emp) {
+        alert("Maling Employee ID o Password!");
+        return;
+      }
+
+      const result = logAttendancePeriod(id, actionType, period);
+      alert(result.message);
+      if (result.ok) {
+        document.getElementById("kioskForm").reset();
+        if (kioskPeriod) kioskPeriod.value = new Date().getHours() < 12 ? "AM" : "PM";
+      }
+    }
+
+    document.getElementById("timeInBtn").addEventListener("click", () => runKioskAction("TIME_IN"));
+    document.getElementById("timeOutBtn").addEventListener("click", () => runKioskAction("TIME_OUT"));
+  </script>
 </body>
 </html>
