@@ -70,7 +70,7 @@
 
     .dept-folders-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
       gap: 10px;
       margin-bottom: 16px;
     }
@@ -86,6 +86,7 @@
       background: #f8fafc;
       color: #1e293b;
       font-weight: 600;
+      font-size: 0.88rem;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -111,7 +112,7 @@
       background: rgba(15, 23, 42, 0.1);
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
     }
 
     .dept-folder-btn.active-faculty .dept-count-badge,
@@ -262,12 +263,16 @@
         </form>
       </div>
 
-      <!-- FACULTY RECORDS (LATEST VIEW) -->
+      <!-- FACULTY RECORDS (NEW RECORD + DEPARTMENTS) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:var(--primary-blue);">
           <i class="fa-solid fa-chalkboard-user"></i>
           Faculty Records
         </h2>
+        <div id="facultyDeptFolders" class="dept-folders-grid"></div>
+        <div class="folder-panel-header">
+          <span id="facultyActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> NEW RECORD</span>
+        </div>
         <div style="overflow-x:auto;">
           <table class="employee-table">
             <thead>
@@ -284,38 +289,16 @@
         </div>
       </div>
 
-      <!-- FACULTY DEPARTMENT FOLDERS -->
-      <div class="card group-section-card">
-        <h2 class="card-title" style="color:var(--primary-blue);">
-          <i class="fa-solid fa-folder-tree"></i>
-          Faculty Department Folders
-        </h2>
-        <div id="facultyDeptFolders" class="dept-folders-grid"></div>
-        <div class="folder-panel-header">
-          <span id="facultyActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> Folder: BSHM</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="employee-table">
-            <thead>
-              <tr>
-                <th>Employee ID (PK)</th>
-                <th>Full Name</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="facultyFolderTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- STAFF RECORDS (LATEST VIEW) -->
+      <!-- STAFF RECORDS (NEW RECORD + DEPARTMENTS) -->
       <div class="card group-section-card">
         <h2 class="card-title" style="color:#198754;">
           <i class="fa-solid fa-user-tie"></i>
           Staff Records
         </h2>
+        <div id="staffDeptFolders" class="dept-folders-grid"></div>
+        <div class="folder-panel-header">
+          <span id="staffActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> NEW RECORD</span>
+        </div>
         <div style="overflow-x:auto;">
           <table class="employee-table">
             <thead>
@@ -332,32 +315,6 @@
         </div>
       </div>
 
-      <!-- STAFF DEPARTMENT FOLDERS -->
-      <div class="card group-section-card">
-        <h2 class="card-title" style="color:#198754;">
-          <i class="fa-solid fa-folder-tree"></i>
-          Staff Department Folders
-        </h2>
-        <div id="staffDeptFolders" class="dept-folders-grid"></div>
-        <div class="folder-panel-header">
-          <span id="staffActiveFolderLabel"><i class="fa-regular fa-folder-open"></i> Folder: BSHM</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="employee-table">
-            <thead>
-              <tr>
-                <th>Employee ID (PK)</th>
-                <th>Full Name</th>
-                <th>Department</th>
-                <th>Position</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="staffFolderTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -365,10 +322,12 @@
 <script src="./database.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const MAX_LATEST_ROWS = 5;
-    const DEPARTMENTS = ["BSHM", "BSED", "BEED", "BSCRIM", "BSIT", "BSBA"];
-    let selectedFacultyDept = "BSHM";
-    let selectedStaffDept = "BSHM";
+    const NEW_RECORD_KEY = "NEW RECORD";
+    const MAX_NEW_RECORDS = 5;
+    const TABS = [NEW_RECORD_KEY, "BSHM", "BSED", "BEED", "BSCRIM", "BSIT", "BSBA"];
+
+    let selectedFacultyTab = NEW_RECORD_KEY;
+    let selectedStaffTab = NEW_RECORD_KEY;
 
     const clean = v => String(v ?? "").trim();
     const isFaculty = emp => clean(emp?.position).toLowerCase().includes("faculty");
@@ -394,24 +353,29 @@
       </tr>
     `;
 
-    function renderDepartmentFolderSection(groupType, sortedEmployees, activeDept, onSelectDept) {
+    function renderGroupSection(groupType, sortedEmployees, activeTab, onSelectTab) {
       const isFac = groupType === "Faculty";
       const foldersContainer = document.getElementById(isFac ? "facultyDeptFolders" : "staffDeptFolders");
       const labelEl = document.getElementById(isFac ? "facultyActiveFolderLabel" : "staffActiveFolderLabel");
-      const bodyEl = document.getElementById(isFac ? "facultyFolderTableBody" : "staffFolderTableBody");
+      const bodyEl = document.getElementById(isFac ? "facultyEmployeeTableBody" : "staffEmployeeTableBody");
       if (!foldersContainer || !labelEl || !bodyEl) return;
 
       const groupEmployees = sortedEmployees.filter(emp =>
         isFac ? isFaculty(emp) : !isFaculty(emp)
       );
 
-      foldersContainer.innerHTML = DEPARTMENTS.map(dept => {
-        const count = groupEmployees.filter(emp => clean(emp.department).toUpperCase() === dept).length;
-        const isActive = dept === activeDept;
+      foldersContainer.innerHTML = TABS.map(tab => {
+        const isNewTab = tab === NEW_RECORD_KEY;
+        const count = isNewTab
+          ? Math.min(groupEmployees.length, MAX_NEW_RECORDS)
+          : groupEmployees.filter(emp => clean(emp.department).toUpperCase() === tab).length;
+
+        const isActive = tab === activeTab;
         const activeClass = isActive ? (isFac ? "active-faculty" : "active-staff") : "";
+
         return `
-          <button type="button" class="dept-folder-btn ${activeClass}" data-dept="${dept}">
-            <span><i class="fa-${isActive ? "solid fa-folder-open" : "regular fa-folder"}"></i> ${dept}</span>
+          <button type="button" class="dept-folder-btn ${activeClass}" data-tab="${esc(tab)}">
+            <span><i class="fa-${isActive ? "solid fa-folder-open" : "regular fa-folder"}"></i> ${esc(tab)}</span>
             <span class="dept-count-badge">${count}</span>
           </button>
         `;
@@ -419,66 +383,42 @@
 
       foldersContainer.querySelectorAll(".dept-folder-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-          onSelectDept(btn.getAttribute("data-dept"));
-          renderEmployeeViews();
+          onSelectTab(btn.getAttribute("data-tab"));
+          renderAllSections();
         });
       });
 
-      labelEl.innerHTML = `<i class="fa-regular fa-folder-open"></i> Folder: ${esc(activeDept)} (${groupType})`;
+      const isNewSelected = activeTab === NEW_RECORD_KEY;
+      labelEl.innerHTML = isNewSelected
+        ? `<i class="fa-regular fa-folder-open"></i> NEW RECORD (Latest ${MAX_NEW_RECORDS} — ${groupType})`
+        : `<i class="fa-regular fa-folder-open"></i> ${esc(activeTab)} (${groupType})`;
 
-      const deptRecords = groupEmployees.filter(
-        emp => clean(emp.department).toUpperCase() === clean(activeDept).toUpperCase()
-      );
+      const rowsToShow = isNewSelected
+        ? groupEmployees.slice(0, MAX_NEW_RECORDS)
+        : groupEmployees.filter(emp => clean(emp.department).toUpperCase() === clean(activeTab).toUpperCase());
 
-      bodyEl.innerHTML = deptRecords.length
-        ? deptRecords.map(makeRow).join("")
-        : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No ${groupType.toLowerCase()} records in ${esc(activeDept)} folder.</td></tr>`;
+      bodyEl.innerHTML = rowsToShow.length
+        ? rowsToShow.map(makeRow).join("")
+        : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No ${groupType.toLowerCase()} records found in ${esc(activeTab)}.</td></tr>`;
     }
 
-    function renderEmployeeViews() {
-      const facultyBody = document.getElementById("facultyEmployeeTableBody");
-      const staffBody = document.getElementById("staffEmployeeTableBody");
+    function renderAllSections() {
+      if (!window.DB || typeof DB.getEmployees !== "function") return;
 
-      if (window.DB && typeof DB.getEmployees === "function" && facultyBody && staffBody) {
-        const all = DB.getEmployees() || [];
-        const sorted = all
-          .map((emp, idx) => ({ ...emp, _idx: idx }))
-          .sort((a, b) => b._idx - a._idx);
+      const sorted = (DB.getEmployees() || [])
+        .map((emp, idx) => ({ ...emp, _idx: idx }))
+        .sort((a, b) => b._idx - a._idx);
 
-        const latestFaculty = sorted.filter(isFaculty).slice(0, MAX_LATEST_ROWS);
-        const latestStaff = sorted.filter(emp => !isFaculty(emp)).slice(0, MAX_LATEST_ROWS);
-
-        facultyBody.innerHTML = latestFaculty.length
-          ? latestFaculty.map(makeRow).join("")
-          : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No registered faculty found.</td></tr>`;
-
-        staffBody.innerHTML = latestStaff.length
-          ? latestStaff.map(makeRow).join("")
-          : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No registered staff found.</td></tr>`;
-
-        renderDepartmentFolderSection("Faculty", sorted, selectedFacultyDept, d => { selectedFacultyDept = d; });
-        renderDepartmentFolderSection("Staff", sorted, selectedStaffDept, d => { selectedStaffDept = d; });
-      }
+      renderGroupSection("Faculty", sorted, selectedFacultyTab, t => { selectedFacultyTab = t; });
+      renderGroupSection("Staff", sorted, selectedStaffTab, t => { selectedStaffTab = t; });
     }
 
-    if (typeof renderEmployeeTable === "function") {
-      renderEmployeeTable();
-    }
-    renderEmployeeViews();
+    renderAllSections();
 
     const regForm = document.getElementById("regForm");
     if (regForm) {
       regForm.addEventListener("submit", () => {
-        const chosenDept = clean(document.getElementById("empDept")?.value).toUpperCase();
-        const chosenPos = clean(document.getElementById("empPos")?.value);
-        if (DEPARTMENTS.includes(chosenDept)) {
-          if (chosenPos.toLowerCase().includes("faculty")) {
-            selectedFacultyDept = chosenDept;
-          } else if (chosenPos) {
-            selectedStaffDept = chosenDept;
-          }
-        }
-        setTimeout(renderEmployeeViews, 50);
+        setTimeout(renderAllSections, 50);
       });
     }
   });
