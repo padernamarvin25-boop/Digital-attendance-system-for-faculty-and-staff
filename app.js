@@ -40,21 +40,23 @@ function getCurrentTimeAMPM() {
     });
 }
 
-function getCurrentPeriodAMPM() {
-    return new Date().getHours() < 12 ? "AM" : "PM";
-}
-
-function computeStatusForPeriod(period) {
-    const now = new Date();
-    const mins = now.getHours() * 60 + now.getMinutes();
-    if (period === "AM") {
-        return mins > 8 * 60 ? "Late" : "Present";
-    }
-    return mins > 13 * 60 ? "Late" : "Present";
-}
-
 function getAdminPassword() {
     return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_ADMIN_PASS;
+}
+
+function showInlineNotice(elementId, text, isSuccess = true) {
+    const box = document.getElementById(elementId);
+    if (!box) return;
+    box.textContent = text;
+    box.style.display = "block";
+    box.style.color = isSuccess ? "#0f5132" : "#842029";
+    box.style.background = isSuccess ? "#d1e7dd" : "#f8d7da";
+    box.style.border = `1px solid ${isSuccess ? "#badbcc" : "#f5c2c7"}`;
+    box.style.padding = "10px 12px";
+    box.style.borderRadius = "6px";
+    box.style.marginTop = "12px";
+    box.style.fontWeight = "600";
+    box.style.fontSize = "0.9rem";
 }
 
 // ==========================================
@@ -101,7 +103,7 @@ function logout() {
 }
 
 // ==========================================
-// EMPLOYEE REGISTRATION & RECORD (DESC)
+// EMPLOYEE REGISTRATION & RECORD (DESC, NO ALERT)
 // ==========================================
 
 function renderEmployeeTable() {
@@ -193,8 +195,6 @@ function editEmployee(index) {
 
 function deleteEmployee(index) {
     if (!window.DB) return;
-    if (!confirm("Sigurado ka bang ide-delete ang employee na ito?")) return;
-
     const employees = DB.getEmployees() || [];
     if (index < 0 || index >= employees.length) return;
 
@@ -209,6 +209,7 @@ function deleteEmployee(index) {
     }
 
     renderEmployeeTable();
+    showInlineNotice("regStatusMsg", "Employee deleted successfully.", true);
 }
 
 function resetForm() {
@@ -233,20 +234,26 @@ function handleEmployeeFormSubmit(event) {
     const position = cleanText(document.getElementById("empPos")?.value);
     const department = cleanText(document.getElementById("empDept")?.value);
 
-    if (!id || !name || !password || !position || !department) return;
+    if (!id || !name || !password || !position || !department) {
+        showInlineNotice("regStatusMsg", "Please complete all fields.", false);
+        return;
+    }
 
     const employees = DB.getEmployees() || [];
     const editIndexRaw = sessionStorage.getItem(EDIT_INDEX_KEY);
     const editIndex = editIndexRaw !== null ? Number(editIndexRaw) : -1;
     const data = { id, name, password, position, department };
 
+    let statusText = "Successful registration! Employee saved.";
     if (editIndex >= 0 && editIndex < employees.length) {
         employees[editIndex] = data;
         sessionStorage.removeItem(EDIT_INDEX_KEY);
+        statusText = "Successful update! Employee record updated.";
     } else {
         const dupIdx = employees.findIndex(e => cleanText(e.id).toLowerCase() === id.toLowerCase());
         if (dupIdx >= 0) {
             employees[dupIdx] = data;
+            statusText = "Successful update! Existing Employee ID updated.";
         } else {
             employees.push(data);
         }
@@ -255,6 +262,7 @@ function handleEmployeeFormSubmit(event) {
     DB.saveEmployees(employees);
     resetForm();
     renderEmployeeTable();
+    showInlineNotice("regStatusMsg", statusText, true);
 }
 
 function setupPasswordToggle() {
@@ -271,22 +279,26 @@ function setupPasswordToggle() {
 }
 
 // ==========================================
-// AM / PM TIME IN & TIME OUT
+// MORNING (AM/PM) & AFTERNOON (AM/PM) ENGINE
 // ==========================================
 
-function logAttendancePeriod(employeeId, actionType) {
-    if (!window.DB) return { ok: false, message: "Database not loaded." };
+function recordMorningAfternoonAttendance(employeeId, actionType, slotKey) {
+    if (!window.DB) {
+        return { ok: false, message: "Database not loaded." };
+    }
 
     const cleanId = cleanText(employeeId);
     const employees = DB.getEmployees() || [];
     const records = DB.getAttendance() || [];
     const today = getTodayISO();
     const nowTime = getCurrentTimeAMPM();
-    const period = getCurrentPeriodAMPM();
+
+    // slotKey values: "MORNING_AM", "MORNING_PM", "AFTERNOON_AM", "AFTERNOON_PM"
+    const slot = cleanText(slotKey).toUpperCase() || "MORNING_AM";
 
     const emp = employees.find(e => cleanText(e.id).toLowerCase() === cleanId.toLowerCase());
     if (!emp) {
-        return { ok: false, message: "Employee not found." };
+        return { ok: false, message: "Invalid Employee ID or Password." };
     }
 
     let recIdx = records.findIndex(
@@ -304,74 +316,75 @@ function logAttendancePeriod(employeeId, actionType) {
             department: emp.department || "General",
             position: emp.position || "Staff",
             date: today,
+            morningAmIn: "--",
+            morningAmOut: "--",
+            morningPmIn: "--",
+            morningPmOut: "--",
+            afternoonAmIn: "--",
+            afternoonAmOut: "--",
+            afternoonPmIn: "--",
+            afternoonPmOut: "--",
             amTimeIn: "--",
             amTimeOut: "--",
             pmTimeIn: "--",
             pmTimeOut: "--",
-            timeIn: "--",
-            timeOut: "--",
             status: "Present"
         });
         recIdx = records.length - 1;
     }
 
     const rec = records[recIdx];
-    rec.amTimeIn = rec.amTimeIn || "--";
-    rec.amTimeOut = rec.amTimeOut || "--";
-    rec.pmTimeIn = rec.pmTimeIn || "--";
-    rec.pmTimeOut = rec.pmTimeOut || "--";
-    rec.recordId = rec.recordId || ("ATT-" + Date.now() + "-" + Math.floor(Math.random() * 1000));
+    const fieldMap = {
+        MORNING_AM: { inKey: "morningAmIn", outKey: "morningAmOut", label: "Morning (AM)" },
+        MORNING_PM: { inKey: "morningPmIn", outKey: "morningPmOut", label: "Morning (PM)" },
+        AFTERNOON_AM: { inKey: "afternoonAmIn", outKey: "afternoonAmOut", label: "Afternoon (AM)" },
+        AFTERNOON_PM: { inKey: "afternoonPmIn", outKey: "afternoonPmOut", label: "Afternoon (PM)" }
+    };
+
+    const cfg = fieldMap[slot] || fieldMap.MORNING_AM;
+    rec[cfg.inKey] = rec[cfg.inKey] || "--";
+    rec[cfg.outKey] = rec[cfg.outKey] || "--";
 
     if (actionType === "TIME_IN") {
-        if (period === "AM") {
-            if (rec.amTimeIn !== "--") {
-                return { ok: false, message: "Naka-AM Time In ka na ngayong araw!" };
-            }
+        if (rec[cfg.inKey] !== "--") {
+            return { ok: false, message: `Already Timed In for ${cfg.label} today.` };
+        }
+        rec[cfg.inKey] = nowTime;
+        if (slot.startsWith("MORNING")) {
             rec.amTimeIn = nowTime;
-            rec.timeIn = nowTime;
-            rec.status = computeStatusForPeriod("AM");
         } else {
-            if (rec.pmTimeIn !== "--") {
-                return { ok: false, message: "Naka-PM Time In ka na ngayong araw!" };
-            }
             rec.pmTimeIn = nowTime;
-            if (!rec.timeIn || rec.timeIn === "--") rec.timeIn = nowTime;
-            if (rec.status !== "Late") {
-                rec.status = computeStatusForPeriod("PM");
-            }
         }
-    } else if (actionType === "TIME_OUT") {
-        if (period === "AM") {
-            if (rec.amTimeIn === "--") {
-                return { ok: false, message: "Kailangan muna ng AM Time In bago mag-AM Time Out!" };
-            }
-            if (rec.amTimeOut !== "--") {
-                return { ok: false, message: "Naka-AM Time Out ka na ngayong araw!" };
-            }
-            rec.amTimeOut = nowTime;
-            rec.timeOut = nowTime;
-        } else {
-            if (rec.pmTimeIn === "--") {
-                return { ok: false, message: "Kailangan muna ng PM Time In bago mag-PM Time Out!" };
-            }
-            if (rec.pmTimeOut !== "--") {
-                return { ok: false, message: "Naka-PM Time Out ka na ngayong araw!" };
-            }
-            rec.pmTimeOut = nowTime;
-            rec.timeOut = nowTime;
-        }
+        records[recIdx] = rec;
+        DB.saveAttendance(records);
+        return {
+            ok: true,
+            message: `Successful Time In (${cfg.label}) for ${emp.name} at ${nowTime}`
+        };
     }
 
-    records[recIdx] = rec;
-    DB.saveAttendance(records);
+    if (actionType === "TIME_OUT") {
+        if (rec[cfg.inKey] === "--") {
+            return { ok: false, message: `Time In required first for ${cfg.label}.` };
+        }
+        if (rec[cfg.outKey] !== "--") {
+            return { ok: false, message: `Already Timed Out for ${cfg.label} today.` };
+        }
+        rec[cfg.outKey] = nowTime;
+        if (slot.startsWith("MORNING")) {
+            rec.amTimeOut = nowTime;
+        } else {
+            rec.pmTimeOut = nowTime;
+        }
+        records[recIdx] = rec;
+        DB.saveAttendance(records);
+        return {
+            ok: true,
+            message: `Successful Time Out (${cfg.label}) for ${emp.name} at ${nowTime}`
+        };
+    }
 
-    if (typeof filterDailyData === "function") filterDailyData();
-    if (typeof renderMonthlyData === "function") renderMonthlyData();
-
-    return {
-        ok: true,
-        message: `SUCCESS! ${period} ${actionType.replace("_", " ")} recorded for ${emp.name} at ${nowTime}`
-    };
+    return { ok: false, message: "Invalid action." };
 }
 
 // ==========================================
@@ -390,6 +403,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const regForm = document.getElementById("regForm");
     if (regForm) {
+        const noticeDiv = document.createElement("div");
+        noticeDiv.id = "regStatusMsg";
+        noticeDiv.style.display = "none";
+        regForm.appendChild(noticeDiv);
+
         regForm.addEventListener("submit", handleEmployeeFormSubmit);
         setupPasswordToggle();
         renderEmployeeTable();
@@ -403,6 +421,7 @@ window.logout = logout;
 window.editEmployee = editEmployee;
 window.deleteEmployee = deleteEmployee;
 window.resetForm = resetForm;
-window.logAttendancePeriod = logAttendancePeriod;
+window.recordMorningAfternoonAttendance = recordMorningAfternoonAttendance;
+window.showInlineNotice = showInlineNotice;
 window.getTodayISO = getTodayISO;
 window.getCurrentMonthISO = getCurrentMonthISO;
