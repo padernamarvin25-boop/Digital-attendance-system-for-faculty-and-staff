@@ -252,8 +252,61 @@
 <script src="./database.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    const MAX_LATEST_ROWS = 5;
+
+    function applyLatestLimitOnly() {
+      const facultyBody = document.getElementById("facultyEmployeeTableBody");
+      const staffBody = document.getElementById("staffEmployeeTableBody");
+
+      if (window.DB && typeof DB.getEmployees === "function" && facultyBody && staffBody) {
+        const all = DB.getEmployees() || [];
+        const sorted = all
+          .map((emp, idx) => ({ ...emp, _idx: idx }))
+          .sort((a, b) => b._idx - a._idx);
+
+        const isFaculty = emp => String(emp.position || "").trim().toLowerCase().includes("faculty");
+        const latestFaculty = sorted.filter(isFaculty).slice(0, MAX_LATEST_ROWS);
+        const latestStaff = sorted.filter(emp => !isFaculty(emp)).slice(0, MAX_LATEST_ROWS);
+
+        const makeRow = emp => `
+          <tr>
+            <td>${String(emp.id || "")}</td>
+            <td><strong>${String(emp.name || "")}</strong></td>
+            <td>${String(emp.department || "")}</td>
+            <td>${String(emp.position || "")}</td>
+            <td style="display:flex;gap:8px;">
+              <button type="button" class="btn btn-outline" style="padding:5px 10px;" onclick="editEmployee(${emp._idx})">Edit</button>
+              <button type="button" class="delete-attendance-btn" onclick="deleteEmployee(${emp._idx})">Delete</button>
+            </td>
+          </tr>
+        `;
+
+        facultyBody.innerHTML = latestFaculty.length
+          ? latestFaculty.map(makeRow).join("")
+          : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No registered faculty found.</td></tr>`;
+
+        staffBody.innerHTML = latestStaff.length
+          ? latestStaff.map(makeRow).join("")
+          : `<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No registered staff found.</td></tr>`;
+      } else {
+        // Fallback kung static rows lang ang nandoon: itago ang lampas sa MAX_LATEST_ROWS
+        [facultyBody, staffBody].forEach(tbody => {
+          if (!tbody) return;
+          Array.from(tbody.querySelectorAll("tr")).forEach((tr, i) => {
+            tr.style.display = i < MAX_LATEST_ROWS ? "" : "none";
+          });
+        });
+      }
+    }
+
     if (typeof renderEmployeeTable === "function") {
       renderEmployeeTable();
+    }
+    applyLatestLimitOnly();
+
+    const regForm = document.getElementById("regForm");
+    if (regForm) {
+      regForm.addEventListener("submit", () => setTimeout(applyLatestLimitOnly, 50));
     }
   });
 </script>
