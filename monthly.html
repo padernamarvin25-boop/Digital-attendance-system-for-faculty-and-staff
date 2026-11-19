@@ -457,7 +457,7 @@
     <div id="dtrBatchControls" class="dtr-batch-controls">
       <label for="receiptScopeSelect"><strong>Generate For:</strong></label>
       <select id="receiptScopeSelect" onchange="renderBatchReceiptsFromSelect()">
-        <option value="ALL">All (Faculty & Staff)</option>
+        <option value="ALL">All (Faculty &amp; Staff)</option>
         <option value="Faculty">Faculty Only</option>
         <option value="Staff">Staff Only</option>
       </select>
@@ -751,98 +751,4 @@
     };
 
     container.innerHTML = buildSingleEmployeeReceiptHtml(emp, records, monthVal);
-    backdrop.classList.add("open");
-  }
-
-  function openBatchReceiptModal(scope = "ALL") {
-    const backdrop = document.getElementById("dtrModalBackdrop");
-    const batchControls = document.getElementById("dtrBatchControls");
-    const selectEl = document.getElementById("receiptScopeSelect");
-    const titleEl = document.getElementById("dtrModalTitle");
-    if (!backdrop || !window.DB) return;
-
-    if (batchControls) batchControls.style.display = "flex";
-    if (selectEl) selectEl.value = scope;
-    if (titleEl) {
-      titleEl.innerHTML = `<i class="fa-solid fa-file-invoice"></i> Digital Attendance System Daily Time Record (Monthly Batch)`;
-    }
-
-    renderBatchReceiptsFromSelect();
-    backdrop.classList.add("open");
-  }
-
-  function renderBatchReceiptsFromSelect() {
-    const container = document.getElementById("dtrTwinContainer");
-    const summaryEl = document.getElementById("receiptMonthSummary");
-    const scope = document.getElementById("receiptScopeSelect")?.value || "ALL";
-    if (!container || !window.DB) return;
-
-    const monthVal = document.getElementById("monthFilter")?.value || getCurrentMonthISO();
-    const employees = DB.getEmployees() || [];
-    const monthRecords = (DB.getAttendance() || []).filter(r => cleanM(r.date).startsWith(monthVal));
-
-    const byIdMap = new Map();
-
-    employees.forEach(e => {
-      const empIdKey = cleanM(e.id).toUpperCase();
-      if (!empIdKey) return;
-      const grp = getGroupM(e, null);
-      if (scope !== "ALL" && grp !== scope) return;
-
-      const empMonthRecs = monthRecords.filter(r => cleanM(r.id || r.employeeId).toUpperCase() === empIdKey);
-      if (empMonthRecs.length > 0) {
-        byIdMap.set(empIdKey, {
-          emp: {
-            id: e.id,
-            name: e.name,
-            department: e.department || "General",
-            position: e.position || grp
-          },
-          records: empMonthRecs
-        });
-      }
-    });
-
-    monthRecords.forEach(r => {
-      const empIdKey = cleanM(r.id || r.employeeId).toUpperCase();
-      if (!empIdKey || byIdMap.has(empIdKey)) return;
-      const grp = getGroupM(null, r);
-      if (scope !== "ALL" && grp !== scope) return;
-
-      const empMonthRecs = monthRecords.filter(rec => cleanM(rec.id || rec.employeeId).toUpperCase() === empIdKey);
-      byIdMap.set(empIdKey, {
-        emp: {
-          id: r.id || r.employeeId,
-          name: r.name || r.employeeName || "Employee",
-          department: r.department || "General",
-          position: r.position || grp
-        },
-        records: empMonthRecs
-      });
-    });
-
-    const entries = Array.from(byIdMap.values());
-    const scopeLabel = scope === "ALL" ? "All (Faculty & Staff)" : `${scope} Only`;
-
-    if (summaryEl) {
-      summaryEl.textContent = `${scopeLabel} • ${formatMonthLabel(monthVal)} • ${entries.length} receipt${entries.length === 1 ? "" : "s"}`;
-    }
-
-    if (!entries.length) {
-      container.innerHTML = `<div style="text-align:center;padding:30px;color:#64748b;">No attendance receipts found for <strong>${escM(scopeLabel)}</strong> in <strong>${escM(formatMonthLabel(monthVal))}</strong>.</div>`;
-      return;
-    }
-
-    container.innerHTML = entries
-      .map(entry => buildSingleEmployeeReceiptHtml(entry.emp, entry.records, monthVal))
-      .join("");
-  }
-
-  function closeDTRModal() {
-    const backdrop = document.getElementById("dtrModalBackdrop");
-    if (backdrop) backdrop.classList.remove("open");
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const monthFilter = document.getElementById("monthFilter");
-    if (monthFilter) monthFilter.value = getCurrentMonth
+    backdrop.classList.
